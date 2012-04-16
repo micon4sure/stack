@@ -56,7 +56,7 @@ class Kernel {
     }
 
     /**
-     * @return User
+     * @return File
      */
     public function getRootFile() {
         return $this->rootFile;
