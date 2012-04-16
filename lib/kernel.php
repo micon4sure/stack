@@ -165,6 +165,11 @@ class Kernel {
 }
 
 class Kernel_PermissionManager {
+    /**
+     * Check for permission to create a user.
+     * @param User $user
+     * @return bool
+     */
     public function checkUserCreatePermission(User $user) {
         return $user->getUber();
     }
