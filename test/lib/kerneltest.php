@@ -49,7 +49,11 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
         catch(\enork\Exception_UserExists $e) {
             // expected.
         }
+    }
 
+    public function testCreateUserFailUserExists() {
+        $user = new \enork\User('test', array(), '/home/test');
+        self::$kernel->createUser($user, self::$kernel->getRootUser());
         // provoke PermissionDenied exception
         try {
             $newUser = new \enork\User('test2', array(), '/home/test2');
