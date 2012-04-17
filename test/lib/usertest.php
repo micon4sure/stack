@@ -1,7 +1,7 @@
 <?php
 namespace test;
 
-class KernelTest extends \PHPUnit_Framework_TestCase {
+class UserTest extends \PHPUnit_Framework_TestCase {
     /**
      * @var \enork\Kernel
      */
