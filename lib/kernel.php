@@ -5,9 +5,9 @@ namespace enork;
  * TODO exception messages
  */
 class Kernel {
-    const PERMIT_READ = 'r';
-    const PERMIT_WRITE = 'w';
-    const PERMIT_EXECUTE = 'x';
+    const PERMISSION_READ = 'r';
+    const PERMISSION_WRITE = 'w';
+    const PERMISSION_EXECUTE = 'x';
 
     const PERMISSION_TYPE_GROUP = 'g';
     const PERMISSION_TYPE_USER = 'u';
@@ -28,35 +28,87 @@ class Kernel {
     private $rootFile;
 
     /**
-     * @var Kernel_PermissionManager
-     */
-    private $permissionManager;
-
-    /**
      * @var Kernel_Adapter
      */
     private $adapter;
 
     /**
+     * @var array
+     */
+    private $contextStack = array();
+
+    /**
+     * @var User
+     */
+    private $user;
+
+    /**
      * Create the kernel.
+     *
      * @param string $dsn
      * @param string $dbName
      */
     public function __construct($dsn, $dbName) {
         $this->couchClient = new \couchClient($dsn, $dbName);
-        $this->permissionManager = new Kernel_PermissionManager($this);
         $this->adapter = new Kernel_Adapter();
     }
 
     /**
-     * @return User
+     * Push a context onto the stack.
+     *
+     * @param kernel\Context $context
+     *
+     * @return \enork\Kernel
+     */
+    public function pushContext(kernel\Context $context) {
+        $this->contextStack[] = $context;
+        return $this;
+    }
+
+    /**
+     * Pop a context off the stack
+     * @return \enork\kernel\Context
+     */
+    public function popContext() {
+        if (!count($this->contextStack)) {
+            throw new Exception_MissingContext("There is no active context on the stack.");
+        }
+        return array_pop($this->contextStack);
+    }
+
+    /**
+     * Get the current context from the stack.
+     * @throws\enork\Exception_MissingContext
+     * @return \enork\kernel\Context
+     */
+    public function currentContext() {
+        if (!count($this->contextStack)) {
+            throw new Exception_MissingContext("There is no active context on the stack.");
+        }
+        return end($this->contextStack);
+    }
+
+    /**
+     * Set the user the kernel will hold as context.
+     *
+     * @param \enork\User $user
+     *
+     * @return \enork\Kernel
+     */
+    public function setUser(User $user) {
+        $this->user = $user;
+        return $this;
+    }
+
+    /**
+     * @return \enork\User
      */
     public function getRootUser() {
         return $this->rootUser;
     }
 
     /**
-     * @return File
+     * @return \enork\File
      */
     public function getRootFile() {
         return $this->rootFile;
@@ -72,7 +124,7 @@ class Kernel {
      * + create root user home
      */
     public function init() {
-        if(!$this->couchClient->databaseExists()) {
+        if (!$this->couchClient->databaseExists()) {
             $this->couchClient->createDatabase();
             // root file
             $rootFile = new \stdClass;
@@ -100,30 +152,34 @@ class Kernel {
         }
 
         // save root user and file for later use
+        $this->pushContext(new \enork\kernel\RootContext());
         $this->rootUser = $this->getUser('root');
-        $this->rootFile = $this->getFile('/', $this->rootUser);
+        $this->rootFile = $this->getFile('/');
+        $this->popContext();
     }
 
     /**
      * Destroy the database.
      */
     public function destroy() {
-        if($this->couchClient->databaseExists()) {
+        if ($this->couchClient->databaseExists()) {
             $this->couchClient->deleteDatabase();
         }
     }
 
     /**
      * Get a user by their uname
+     *
      * @param string $uname
+     *
      * @return \enork\User
      */
     public function getUser($uname) {
         try {
             $doc = $this->couchClient->getDoc("user:$uname");
         }
-        catch(\couchNotFoundException $e) {
-            throw new Exception_UserNotFound();
+        catch (\couchNotFoundException $e) {
+            throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
         return $this->adapter->toUser($doc);
     }
@@ -131,98 +187,47 @@ class Kernel {
     /**
      * @param User $user
      * @param User $creator
-     * @throws \enork\Exception_PermissionDenied|\enork\Exception_UserExists
+     *
+     * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied|\enork\Exception_UserExists
      */
-    public function createUser(User $user, User $creator) {
-        if(!$this->permissionManager->checkUserCreatePermission($creator)) {
-            throw new Exception_PermissionDenied();
+    public function createUser(User $user) {
+        if (!$this->currentContext()->checkUserCreatePermission($user)) {
+            throw new Exception_PermissionDenied("The permission to create the user has been denied");
         }
         $doc = $this->adapter->fromUser($user);
         try {
             $this->couchClient->storeDoc($doc);
         }
-        catch(\couchConflictException $e) {
-            throw new Exception_UserExists();
+        catch (\couchConflictException $e) {
+            throw new Exception_UserExists("Could not create user with uname '{$user->getUname()}'. Already exists.");
         }
     }
 
     /**
      * Get a files by its path
-     * @param string $path
+     *
+     * @param string      $path
      * @param \enork\User $user User asking to get the file
+     *
+     * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied
      * @return \enork\File
      */
-    public function getFile($path, User $user) {
+    public function getFile($path) {
         $doc = $this->couchClient->getDoc("file:$path");
         $path = \lean\Text::offsetLeft($doc->_id, 'file:');
         $owner = \lean\Text::offsetLeft($doc->owner, 'user:');
         $file = new File($path, $owner, $doc->permissions);
-        if(!$this->permissionManager->checkFilePermission($user, $file, self::PERMIT_READ)) {
-            throw new Exception_PermissionDenied();
+        if (!$this->currentContext()->checkFilePermission($file, self::PERMISSION_READ)) {
+            throw new Exception_PermissionDenied("Permission to receive file '$path' was denied.");
         }
         return $file;
-    }
-}
-
-class Kernel_PermissionManager {
-    /**
-     * Check for permission to create a user.
-     * @param User $user
-     * @return bool
-     */
-    public function checkUserCreatePermission(User $user) {
-        return $user->getUber();
-    }
-
-    /**
-     * Check if a user has permission to access a file in ways of $permit (r/w/x)
-     * @param User $user
-     * @param File $file
-     * @param string $permit
-     * @return bool
-     */
-    public function checkFilePermission(User $user, File $file, $permit) {
-        if($file->getOwner() == $user->getUname()) {
-            return true;
-        }
-
-        return $this->checkPermissions($user, $file->getPermissions(), $permit);
-    }
-
-    /**
-     * @param User $user
-     * @param array $permissions
-     * @param $requested the requested permission type
-     * @return bool
-     */
-    protected function checkPermissions(User $user, array $permissions, $requested) {
-        if($user->getUber()) {
-            return true;
-        }
-
-        foreach($permissions as $permission) {
-            // check if permit is the requested one
-            if($permission->permit != $requested) {
-                continue;
-            }
-
-            // check if user is in group permission is valid for
-            if($permission->type == self::PERMISSION_TYPE_GROUP) {
-                if(in_array($permission->group, $user->getGroups()))
-                    return true;
-            }
-            // check if user has an explicit permission
-            else if($permission->type == self::PERMISSION_TYPE_USER && $permission->user == $user->getUname()) {
-                return true;
-            }
-        }
-        return false;
     }
 }
 
 class Kernel_Adapter {
     /**
      * @param User $user
+     *
      * @return \object
      */
     public function fromUser(User $user) {
@@ -236,6 +241,7 @@ class Kernel_Adapter {
 
     /**
      * @param \object $doc
+     *
      * @return User
      */
     public function toUser($doc) {
@@ -249,6 +255,7 @@ class Kernel_Adapter {
 
     /**
      * @param File $file
+     *
      * @return \object
      */
     public function fromFile(File $file) {
@@ -257,6 +264,7 @@ class Kernel_Adapter {
 
     /**
      * @param \object $doc
+     *
      * @return File
      */
     public function toFile($doc) {

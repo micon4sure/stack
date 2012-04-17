@@ -17,7 +17,6 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
         self::$kernel->init();
     }
 
-    // ### tests
     public function testGetRootUser() {
         $root = self::$kernel->getUser('root');
         $this->assertTrue($root instanceof \enork\User);
@@ -25,43 +24,54 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(array('root'), $root->getGroups());
     }
 
+    public function testNoContextOnStack() {
+        try {
+            self::$kernel->getFile('/');
+            $this->fail('Expecting Exception_MissingContext');
+        }
+        Catch(\enork\Exception_MissingContext $e) {
+            // pass
+        }
+    }
+
     public function testGetRootFile() {
-        $root = self::$kernel->getFile('/', self::$kernel->getUser('root'));
+        // provoke no context on stack exception
+        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        $root = self::$kernel->getFile('/');
         $this->assertTrue($root instanceof \enork\File);
         $this->assertEquals('root', $root->getOwner());
     }
 
     public function testGetRootHome() {
-        $root = self::$kernel->getFile('/root', self::$kernel->getUser('root'));
+        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        $root = self::$kernel->getFile('/root');
         $this->assertTrue($root instanceof \enork\File);
         $this->assertEquals('root', $root->getOwner());
     }
 
     public function testCreateUser() {
+        self::$kernel->pushContext(new \enork\kernel\RootContext());
         $user = new \enork\User('test', array(), '/home/test');
-        self::$kernel->createUser($user, self::$kernel->getRootUser());
+        self::$kernel->createUser($user);
 
         // provoke UserExists exception
         try {
-            self::$kernel->createUser($user, self::$kernel->getRootUser());
+            self::$kernel->createUser($user);
             $this->fail('Expecting Exception_UserExists');
         }
         catch(\enork\Exception_UserExists $e) {
-            // expected.
+            // pass
         }
-    }
 
-    public function testCreateUserFailUserExists() {
-        $user = new \enork\User('test', array(), '/home/test');
-        self::$kernel->createUser($user, self::$kernel->getRootUser());
         // provoke PermissionDenied exception
         try {
-            $newUser = new \enork\User('test2', array(), '/home/test2');
-            self::$kernel->createUser($user, $user);
-            $this->fail('Expecting Exception_UserExists');
+            new \enork\kernel\RootContext();
+            self::$kernel->pushContext(new \enork\kernel\UserContext($user));
+            self::$kernel->createUser($user);
+            $this->fail('Expecting Exception_PermissionDenied');
         }
         catch(\enork\Exception_PermissionDenied $e) {
-            // expected.
+            // pass
         }
     }
 }
