@@ -54,7 +54,6 @@ class Kernel {
      * Push a context onto the stack.
      *
      * @param kernel\Context $context
-     *
      * @return \enork\Kernel
      */
     public function pushContext(kernel\Context $context) {
@@ -89,7 +88,6 @@ class Kernel {
      * Set the user the kernel will hold as context.
      *
      * @param \enork\User $user
-     *
      * @return \enork\Kernel
      */
     public function setUser(User $user) {
@@ -168,7 +166,6 @@ class Kernel {
      * Get a user by their uname
      *
      * @param string $uname
-     *
      * @return \enork\User
      */
     public function getUser($uname) {
@@ -183,7 +180,6 @@ class Kernel {
 
     /**
      * @param User $user
-     *
      * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied|\enork\Exception_UserExists
      */
     public function createUser(User $user) {
@@ -202,8 +198,7 @@ class Kernel {
     /**
      * Get a files by its path
      *
-     * @param string      $path
-     *
+     * @param string $path
      * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied
      * @return \enork\File
      */
@@ -222,7 +217,6 @@ class Kernel {
 class Kernel_Adapter {
     /**
      * @param User $user
-     *
      * @return \object
      */
     public function fromUser(User $user) {
@@ -236,7 +230,6 @@ class Kernel_Adapter {
 
     /**
      * @param \object $doc
-     *
      * @return User
      */
     public function toUser($doc) {
@@ -250,7 +243,6 @@ class Kernel_Adapter {
 
     /**
      * @param File $file
-     *
      * @return \object
      */
     public function fromFile(File $file) {
@@ -259,7 +251,6 @@ class Kernel_Adapter {
 
     /**
      * @param \object $doc
-     *
      * @return File
      */
     public function toFile($doc) {

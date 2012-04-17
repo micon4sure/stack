@@ -28,7 +28,6 @@ class UserContext implements Context {
      * Check for permission to create a user.
      *
      * @param \enork\User $user
-     *
      * @return bool
      */
     public function checkUserCreatePermission(\enork\User $user) {
@@ -39,7 +38,6 @@ class UserContext implements Context {
      * Check for permission to delete a user.
      *
      * @param \enork\User $user
-     *
      * @return bool
      */
     public function checkUserDeletePermission(\enork\User $user) {
@@ -51,7 +49,6 @@ class UserContext implements Context {
      *
      * @param \enork\File  $file
      * @param string       $permission
-     *
      * @return bool
      */
     public function checkFilePermission(\enork\File $file, $permission) {
@@ -65,7 +62,6 @@ class UserContext implements Context {
     /**
      * @param array  $permissions
      * @param string $requested the requested permission type
-     *
      * @return bool
      */
     protected function checkPermissions(array $permissions, $requested) {

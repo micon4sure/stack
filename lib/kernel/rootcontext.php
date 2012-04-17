@@ -6,8 +6,7 @@ class RootContext implements \enork\kernel\Context {
     /**
      * Check for permission to create a user.
      *
-     * @param User $user the user to be created
-     *
+     * @param \enork\User $user the user to be created
      * @return bool
      */
     public function checkUserCreatePermission(\enork\User $user) {
@@ -17,8 +16,7 @@ class RootContext implements \enork\kernel\Context {
     /**
      * Check for permission to delete a user.
      *
-     * @param User $user the user to be deleted
-     *
+     * @param \enork\User $user the user to be deleted
      * @return bool
      */
     public function checkUserDeletePermission(\enork\User $user) {
@@ -28,11 +26,8 @@ class RootContext implements \enork\kernel\Context {
     /**
      * Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
-     * @param File     $file
-     * @param string   $permission
-     *
-     * @internal param string $permit
-     *
+     * @param \enork\File  $file
+     * @param string       $permission
      * @return bool
      */
     public function checkFilePermission(\enork\File $file, $permission) {
