@@ -1,9 +1,6 @@
 <?php
 namespace enork;
 
-/**
- * TODO exception messages
- */
 class Kernel {
     const PERMISSION_READ = 'r';
     const PERMISSION_WRITE = 'w';
@@ -186,7 +183,6 @@ class Kernel {
 
     /**
      * @param User $user
-     * @param User $creator
      *
      * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied|\enork\Exception_UserExists
      */
@@ -207,7 +203,6 @@ class Kernel {
      * Get a files by its path
      *
      * @param string      $path
-     * @param \enork\User $user User asking to get the file
      *
      * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied
      * @return \enork\File
