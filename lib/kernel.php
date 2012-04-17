@@ -85,17 +85,6 @@ class Kernel {
     }
 
     /**
-     * Set the user the kernel will hold as context.
-     *
-     * @param \enork\User $user
-     * @return \enork\Kernel
-     */
-    public function setUser(User $user) {
-        $this->user = $user;
-        return $this;
-    }
-
-    /**
      * @return \enork\User
      */
     public function getRootUser() {

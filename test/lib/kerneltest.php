@@ -1,7 +1,7 @@
 <?php
 namespace test;
 
-class UserTest extends \PHPUnit_Framework_TestCase {
+class KernelTest extends \PHPUnit_Framework_TestCase {
     /**
      * @var \enork\Kernel
      */
@@ -22,7 +22,17 @@ class UserTest extends \PHPUnit_Framework_TestCase {
             self::$kernel->getFile('/');
             $this->fail('Expecting Exception_MissingContext');
         }
-        Catch(\enork\Exception_MissingContext $e) {
+        catch(\enork\Exception_MissingContext $e) {
+            // pass
+        }
+    }
+
+    public function testPopEmptyContext() {
+        try {
+            self::$kernel->popContext();
+            $this->fail('Expecting Exception_MissingContext');
+        }
+        catch(\enork\Exception_MissingContext $e) {
             // pass
         }
     }

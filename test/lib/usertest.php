@@ -22,55 +22,15 @@ class UserTest extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($root instanceof \enork\User);
         $this->assertEquals('/root', $root->getHome());
         $this->assertEquals(array('root'), $root->getGroups());
+        $this->assertEquals($root, self::$kernel->getRootUser());
     }
 
-    public function testNoContextOnStack() {
+    public function testGetUnknownUser() {
         try {
-            self::$kernel->getFile('/');
+            self::$kernel->popContext();
             $this->fail('Expecting Exception_MissingContext');
         }
-        Catch(\enork\Exception_MissingContext $e) {
-            // pass
-        }
-    }
-
-    public function testGetRootFile() {
-        // provoke no context on stack exception
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
-        $root = self::$kernel->getFile('/');
-        $this->assertTrue($root instanceof \enork\File);
-        $this->assertEquals('root', $root->getOwner());
-    }
-
-    public function testGetRootHome() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
-        $root = self::$kernel->getFile('/root');
-        $this->assertTrue($root instanceof \enork\File);
-        $this->assertEquals('root', $root->getOwner());
-    }
-
-    public function testCreateUser() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
-        $user = new \enork\User('test', array(), '/home/test');
-        self::$kernel->createUser($user);
-
-        // provoke UserExists exception
-        try {
-            self::$kernel->createUser($user);
-            $this->fail('Expecting Exception_UserExists');
-        }
-        catch(\enork\Exception_UserExists $e) {
-            // pass
-        }
-
-        // provoke PermissionDenied exception
-        try {
-            new \enork\kernel\RootContext();
-            self::$kernel->pushContext(new \enork\kernel\UserContext($user));
-            self::$kernel->createUser($user);
-            $this->fail('Expecting Exception_PermissionDenied');
-        }
-        catch(\enork\Exception_PermissionDenied $e) {
+        catch(\enork\Exception_MissingContext $e) {
             // pass
         }
     }
