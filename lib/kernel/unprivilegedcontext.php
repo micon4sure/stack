@@ -15,7 +15,7 @@ namespace enork\kernel;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class RootContext implements \enork\kernel\Context {
+class UnprivilegedContext implements \enork\kernel\Context {
 
     /**
      * Check for permission to create a user.
@@ -24,7 +24,7 @@ class RootContext implements \enork\kernel\Context {
      * @return bool
      */
     public function checkUserCreatePermission(\enork\User $user) {
-        return true;
+        return false;
     }
 
     /**
@@ -34,7 +34,7 @@ class RootContext implements \enork\kernel\Context {
      * @return bool
      */
     public function checkUserDeletePermission(\enork\User $user) {
-        return true;
+        return false;
     }
 
     /**
@@ -45,6 +45,6 @@ class RootContext implements \enork\kernel\Context {
      * @return bool
      */
     public function checkFilePermission(\enork\File $file, $permission) {
-        return true;
+        return false;
     }
 }
