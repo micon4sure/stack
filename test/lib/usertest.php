@@ -53,13 +53,13 @@ class UserTest extends \PHPUnit_Framework_TestCase {
 
     public function testCreateUser() {
         self::$kernel->pushContext(new \enork\kernel\RootContext());
-        $user = new \enork\User('test', array(), '/home/test');
+        $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
     }
 
     public function testCreateuserFailPermissionDenied() {
         self::$kernel->pushContext(new \enork\kernel\RootContext());
-        $user = new \enork\User('test', array(), '/home/test');
+        $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
 
         self::$kernel->pushContext(new \enork\kernel\UserContext($user));
@@ -74,7 +74,7 @@ class UserTest extends \PHPUnit_Framework_TestCase {
 
     public function testCreateUserFailUserExists() {
         self::$kernel->pushContext(new \enork\kernel\RootContext());
-        $user = new \enork\User('test', array(), '/home/test');
+        $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
 
         try {

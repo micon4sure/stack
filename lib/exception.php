@@ -15,18 +15,38 @@ namespace enork;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Exception extends \lean\Exception {}
+class Exception extends \lean\Exception {
+    public function __construct($message = '', $code = 10, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}
 
 class Exception_UserNotFound extends Exception {
-
+    public function __construct($message = '', $code = 20, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }
+
 class Exception_UserExists extends Exception {
-
+    public function __construct($message = '', $code = 30, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }
-class Exception_PermissionDenied extends Exception {
 
+class Exception_PermissionDenied extends Exception {
+    public function __construct($message = '', $code = 40, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }
 
 class Exception_MissingContext extends Exception {
+    public function __construct($message = '', $code = 50, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}
 
+class Exception_RootHasNoParent extends Exception{
+    public function __construct($message = '', $code = 60, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }

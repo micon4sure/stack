@@ -61,7 +61,7 @@ class Kernel {
      */
     public function __construct($dsn, $dbName) {
         $this->couchClient = new \couchClient($dsn, $dbName);
-        $this->adapter = new Kernel_Adapter();
+        $this->adapter = new Kernel_Adapter($this);
     }
 
     /**
@@ -77,6 +77,7 @@ class Kernel {
 
     /**
      * Pop a context off the stack
+     *
      * @return \enork\kernel\Context
      */
     public function popContext() {
@@ -88,6 +89,7 @@ class Kernel {
 
     /**
      * Get the current context from the stack.
+     *
      * @throws\enork\Exception_MissingContext
      * @return \enork\kernel\Context
      */
@@ -99,16 +101,24 @@ class Kernel {
     }
 
     /**
+     * Lazy get root user
      * @return \enork\User
      */
     public function getRootUser() {
+        if ($this->rootUser === null) {
+            return $this->rootUser = $this->getUser('root');
+        }
         return $this->rootUser;
     }
 
     /**
+     * Lazy get root file
      * @return \enork\File
      */
     public function getRootFile() {
+        if ($this->rootFile === null) {
+            $this->rootFile = $this->getFile('/');
+        }
         return $this->rootFile;
     }
 
@@ -151,8 +161,6 @@ class Kernel {
 
         // save root user and file for later use
         $this->pushContext(new \enork\kernel\RootContext());
-        $this->rootUser = $this->getUser('root');
-        $this->rootFile = $this->getFile('/');
         $this->popContext();
     }
 
@@ -206,23 +214,57 @@ class Kernel {
      * @return \enork\File
      */
     public function getFile($path) {
-        $doc = $this->couchClient->getDoc("file:$path");
-        $path = \lean\Text::offsetLeft($doc->_id, 'file:');
-        $owner = \lean\Text::offsetLeft($doc->owner, 'user:');
-        $file = new File($path, $owner, $doc->permissions);
+        try {
+            $doc = $this->couchClient->getDoc("file:$path");
+        }
+        catch (\couchNotFoundException $e) {
+            throw new Exception_FileNotFound("File '$path' was not found'");
+        }
+        $file = $this->adapter->toFile($doc);
         if (!$this->currentContext()->checkFilePermission($file, self::PERMISSION_READ)) {
             throw new Exception_PermissionDenied("Permission to receive file '$path' was denied.");
         }
         return $file;
     }
 
+    /** Write a file to the file system.
+     * Check permissions to write to parent file first
+     *
+     * @param File $file
+     * @return File
+     * @throws Exception_PermissionDenied
+     */
     public function createFile(File $file) {
         $doc = $this->adapter->fromFile($file);
+        $this->pushContext(new \enork\kernel\RootContext());
+        $parent = $this->getParent($file);
+        $this->popContext();
+        if (!$this->currentContext()->checkFilePermission($file, self::PERMISSION_READ)) {
+            throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.");
+        }
+        return $file;
     }
 }
 
+/**
+ * Adapts from and to couchDB documents to instances of the appropriate type.
+ */
 class Kernel_Adapter {
     /**
+     * @var Kernel
+     */
+    private $kernel;
+
+    /**
+     * @param Kernel $kernel
+     */
+    public function __construct(Kernel $kernel) {
+        $this->kernel = $kernel;
+    }
+
+    /**
+     * Adapt User instance to be saved as a couchdb document.
+     *
      * @param User $user
      * @return \object
      */
@@ -236,6 +278,8 @@ class Kernel_Adapter {
     }
 
     /**
+     * Adapt a couchdb document to a User instance.
+     *
      * @param \object $doc
      * @return User
      */
@@ -243,27 +287,34 @@ class Kernel_Adapter {
         // cut prefixes and create user
         $uname = \lean\Text::offsetLeft($doc->_id, 'user:');
         $home = \lean\Text::offsetLeft($doc->home, 'file:');
-        $user = new User($uname, $doc->groups, $home);
+        $user = new User($this->kernel, $uname, $doc->groups, $home);
         $user->setUber($doc->uber);
         return $user;
     }
 
     /**
+     * Adapt File instance to be saved as a couchdb document.
+     *
      * @param File $file
      * @return \object
      */
     public function fromFile(File $file) {
-        \lean\Dump::flat($file);
         $doc = new \stdClass;
-
+        $doc->path = 'file:' . $file->getPath();
+        $doc->owner = 'user:' . $file->getOwner();
+        $doc->permissions = $file->getPermissions();
+        return $doc;
     }
 
-
     /**
+     * Adapt a couchdb document to a File instance.
+     *
      * @param \object $doc
      * @return File
      */
     public function toFile($doc) {
-
+        $path = \lean\Text::offsetLeft($doc->_id, 'file:');
+        $owner = \lean\Text::offsetLeft($doc->owner, 'user:');
+        return new File($this->kernel, $path, $owner, $doc->permissions);
     }
 }

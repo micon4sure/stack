@@ -4,3 +4,4 @@
 * is an application, running productive code against the platform
 * uses [lean](http://lean.kamundo.de) and [slim](http://slimframework.com)
 * is licensed under the terms of MIT license
+* is short for "no idea how to name this. Let's take the very next word and reverse it."

@@ -15,13 +15,14 @@ namespace enork;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class User {
+class User extends Document  {
     private $uname;
     private $home;
     private $uber = false;
     private $groups = array();
 
-    public function __construct($uname, array $groups, $home = null) {
+    public function __construct(Kernel $kernel, $uname, array $groups, $home = null) {
+        parent::__construct($kernel);
         $this->uname = $uname;
         if($home === null)
             $home = "/home/$uname";

@@ -15,52 +15,11 @@ namespace enork;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class File extends Document {
-    private $path;
-    private $owner;
-    private $permissions;
+class Document {
     private $kernel;
-
-    public function __construct(Kernel $kernel, $path, $owner, array $permissions) {
-        parent::__construct($kernel);
-        $this->path = $path;
-        $this->owner = $owner;
-        $this->permissions = $permissions;
+    public function __construct(Kernel $kernel) {
         $this->kernel = $kernel;
     }
-
-    public function setOwner($owner) {
-        $this->owner = $owner;
-    }
-
-    public function getOwner() {
-        return $this->owner;
-    }
-
-    public function setPath($path) {
-        $this->path = $path;
-    }
-
-    public function getPath() {
-        return $this->path;
-    }
-
-    public function getPermissions() {
-        return $this->permissions;
-    }
-
-    /**
-     * Get the parent file from the kernel, if any.
-     * @return File
-     * @throws Exception_RootHasNoParent|Exception_PermissionDenied|Exception_FileNotFound
-     */
-    public function getParent() {
-        if ($this->getPath() == '/') {
-            throw new Exception_RootHasNoParent("Root file '/' does not have a parent.");
-        }
-        return $this->kernel->getFile(dirname($this->getPath()));
-    }
-
     protected function getKernel() {
         return $this->kernel;
     }
