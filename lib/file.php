@@ -49,10 +49,11 @@ class File extends Document {
         return $this->permissions;
     }
 
-    /**
-     * Get the parent file from the kernel, if any.
+    /** Get the parent file from the kernel, if any.
      * @return File
-     * @throws Exception_RootHasNoParent|Exception_PermissionDenied|Exception_FileNotFound
+     * @throws Exception_RootHasNoParent
+     * @throws Exception_PermissionDenied
+     * @throws Exception_FileNotFound
      */
     public function getParent() {
         if ($this->getPath() == '/') {
