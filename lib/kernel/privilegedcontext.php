@@ -15,7 +15,7 @@ namespace enork\kernel;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class RootContext implements \enork\kernel\Context {
+class PrivilegedContext implements \enork\kernel\Context {
 
     /**
      * Check for permission to create a user.

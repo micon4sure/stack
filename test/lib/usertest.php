@@ -41,7 +41,7 @@ class UserTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetUnknownUser() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
         try {
             self::$kernel->getUser('unknown');
             $this->fail('Expecting Exception_UserNotFound');
@@ -52,13 +52,13 @@ class UserTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testCreateUser() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
         $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
     }
 
     public function testCreateuserFailPermissionDenied() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
         $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
 
@@ -73,7 +73,7 @@ class UserTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testCreateUserFailUserExists() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
         $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
 
@@ -87,7 +87,16 @@ class UserTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetRootUserLazy() {
-        $rootUser = self::$kernel;
-        $this->assertTrue($rootUser);
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
+        $rootUser = self::$kernel->getRootUser();
+        $this->assertNotNull($rootUser === self::$kernel->getRootUser());
+        $this->assertTrue($rootUser === self::$kernel->getRootUser());
+    }
+
+    public function testGetrootFileLazy() {
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
+        $rootFile = self::$kernel->getrootFile();
+        $this->assertNotNull($rootFile === self::$kernel->getrootFile());
+        $this->assertTrue($rootFile === self::$kernel->getrootFile());
     }
 }

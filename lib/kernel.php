@@ -134,34 +134,30 @@ class Kernel {
     public function init() {
         if (!$this->couchClient->databaseExists()) {
             $this->couchClient->createDatabase();
-            // root file
-            $rootFile = new \stdClass;
-            $rootFile->_id = 'file:/';
-            $rootFile->parent = null;
-            $rootFile->owner = 'user:root';
-            $rootFile->permissions = array();
-            $this->couchClient->storeDoc($rootFile);
-
-            // root user
-            $rootUser = new \stdClass;
-            $rootUser->_id = 'user:root';
-            $rootUser->home = 'file:/root';
-            $rootUser->uber = true;
-            $rootUser->groups = array('root');
-            $this->couchClient->storeDoc($rootUser);
-
-            // root home
-            $rootHome = new \stdClass;
-            $rootHome->_id = 'file:/root';
-            $rootHome->parent = 'file:/';
-            $rootHome->owner = 'user:root';
-            $rootHome->permissions = array();
-            $this->couchClient->storeDoc($rootHome);
+            $this->pushContext(new \enork\kernel\PrivilegedContext());
+            try {
+                // root user
+                $rootUser = new User($this, 'root', array('root'), '/root');
+                $rootUser->setUber(true);
+                $doc = $this->adapter->fromUser($rootUser);
+                $this->couchClient->storeDoc($doc);
+                // root file
+                $rootFile = new File($this, '/', $rootUser->getUname());
+                $doc = $this->adapter->fromFile($rootFile);
+                $this->couchClient->storeDoc($doc);
+                // root home file
+                $rootHome = new File($this, '/root', $rootUser->getUname());
+                $doc = $this->adapter->fromFile($rootHome);
+                $this->couchClient->storeDoc($doc);
+            }
+            // finally pop context
+            catch(\Exception $e) {
+                // roll back context in case of exception
+                $this->popContext();
+                throw $e;
+            }
+            $this->popContext();
         }
-
-        // save root user and file for later use
-        $this->pushContext(new \enork\kernel\RootContext());
-        $this->popContext();
     }
 
     /**
@@ -180,12 +176,15 @@ class Kernel {
      * @return \enork\User
      */
     public function getUser($uname) {
+        // get document
         try {
             $doc = $this->couchClient->getDoc("user:$uname");
         }
         catch (\couchNotFoundException $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
+
+        // return user abstracted via User instance
         return $this->adapter->toUser($doc);
     }
 
@@ -194,6 +193,7 @@ class Kernel {
      * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied|\enork\Exception_UserExists
      */
     public function createUser(User $user) {
+
         if (!$this->currentContext()->checkUserCreatePermission($user)) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied");
         }
@@ -207,7 +207,7 @@ class Kernel {
     }
 
     /**
-     * Get a files by its path
+     * Get a file by its path
      *
      * @param string $path
      * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied
@@ -227,7 +227,8 @@ class Kernel {
         return $file;
     }
 
-    /** Write a file to the file system.
+    /**
+     * Write a file to the file system
      * Check permissions to write to parent file first
      *
      * @param File $file
@@ -235,19 +236,25 @@ class Kernel {
      * @throws Exception_PermissionDenied
      */
     public function createFile(File $file) {
-        $doc = $this->adapter->fromFile($file);
-        $this->pushContext(new \enork\kernel\RootContext());
-        $parent = $this->getParent($file);
-        $this->popContext();
-        if (!$this->currentContext()->checkFilePermission($file, self::PERMISSION_READ)) {
-            throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.");
+        // don't allow creation of root file
+        if($file->getPath() == '/') {
+            throw new Exception_PermissionDenied("Not allowed to create or delete root file.", Exception_PermissionDenied::PERMISSION_DENIED_CANT_CREATE_ROOT);
         }
+        // check file permission on the document
+        if (!$this->currentContext()->checkFilePermission($file, self::PERMISSION_READ)) {
+            throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.", Exception_PermissionDenied::PERMISSION_DENIED_MISSING_PERMISSION);
+        }
+
+        // actually write document
+        $doc = $this->adapter->fromFile($file);
+        $this->couchClient->storeDoc($doc);
+
         return $file;
     }
 }
 
 /**
- * Adapts from and to couchDB documents to instances of the appropriate type.
+ * Adapts from and to couchDB documents to instances of the appropriate type
  */
 class Kernel_Adapter {
     /**
@@ -263,7 +270,7 @@ class Kernel_Adapter {
     }
 
     /**
-     * Adapt User instance to be saved as a couchdb document.
+     * Adapt User instance to be saved as a couchdb document
      *
      * @param User $user
      * @return \object
@@ -278,7 +285,7 @@ class Kernel_Adapter {
     }
 
     /**
-     * Adapt a couchdb document to a User instance.
+     * Adapt a couchdb document to a User instance
      *
      * @param \object $doc
      * @return User
@@ -293,21 +300,21 @@ class Kernel_Adapter {
     }
 
     /**
-     * Adapt File instance to be saved as a couchdb document.
+     * Adapt File instance to be saved as a couchdb document
      *
      * @param File $file
      * @return \object
      */
     public function fromFile(File $file) {
         $doc = new \stdClass;
-        $doc->path = 'file:' . $file->getPath();
+        $doc->_id = 'file:' . $file->getPath();
         $doc->owner = 'user:' . $file->getOwner();
         $doc->permissions = $file->getPermissions();
         return $doc;
     }
 
     /**
-     * Adapt a couchdb document to a File instance.
+     * Adapt a couchdb document to a File instance
      *
      * @param \object $doc
      * @return File

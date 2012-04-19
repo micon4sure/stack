@@ -21,7 +21,7 @@ class File extends Document {
     private $permissions;
     private $kernel;
 
-    public function __construct(Kernel $kernel, $path, $owner, array $permissions) {
+    public function __construct(Kernel $kernel, $path, $owner, array $permissions = array()) {
         parent::__construct($kernel);
         $this->path = $path;
         $this->owner = $owner;

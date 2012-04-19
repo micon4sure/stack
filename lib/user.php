@@ -21,7 +21,7 @@ class User extends Document  {
     private $uber = false;
     private $groups = array();
 
-    public function __construct(Kernel $kernel, $uname, array $groups, $home = null) {
+    public function __construct(Kernel $kernel, $uname, array $groups = array(), $home = null) {
         parent::__construct($kernel);
         $this->uname = $uname;
         if($home === null)

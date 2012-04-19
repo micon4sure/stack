@@ -27,16 +27,26 @@ class Exception_UserNotFound extends Exception {
     }
 }
 
-class Exception_UserExists extends Exception {
+class Exception_FileNotFound extends Exception {
     public function __construct($message = '', $code = 30, \Exception $previous = null) {
         parent::__construct($message, $code, $previous);
     }
 }
 
-class Exception_PermissionDenied extends Exception {
+class Exception_UserExists extends Exception {
     public function __construct($message = '', $code = 40, \Exception $previous = null) {
         parent::__construct($message, $code, $previous);
     }
+}
+
+class Exception_PermissionDenied extends Exception {
+    public function __construct($message = '', $code = 50, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+    const PERMISSION_DENIED_MISSING_PERMISSION = 51;
+    const PERMISSION_DENIED_CREDENTIALS_REVOKED = 52;
+    const PERMISSION_DENIED_CANT_CREATE_ROOT_USER = 53;
+    const PERMISSION_DENIED_CANT_CREATE_ROOT_FILE = 54;
 }
 
 class Exception_MissingContext extends Exception {

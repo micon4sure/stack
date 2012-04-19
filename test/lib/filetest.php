@@ -22,29 +22,26 @@ class FileTest extends \PHPUnit_Framework_TestCase {
      */
     private static $kernel;
 
+    /**
+     * Reset the kernel before each test.
+     */
     public function setUp() {
         self::resetKernel();
     }
 
+    /**
+     * @static
+     * Destroy the underlying couchDB and rebuild it.
+     */
     private static function resetKernel() {
         self::$kernel = new \enork\Kernel('http://root:root@127.0.0.1:5984', 'enork');
         self::$kernel->destroy();
         self::$kernel->init();
     }
 
-    public function testNoContextOnStack() {
-        try {
-            self::$kernel->getFile('/');
-            $this->fail('Expecting Exception_MissingContext');
-        }
-        Catch(\enork\Exception_MissingContext $e) {
-            // pass
-        }
-    }
-
     public function testGetRootFile() {
         // provoke no context on stack exception
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
         $root = self::$kernel->getFile('/');
         $this->assertTrue($root instanceof \enork\File);
         $this->assertEquals('root', $root->getOwner());
@@ -52,14 +49,15 @@ class FileTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetRootHome() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
         $root = self::$kernel->getFile('/root');
         $this->assertTrue($root instanceof \enork\File);
         $this->assertEquals('root', $root->getOwner());
     }
 
     public function testCreateFile() {
-        self::$kernel->pushContext(new \enork\kernel\RootContext());
+        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
+        // TODO
     }
 
     public function testGetFileFailedPermissionDenied() {
@@ -72,4 +70,6 @@ class FileTest extends \PHPUnit_Framework_TestCase {
             // pass
         }
     }
+
+
 }
