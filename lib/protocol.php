@@ -23,7 +23,7 @@ interface Protocol {
     /** Create a user in the system
      *
      * @param User $user
-     * @throws \stackos\Exception_MissingContext
+     * @throws \stackos\Exception_MissingSecurityStrategy
      * @throws \stackos\Exception_PermissionDenied PERMISSION_DENIED_CANT_CREATE_ROOT_USER
      * @throws \stackos\Exception_UserExists
      * @return boolean
@@ -33,7 +33,7 @@ interface Protocol {
     /** Get a files by its path
      *
      * @param string $path
-     * @throws \stackos\Exception_MissingContext
+     * @throws \stackos\Exception_MissingSecurityStrategy
      * @throws \stackos\Exception_PermissionDenied
      * @return \stackos\File
      */

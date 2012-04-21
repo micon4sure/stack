@@ -35,19 +35,19 @@ class KernelTests extends \PHPUnit_Framework_TestCase {
     public function testNoContextOnStack() {
         try {
             self::$kernel->getFile(new \stackos\User(self::$kernel, 'noname'), '/');
-            $this->fail('Expecting Exception_MissingContext');
+            $this->fail('Expecting Exception_MissingSecurityStrategy');
         }
-        catch(\stackos\Exception_MissingContext $e) {
+        catch(\stackos\Exception_MissingSecurityStrategy $e) {
             // pass
         }
     }
 
-    public function testPopEmptyContext() {
+    public function testPopEmptyStrategyStack() {
         try {
             self::$kernel->popSecurityStrategy();
-            $this->fail('Expecting Exception_MissingContext');
+            $this->fail('Expecting Exception_MissingSecurityStrategy');
         }
-        catch(\stackos\Exception_MissingContext $e) {
+        catch(\stackos\Exception_MissingSecurityStrategy $e) {
             // pass
         }
     }

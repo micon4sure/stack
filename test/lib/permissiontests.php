@@ -57,7 +57,6 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($check);
 
         // test owner no implicit execute permission
-        \lean\util\Dump::flat($strategy);
         $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_EXECUTE);
         $this->assertFalse($check);
     }
@@ -77,13 +76,6 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($check);
     }
 
-    // TODO
-    public function checkUserDeletePermission() {
-        $uber = new \stackos\User(self::$kernel, 'uber');
-        $uber->setUber(true);
-        $user = new \stackos\User(self::$kernel, 'user');
-    }
-
     protected function checkPermissions($user, $file) {
         // create new mock context exposing the checkPermissions method
         $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $user);
@@ -97,7 +89,7 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
             self::$kernel->popSecurityStrategy();
             $this->fail('Expecting Exception_MissingContext');
         }
-        catch (\stackos\Exception_MissingContext $e) {
+        catch (\stackos\Exception_MissingSecurityStrategy $e) {
             // pass
         }
     }

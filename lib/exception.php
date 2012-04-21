@@ -49,7 +49,7 @@ class Exception_PermissionDenied extends Exception {
     const PERMISSION_DENIED_CANT_CREATE_ROOT_FILE = 54;
 }
 
-class Exception_MissingContext extends Exception {
+class Exception_MissingSecurityStrategy extends Exception {
     public function __construct($message = '', $code = 50, \Exception $previous = null) {
         parent::__construct($message, $code, $previous);
     }

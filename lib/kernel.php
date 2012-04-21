@@ -15,6 +15,12 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+const ROOT_UNAME = 'root';
+const ROOT_FILE_PATH = '/';
+const ROOT_FILE_HOME = '/root';
+const ROOT_FILE_USERS = '/root/users';
+const ROOT_FILE_GROUPS = '/root/groups';
+
 class Kernel {
     /**
      * @var \couchClient
@@ -75,7 +81,7 @@ class Kernel {
      */
     public function popSecurityStrategy() {
         if (!count($this->securityStrategyStack)) {
-            throw new Exception_MissingContext("There is no active context on the stack.");
+            throw new Exception_MissingSecurityStrategy("There is no active context on the stack.");
         }
         return array_pop($this->securityStrategyStack);
     }
@@ -83,12 +89,12 @@ class Kernel {
     /**
      * Get the current context from the stack.
      *
-     * @throws\stackos\Exception_MissingContext
+     * @throws\stackos\Exception_MissingSecurityStrategy
      * @return \stackos\kernel\Context
      */
     public function currentContext() {
         if (!count($this->securityStrategyStack)) {
-            throw new Exception_MissingContext("There is no active context on the stack.");
+            throw new Exception_MissingSecurityStrategy("There is no active context on the stack.");
         }
         return end($this->securityStrategyStack);
     }
@@ -99,7 +105,7 @@ class Kernel {
      */
     public function getRootUser() {
         if ($this->rootUser === null) {
-            return $this->rootUser = $this->getUser('root');
+            return $this->rootUser = $this->getUser(ROOT_UNAME);
         }
         return $this->rootUser;
     }
@@ -110,7 +116,7 @@ class Kernel {
      */
     public function getRootFile() {
         if ($this->rootFile === null) {
-            $this->rootFile = $this->getFile($this->getRootUser(), '/');
+            $this->rootFile = $this->getFile($this->getRootUser(), ROOT_FILE_PATH);
         }
         return $this->rootFile;
     }
@@ -132,26 +138,16 @@ class Kernel {
             $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
             try {
                 // root user
-                $rootUser = new User($this, 'root', array('root'), '/root');
+                $rootUser = new User($this, ROOT_UNAME, array('root'), '/root');
                 $rootUser->setUber(true);
                 $doc = $this->adapter->fromUser($rootUser);
                 $this->couchClient->storeDoc($doc);
-                // root file
-                $rootFile = new File($this, '/', $rootUser->getUname());
-                $doc = $this->adapter->fromFile($rootFile);
-                $this->couchClient->storeDoc($doc);
-                // root home file
-                $rootHome = new File($this, '/root', $rootUser->getUname());
-                $doc = $this->adapter->fromFile($rootHome);
-                $this->couchClient->storeDoc($doc);
-                // users file
-                $rootHome = new File($this, '/users', $rootUser->getUname());
-                $doc = $this->adapter->fromFile($rootHome);
-                $this->couchClient->storeDoc($doc);
-                // groups file
-                $rootHome = new File($this, '/groups', $rootUser->getUname());
-                $doc = $this->adapter->fromFile($rootHome);
-                $this->couchClient->storeDoc($doc);
+                $initDirs = array(ROOT_FILE_PATH, ROOT_FILE_HOME, ROOT_FILE_USERS, ROOT_FILE_GROUPS);
+                foreach($initDirs as $dir) {
+                    $file = new File($this, $dir, ROOT_UNAME);
+                    $doc = $this->adapter->fromFile($file);
+                    $this->couchClient->storeDoc($doc);
+                }
             }
             // finally pop context
             catch(\Exception $e) {
@@ -193,11 +189,11 @@ class Kernel {
 
     /**
      * @param User $user
-     * @throws \stackos\Exception_MissingContext|\stackos\Exception_PermissionDenied|\stackos\Exception_UserExists
+     * @throws \stackos\Exception_MissingSecurityStrategy|\stackos\Exception_PermissionDenied|\stackos\Exception_UserExists
      */
     public function createUser(User $user) {
 
-        if (!$this->currentContext()->checkDocumentPermission($user, $this->getFile($user, '/users'), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+        if (!$this->currentContext()->checkDocumentPermission($user, $this->getFile($user, ROOT_FILE_USERS), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied");
         }
         $doc = $this->adapter->fromUser($user);
@@ -212,7 +208,7 @@ class Kernel {
     /** Get a file by its path
      *
      * @param string $path
-     * @throws \stackos\Exception_MissingContext|\stackos\Exception_PermissionDenied
+     * @throws \stackos\Exception_MissingSecurityStrategy|\stackos\Exception_PermissionDenied
      * @return \stackos\File
      */
     public function getFile(User $user, $path) {

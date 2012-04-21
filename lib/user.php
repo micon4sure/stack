@@ -49,11 +49,6 @@ class User extends Document {
         return $this->home;
     }
 
-    public function setHome($home) {
-        $this->home = $home;
-        return $this;
-    }
-
     public function getUber() {
         return $this->uber;
     }
