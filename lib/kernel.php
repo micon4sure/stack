@@ -16,10 +16,10 @@ namespace stackos;
  */
 
 const ROOT_UNAME = 'root';
-const ROOT_FILE_PATH = '/';
-const ROOT_FILE_HOME = '/root';
-const ROOT_FILE_USERS = '/root/users';
-const ROOT_FILE_GROUPS = '/root/groups';
+const ROOT_PATH = '/';
+const ROOT_PATH_HOME = '/root';
+const ROOT_PATH_USERS = '/root/users';
+const ROOT_PATH_GROUPS = '/root/groups';
 
 class Kernel {
     /**
@@ -116,7 +116,7 @@ class Kernel {
      */
     public function getRootFile() {
         if ($this->rootFile === null) {
-            $this->rootFile = $this->getFile($this->getRootUser(), ROOT_FILE_PATH);
+            $this->rootFile = $this->getFile($this->getRootUser(), ROOT_PATH);
         }
         return $this->rootFile;
     }
@@ -142,7 +142,7 @@ class Kernel {
                 $rootUser->setUber(true);
                 $doc = $this->adapter->fromUser($rootUser);
                 $this->couchClient->storeDoc($doc);
-                $initDirs = array(ROOT_FILE_PATH, ROOT_FILE_HOME, ROOT_FILE_USERS, ROOT_FILE_GROUPS);
+                $initDirs = array(ROOT_PATH, ROOT_PATH_HOME, ROOT_PATH_USERS, ROOT_PATH_GROUPS);
                 foreach($initDirs as $dir) {
                     $file = new File($this, $dir, ROOT_UNAME);
                     $doc = $this->adapter->fromFile($file);
@@ -193,7 +193,7 @@ class Kernel {
      */
     public function createUser(User $user) {
 
-        if (!$this->currentContext()->checkDocumentPermission($user, $this->getFile($user, ROOT_FILE_USERS), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+        if (!$this->currentContext()->checkDocumentPermission($user, $this->getFile($user, ROOT_PATH_USERS), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied");
         }
         $doc = $this->adapter->fromUser($user);
