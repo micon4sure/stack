@@ -31,7 +31,18 @@ require_once APPLICATION_ROOT . '/external/PHP-on-Couch/lib/couchClient.php';
 require_once APPLICATION_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
 
 
-class stackosSuite {
+class StackOSTest extends \PHPUnit_Framework_TestCase {
+    /**
+     * @var \stackos\Kernel
+     */
+    protected static $kernel;
+
+    protected static function getNoname() {
+        return new \stackos\User(self::$kernel, 'noname');
+    }
+}
+
+class StackOSSuite {
     public static function suite() {
         $suite = new \PHPUnit_Framework_TestSuite('stackos');
         $suite->addTestSuite('test\KernelTests');

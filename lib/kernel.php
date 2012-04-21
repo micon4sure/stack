@@ -95,26 +95,6 @@ class Kernel {
         return end($this->securityStrategyStack);
     }
 
-    /** Lazy get root user
-     * @return \stackos\User
-     */
-    public function getRootUser() {
-        if ($this->rootUser === null) {
-            return $this->rootUser = $this->getUser(ROOT_UNAME);
-        }
-        return $this->rootUser;
-    }
-
-    /** Lazy get root file
-     * @return \stackos\File
-     */
-    public function getRootFile() {
-        if ($this->rootFile === null) {
-            $this->rootFile = $this->getFile($this->getRootUser(), ROOT_PATH);
-        }
-        return $this->rootFile;
-    }
-
     /** Initialize the kernel.
      * Make sure the database exists.
      * If not:
@@ -162,16 +142,21 @@ class Kernel {
 
     /** Get a user by their uname
      *
-     * @param string $uname
+     * @param \stackos\User $user
+     * @param string        $uname
      * @return \stackos\User
      */
-    public function getUser($uname) {
+    public function getUser(User $user, $uname) {
         // get document
         try {
             $doc = $this->couchClient->getDoc("user:$uname");
         }
         catch (\couchNotFoundException $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
+        }
+
+        if (!$this->currentStrategy()->checkDocumentPermission($user, new User($this, $uname), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+            throw new Exception_PermissionDenied("Permission to read user '$uname' was denied.");
         }
 
         // return user abstracted via User instance

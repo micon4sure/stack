@@ -15,7 +15,7 @@ namespace stackos\kernel\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class UnrivilegedStrategy implements Strategy {
+class UnprivilegedStrategy implements Strategy {
 
     /**
      * Check for permission to create a user.

@@ -16,12 +16,7 @@
 
 namespace test;
 
-class PermissionTests extends \PHPUnit_Framework_TestCase {
-    /**
-     * @var \stackos\Kernel
-     */
-    private static $kernel;
-
+class PermissionTests extends \StackOSTest {
     public function setUp() {
         self::resetKernel();
     }
@@ -92,8 +87,5 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
         catch (\stackos\Exception_MissingSecurityStrategy $e) {
             // pass
         }
-    }
-    protected static function getNoname() {
-        return new \stackos\User(self::$kernel, 'noname');
     }
 }

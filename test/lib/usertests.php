@@ -16,12 +16,7 @@
 
 namespace test;
 
-class UserTests extends \PHPUnit_Framework_TestCase {
-    /**
-     * @var \stackos\Kernel
-     */
-    private static $kernel;
-
+class UserTests extends \StackOSTest {
     public function setUp() {
         self::resetKernel();
     }
@@ -32,18 +27,10 @@ class UserTests extends \PHPUnit_Framework_TestCase {
         self::$kernel->init();
     }
 
-    public function testGetRootUser() {
-        $root = self::$kernel->getUser('root');
-        $this->assertTrue($root instanceof \stackos\User);
-        $this->assertEquals('/root', $root->getHome());
-        $this->assertEquals(array('root'), $root->getGroups());
-        $this->assertEquals($root, self::$kernel->getRootUser());
-    }
-
     public function testGetUnknownUser() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         try {
-            self::$kernel->getUser('unknown');
+            self::$kernel->getUser(self::getNoname(), 'unknown');
             $this->fail('Expecting Exception_UserNotFound');
         }
         catch(\stackos\Exception_UserNotFound $e) {
@@ -57,12 +44,9 @@ class UserTests extends \PHPUnit_Framework_TestCase {
         self::$kernel->createUser($user);
     }
 
-    public function testCreateuserFailPermissionDenied() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+    public function testCreateUserFailPermissionDenied() {
         $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
-        self::$kernel->createUser($user);
-
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UserStrategy(self::$kernel, $user));
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy);
         try {
             self::$kernel->createUser($user);
             $this->fail('Expecting Exception_PermissionDenied');
@@ -72,7 +56,21 @@ class UserTests extends \PHPUnit_Framework_TestCase {
         }
     }
 
-    public function testCreateUserFailUserExists() {
+    public function testGetUserPermissionDenied() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->createUser(self::getNoname());
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
+
+        try {
+            self::$kernel->getUser(self::getNoname(), self::getNoname()->getUname());
+            $this->fail('Expecting Exception_PermissionDenied');
+        }
+        catch(\stackos\Exception_PermissionDenied $e) {
+            // pass
+        }
+    }
+
+    public function testCreateUserUserExists() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
@@ -84,19 +82,5 @@ class UserTests extends \PHPUnit_Framework_TestCase {
         catch(\stackos\Exception_UserExists $e) {
             // pass
         }
-    }
-
-    public function testGetRootUserLazy() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
-        $rootUser = self::$kernel->getRootUser();
-        $this->assertNotNull($rootUser === self::$kernel->getRootUser());
-        $this->assertTrue($rootUser === self::$kernel->getRootUser());
-    }
-
-    public function testGetRootFileLazy() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
-        $rootFile = self::$kernel->getRootFile();
-        $this->assertNotNull($rootFile === self::$kernel->getRootFile());
-        $this->assertTrue($rootFile === self::$kernel->getRootFile());
     }
 }
