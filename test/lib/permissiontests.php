@@ -81,7 +81,7 @@ class PermissionTests extends \StackOSTest {
 
     public function testPopEmptyContext() {
         try {
-            self::$kernel->popSecurityStrategy();
+            self::$kernel->pullSecurityStrategy();
             $this->fail('Expecting Exception_MissingContext');
         }
         catch (\stackos\Exception_MissingSecurityStrategy $e) {

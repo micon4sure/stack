@@ -44,7 +44,7 @@ class DefaultStrategy implements Strategy {
         $this->getKernel()->pushSecurityStrategy(new PrivilegedContext());
         $file = $this->getKernel()->getFile($user, '/root/users');
         $check = $this->checkDocumentPermission($user, $file, Kernel_Priviledge::WRITE);
-        $this->getKernel()->popSecurityStrategy();
+        $this->getKernel()->pullSecurityStrategy();
         return $check;
     }
 
@@ -59,7 +59,7 @@ class DefaultStrategy implements Strategy {
         $this->getKernel()->pushSecurityStrategy(new PrivilegedContext());
         $file = $this->getKernel()->getFile($user, '/root/users');
         $check = $this->checkDocumentPermission($user, $file, Kernel_Priviledge::WRITE);
-        $this->getKernel()->popSecurityStrategy();
+        $this->getKernel()->pullSecurityStrategy();
         return $check;
     }
 

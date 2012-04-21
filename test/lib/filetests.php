@@ -53,6 +53,10 @@ class FileTests extends \StackOSTest {
         }
     }
 
+    public function testCreateFilePermissionDenied() {
+
+    }
+
     public function testGetFilePermissionDenied() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
         try {
@@ -71,6 +75,32 @@ class FileTests extends \StackOSTest {
             $this->fail('Expecting Exception_FileNotFound');
         }
         catch(\stackos\Exception_FileNotFound $e) {
+            // pass
+        }
+    }
+
+    public function testGetParent() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $user = self::getNoname();
+
+        // create files
+        self::$kernel->createFile(self::getNoname(), new \stackos\File(self::$kernel, '/foo', $user->getUname()), \stackos\ROOT_PATH_USERS);
+        self::$kernel->createFile(self::getNoname(), new \stackos\File(self::$kernel, '/foo/bar', $user->getUname()), \stackos\ROOT_PATH_USERS);
+
+        // read /foo/bar
+        $file = self::$kernel->getFile($user, '/foo/bar');
+    }
+
+    public function testRootHasNoParent() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $user = self::getNoname();
+
+        // read /foo/bar
+        $file = self::$kernel->getFile($user, '/');
+        try {
+            $file->getParent($user);
+            $this->fail();
+        } catch (\stackos\Exception_RootHasNoParent $e) {
             // pass
         }
     }

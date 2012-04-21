@@ -27,6 +27,11 @@ class UserTests extends \StackOSTest {
         self::$kernel->init();
     }
 
+    public function testGetUser() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $this->assertTrue(self::$kernel->getUser(new \stackos\User(self::$kernel, 'root'),'root') instanceof \stackos\User);
+    }
+
     public function testGetUnknownUser() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         try {

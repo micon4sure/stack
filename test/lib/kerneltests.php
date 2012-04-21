@@ -44,7 +44,7 @@ class KernelTests extends \PHPUnit_Framework_TestCase {
 
     public function testPopEmptyStrategyStack() {
         try {
-            self::$kernel->popSecurityStrategy();
+            self::$kernel->pullSecurityStrategy();
             $this->fail('Expecting Exception_MissingSecurityStrategy');
         }
         catch(\stackos\Exception_MissingSecurityStrategy $e) {

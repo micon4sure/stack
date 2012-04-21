@@ -76,7 +76,7 @@ class Kernel {
      *
      * @return \stackos\kernel\Context
      */
-    public function popSecurityStrategy() {
+    public function pullSecurityStrategy() {
         if (!count($this->securityStrategyStack)) {
             throw new Exception_MissingSecurityStrategy("There is no active context on the stack.");
         }
@@ -110,11 +110,12 @@ class Kernel {
             $this->couchClient->createDatabase();
             $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
             try {
-                // root user
+                // create root user
                 $rootUser = new User($this, ROOT_UNAME, array('root'), '/root');
                 $rootUser->setUber(true);
                 $doc = $this->adapter->fromUser($rootUser);
                 $this->couchClient->storeDoc($doc);
+                // create root directories
                 $initDirs = array(ROOT_PATH, ROOT_PATH_HOME, ROOT_PATH_USERS, ROOT_PATH_GROUPS);
                 foreach($initDirs as $dir) {
                     $file = new File($this, $dir, ROOT_UNAME);
@@ -122,13 +123,12 @@ class Kernel {
                     $this->couchClient->storeDoc($doc);
                 }
             }
-            // finally pop context
+            // finally pop strategy
             catch(\Exception $e) {
-                // roll back context in case of exception
-                $this->popSecurityStrategy();
+                $this->pullSecurityStrategy();
                 throw $e;
             }
-            $this->popSecurityStrategy();
+            $this->pullSecurityStrategy();
         }
     }
 
@@ -214,7 +214,7 @@ class Kernel {
     public function createFile(User $user, File $file) {
         $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         $exists = $this->fileExists($user, $file->getPath());
-        $this->popSecurityStrategy();
+        $this->pullSecurityStrategy();
         if($exists) {
             throw new Exception_FileExists("The file at '{$file->getPath()}' could not be created. It exists already.");
         }

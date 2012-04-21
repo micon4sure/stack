@@ -18,7 +18,6 @@ namespace stackos;
 class File extends Document {
     private $path;
     private $owner;
-    private $permissions;
     private $kernel;
 
     /**
