@@ -155,7 +155,7 @@ class Kernel {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
 
-        if (!$this->currentStrategy()->checkDocumentPermission($user, new User($this, $uname), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, new User($this, $uname), \stackos\kernel\security\Priviledge::READ)) {
             throw new Exception_PermissionDenied("Permission to read user '$uname' was denied.");
         }
 
@@ -169,7 +169,7 @@ class Kernel {
      */
     public function createUser(User $user) {
 
-        if (!$this->currentStrategy()->checkDocumentPermission($user, $this->getFile($user, ROOT_PATH_USERS), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, $this->getFile($user, ROOT_PATH_USERS), \stackos\kernel\security\Priviledge::READ)) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied");
         }
         $doc = $this->adapter->fromUser($user);
@@ -196,7 +196,7 @@ class Kernel {
             throw new Exception_FileNotFound("File '$path' was not found'");
         }
         $file = $this->adapter->toFile($doc);
-        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::READ)) {
             throw new Exception_PermissionDenied("Permission to receive file '$path' was denied.");
         }
         return $file;
@@ -219,7 +219,7 @@ class Kernel {
             throw new Exception_FileExists("The file at '{$file->getPath()}' could not be created. It exists already.");
         }
         // check file permission on the document
-        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_WRITE)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::WRITE)) {
             throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.", Exception_PermissionDenied::PERMISSION_DENIED_MISSING_PERMISSION);
         }
 

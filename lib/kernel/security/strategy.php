@@ -2,17 +2,6 @@
 namespace stackos\kernel\security;
 
 interface Strategy {
-    /** Read permission
-     */
-    const PERMISSION_TYPE_READ = 'r';
-    /** Write permission
-     */
-    const PERMISSION_TYPE_WRITE = 'w';
-    /** Execute permission: allows to execute applications enclosed in a file
-     *  Allows transversion into directory (TODO unimplemented)
-     */
-    const PERMISSION_TYPE_EXECUTE = 'x';
-
     /** Group context: PERMISSION_\w+ for group $foo
      */
     const PERMISSION_HOLDER_TYPE_GROUP = 'g';

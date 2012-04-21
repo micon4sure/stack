@@ -43,7 +43,7 @@ class DefaultStrategy implements Strategy {
     public function checkUserCreatePermission(\stackos\User $user) {
         $this->getKernel()->pushSecurityStrategy(new PrivilegedContext());
         $file = $this->getKernel()->getFile($user, '/root/users');
-        $check = $this->checkDocumentPermission($user, $file, Kernel_Security::PERMISSION_TYPE_WRITE);
+        $check = $this->checkDocumentPermission($user, $file, Kernel_Priviledge::WRITE);
         $this->getKernel()->popSecurityStrategy();
         return $check;
     }
@@ -58,7 +58,7 @@ class DefaultStrategy implements Strategy {
     public function checkUserDeletePermission(\stackos\User $user) {
         $this->getKernel()->pushSecurityStrategy(new PrivilegedContext());
         $file = $this->getKernel()->getFile($user, '/root/users');
-        $check = $this->checkDocumentPermission($user, $file, Kernel_Security::PERMISSION_TYPE_WRITE);
+        $check = $this->checkDocumentPermission($user, $file, Kernel_Priviledge::WRITE);
         $this->getKernel()->popSecurityStrategy();
         return $check;
     }
@@ -66,23 +66,23 @@ class DefaultStrategy implements Strategy {
     /** Check if a user has permission to access a document in ways of $permission (r/w/x)
      *
      * @param Document $document
-     * @param string   $permission
+     * @param string   $priviledge
      *
      * @return bool
      */
-    public function checkDocumentPermission(\stackos\User $user, \stackos\Document $document, $permission) {
+    public function checkDocumentPermission(\stackos\User $user, \stackos\Document $document, $priviledge) {
         // grant uber all priviledges
         if ($user->getUber()) {
             return true;
         }
 
         // grant owner all priviledges except execute
-        if($document->getOwner() == $user->getUname() && $permission != self::PERMISSION_TYPE_EXECUTE)
+        if($document->getOwner() == $user->getUname() && $priviledge != Priviledge::EXECUTE)
             return true;
 
         foreach ($document->getPermissions() as $havingPermission) {
             // check if this permission has been requested
-            if ($havingPermission->getPriviledge() != $permission) {
+            if ($havingPermission->getPriviledge() != $priviledge) {
                 continue;
             }
 

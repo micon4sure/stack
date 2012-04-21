@@ -45,14 +45,14 @@ class PermissionTests extends \StackOSTest {
         $owner = new \stackos\User(self::$kernel, 'owner', array());
         $file = new \stackos\File(self::$kernel, '/ownertest', $owner->getUname(), array());
         $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $owner);
-        $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)
-              && $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_WRITE);
+        $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Priviledge::READ)
+              && $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Priviledge::WRITE);
 
         // test implicit owner file permissions
         $this->assertTrue($check);
 
         // test owner no implicit execute permission
-        $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_EXECUTE);
+        $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Priviledge::EXECUTE);
         $this->assertFalse($check);
     }
 
@@ -64,19 +64,19 @@ class PermissionTests extends \StackOSTest {
 
         // add user to group share
         $noname->addToGroup('share');
-        $file->addPermission(new \stackos\kernel\security\Permission_Group('share', \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ));
+        $file->addPermission(new \stackos\kernel\security\Permission_Group('share', \stackos\kernel\security\Priviledge::READ));
         // and assert that they have permission
         $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $noname);
-        $check = $strategy->checkDocumentPermission($noname, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ);
+        $check = $strategy->checkDocumentPermission($noname, $file, \stackos\kernel\security\Priviledge::READ);
         $this->assertTrue($check);
     }
 
     protected function checkPermissions($user, $file) {
         // create new mock context exposing the checkPermissions method
         $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $user);
-        return $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)
-            && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_WRITE)
-            && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_EXECUTE);
+        return $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::READ)
+            && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::WRITE)
+            && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::EXECUTE);
     }
 
     public function testPopEmptyContext() {
