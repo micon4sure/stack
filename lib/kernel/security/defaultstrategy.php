@@ -80,19 +80,19 @@ class DefaultStrategy implements Strategy {
         if($document->getOwner() == $user->getUname() && $priviledge != Priviledge::EXECUTE)
             return true;
 
-        foreach ($document->getPermissions() as $havingPermission) {
+        foreach ($document->getPermissions() as $permission) {
             // check if this permission has been requested
-            if ($havingPermission->getPriviledge() != $priviledge) {
+            if ($permission->getPriviledge() != $priviledge) {
                 continue;
             }
 
             // check if user is in group permission is valid for
-            if ($havingPermission->getHolderType() == self::PERMISSION_HOLDER_TYPE_GROUP) {
+            if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_GROUP) {
                 return in_array($user->getUname(), $user->getGroups());
             }
             // check if user has an explicit permission
-            else if ($havingPermission->getHolderType() == self::PERMISSION_HOLDER_TYPE_USER) {
-                return $havingPermission->getHolder() == $user->getUname();
+            else if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_USER) {
+                return $permission->getHolder() == $user->getUname();
             }
         }
         return false;
