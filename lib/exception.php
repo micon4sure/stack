@@ -32,6 +32,11 @@ class Exception_FileNotFound extends Exception {
         parent::__construct($message, $code, $previous);
     }
 }
+class Exception_FileExists extends Exception {
+    public function __construct($message = '', $code = 30, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}
 
 class Exception_UserExists extends Exception {
     public function __construct($message = '', $code = 40, \Exception $previous = null) {

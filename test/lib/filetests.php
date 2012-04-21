@@ -59,7 +59,8 @@ class FileTests extends \PHPUnit_Framework_TestCase {
 
     public function testCreateFile() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
-        // TODO
+        $file = new \stackos\File(self::$kernel, '/test', self::getNoname()->getUname());
+        self::$kernel->createFile(self::getNoname(), $file);
     }
 
     public function testGetFileFailedPermissionDenied() {
@@ -73,6 +74,16 @@ class FileTests extends \PHPUnit_Framework_TestCase {
         }
     }
 
+    public function testFileNotFound() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        try {
+            self::$kernel->getFile(self::getNoname(), '/noname');
+            $this->fail('Expecting Exception_FileNotFound');
+        }
+        catch(\stackos\Exception_FileNotFound $e) {
+            // pass
+        }
+    }
 
     protected static function getNoname() {
         return new \stackos\User(self::$kernel, 'noname');

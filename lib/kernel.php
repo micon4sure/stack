@@ -52,8 +52,7 @@ class Kernel {
      */
     private $user;
 
-    /**
-     * Create the kernel.
+    /** Create the kernel.
      *
      * @param string $dsn
      * @param string $dbName
@@ -63,8 +62,7 @@ class Kernel {
         $this->adapter = new Kernel_Adapter($this);
     }
 
-    /**
-     * Push a context onto the stack.
+    /** Push a context onto the stack.
      *
      * @param kernel\Context $context
      * @return \stackos\Kernel
@@ -74,8 +72,7 @@ class Kernel {
         return $this;
     }
 
-    /**
-     * Pop a context off the stack
+    /** Pop a context off the stack
      *
      * @return \stackos\kernel\Context
      */
@@ -86,21 +83,19 @@ class Kernel {
         return array_pop($this->securityStrategyStack);
     }
 
-    /**
-     * Get the current context from the stack.
+    /** Get the current context from the stack.
      *
      * @throws\stackos\Exception_MissingSecurityStrategy
      * @return \stackos\kernel\Context
      */
-    public function currentContext() {
+    public function currentStrategy() {
         if (!count($this->securityStrategyStack)) {
             throw new Exception_MissingSecurityStrategy("There is no active context on the stack.");
         }
         return end($this->securityStrategyStack);
     }
 
-    /**
-     * Lazy get root user
+    /** Lazy get root user
      * @return \stackos\User
      */
     public function getRootUser() {
@@ -110,8 +105,7 @@ class Kernel {
         return $this->rootUser;
     }
 
-    /**
-     * Lazy get root file
+    /** Lazy get root file
      * @return \stackos\File
      */
     public function getRootFile() {
@@ -121,8 +115,7 @@ class Kernel {
         return $this->rootFile;
     }
 
-    /**
-     * Initialize the kernel.
+    /** Initialize the kernel.
      * Make sure the database exists.
      * If not:
      * + create database
@@ -159,8 +152,7 @@ class Kernel {
         }
     }
 
-    /**
-     * Destroy the database.
+    /** Destroy the database.
      */
     public function destroy() {
         if ($this->couchClient->databaseExists()) {
@@ -168,8 +160,7 @@ class Kernel {
         }
     }
 
-    /**
-     * Get a user by their uname
+    /** Get a user by their uname
      *
      * @param string $uname
      * @return \stackos\User
@@ -193,7 +184,7 @@ class Kernel {
      */
     public function createUser(User $user) {
 
-        if (!$this->currentContext()->checkDocumentPermission($user, $this->getFile($user, ROOT_PATH_USERS), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, $this->getFile($user, ROOT_PATH_USERS), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied");
         }
         $doc = $this->adapter->fromUser($user);
@@ -207,9 +198,10 @@ class Kernel {
 
     /** Get a file by its path
      *
+     * @param User $user
      * @param string $path
-     * @throws \stackos\Exception_MissingSecurityStrategy|\stackos\Exception_PermissionDenied
-     * @return \stackos\File
+     * @return File
+     * @throws Exception_FileNotFound|Exception_PermissionDenied
      */
     public function getFile(User $user, $path) {
         try {
@@ -219,27 +211,30 @@ class Kernel {
             throw new Exception_FileNotFound("File '$path' was not found'");
         }
         $file = $this->adapter->toFile($doc);
-        if (!$this->currentContext()->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
             throw new Exception_PermissionDenied("Permission to receive file '$path' was denied.");
         }
         return $file;
     }
 
-    /**
-     * Write a file to the file system
+
+    /** Write a file to the file system
      * Check permissions to write to parent file first
      *
+     * @param User $user
      * @param File $file
      * @return File
      * @throws Exception_PermissionDenied
      */
-    public function createFile(File $file) {
-        // don't allow creation of root file
-        if($file->getPath() == '/') {
-            throw new Exception_PermissionDenied("Not allowed to create or delete root file.", Exception_PermissionDenied::PERMISSION_DENIED_CANT_CREATE_ROOT);
+    public function createFile(User $user, File $file) {
+        $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $exists = $this->fileExists($user, $file->getPath());
+        $this->popSecurityStrategy();
+        if($exists) {
+            throw new Exception_FileExists("The file at '{$file->getPath()}' could not be created. It exists already.");
         }
         // check file permission on the document
-        if (!$this->currentContext()->checkFilePermission($file, \stackos\kernel\Context::PERMISSION_TYPE_READ)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_WRITE)) {
             throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.", Exception_PermissionDenied::PERMISSION_DENIED_MISSING_PERMISSION);
         }
 
@@ -247,7 +242,25 @@ class Kernel {
         $doc = $this->adapter->fromFile($file);
         $this->couchClient->storeDoc($doc);
 
+
         return $file;
+    }
+
+    /** Check if a file exists
+     * TODO dont check with exceptions; build fileExists into kernel
+     *
+     * @param $user
+     * @param $path
+     * @return bool
+     */
+    public function fileExists($user, $path) {
+        try {
+            $this->getFile($user, $path);
+            return true;
+        }
+        catch(Exception_FileNotFound $e) {
+            return false;
+        }
     }
 }
 
