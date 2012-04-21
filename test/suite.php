@@ -22,7 +22,7 @@ define('APPLICATION_ROOT', realpath('..'));
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
 $autoload->register('test', __DIR__ . '/lib');
-$autoload->register('enork', APPLICATION_ROOT . '/lib');
+$autoload->register('stackos', APPLICATION_ROOT . '/lib');
 
 date_default_timezone_set('Europe/Berlin');
 
@@ -31,9 +31,9 @@ require_once APPLICATION_ROOT . '/external/PHP-on-Couch/lib/couchClient.php';
 require_once APPLICATION_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
 
 
-class EnorkSuite {
+class stackosSuite {
     public static function suite() {
-        $suite = new \PHPUnit_Framework_TestSuite('enork');
+        $suite = new \PHPUnit_Framework_TestSuite('stackos');
         $suite->addTestSuite('test\KernelTests');
         $suite->addTestSuite('test\UserTests');
         $suite->addTestSuite('test\FileTests');

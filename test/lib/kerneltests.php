@@ -18,7 +18,7 @@ namespace test;
 
 class KernelTests extends \PHPUnit_Framework_TestCase {
     /**
-     * @var \enork\Kernel
+     * @var \stackos\Kernel
      */
     private static $kernel;
 
@@ -27,27 +27,27 @@ class KernelTests extends \PHPUnit_Framework_TestCase {
     }
 
     private static function resetKernel() {
-        self::$kernel = new \enork\Kernel('http://root:root@127.0.0.1:5984', 'enork');
+        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
         self::$kernel->destroy();
         self::$kernel->init();
     }
 
     public function testNoContextOnStack() {
         try {
-            self::$kernel->getFile('/');
+            self::$kernel->getFile(new \stackos\User(self::$kernel, 'noname'), '/');
             $this->fail('Expecting Exception_MissingContext');
         }
-        catch(\enork\Exception_MissingContext $e) {
+        catch(\stackos\Exception_MissingContext $e) {
             // pass
         }
     }
 
     public function testPopEmptyContext() {
         try {
-            self::$kernel->popContext();
+            self::$kernel->popSecurityStrategy();
             $this->fail('Expecting Exception_MissingContext');
         }
-        catch(\enork\Exception_MissingContext $e) {
+        catch(\stackos\Exception_MissingContext $e) {
             // pass
         }
     }

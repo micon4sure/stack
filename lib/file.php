@@ -1,5 +1,5 @@
 <?php
-namespace enork;
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -28,10 +28,9 @@ class File extends Document {
      * @param array  $permissions
      */
     public function __construct(Kernel $kernel, $path, $owner, array $permissions = array()) {
-        parent::__construct($kernel);
+        parent::__construct($kernel, $permissions);
         $this->path = $path;
         $this->owner = $owner;
-        $this->permissions = $permissions;
         $this->kernel = $kernel;
     }
 
@@ -50,10 +49,6 @@ class File extends Document {
         return $this->path;
     }
 
-    public function getPermissions() {
-        return $this->permissions;
-    }
-
     /** Get the parent file from the kernel, if any.
      *
      * @return File
@@ -61,11 +56,11 @@ class File extends Document {
      * @throws Exception_PermissionDenied
      * @throws Exception_FileNotFound
      */
-    public function getParent() {
+    public function getParent(User $user) {
         if ($this->getPath() == '/') {
             throw new Exception_RootHasNoParent("Root file '/' does not have a parent.");
         }
-        return $this->kernel->getFile(dirname($this->getPath()));
+        return $this->kernel->getFile($user, dirname($this->getPath()));
     }
 
     protected function getKernel() {

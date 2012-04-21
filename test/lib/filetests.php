@@ -18,7 +18,7 @@ namespace test;
 
 class FileTests extends \PHPUnit_Framework_TestCase {
     /**
-     * @var \enork\Kernel
+     * @var \stackos\Kernel
      */
     private static $kernel;
 
@@ -34,42 +34,47 @@ class FileTests extends \PHPUnit_Framework_TestCase {
      * Destroy the underlying couchDB and rebuild it.
      */
     private static function resetKernel() {
-        self::$kernel = new \enork\Kernel('http://root:root@127.0.0.1:5984', 'enork');
+        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
         self::$kernel->destroy();
         self::$kernel->init();
     }
 
+    public function testGetRootUser() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $this->assertTrue(self::$kernel->getRootUser() === self::$kernel->getRootUser());
+    }
+
     public function testGetRootFile() {
-        // provoke no context on stack exception
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $root = self::$kernel->getFile('/');
-        $this->assertTrue($root instanceof \enork\File);
-        $this->assertEquals('root', $root->getOwner());
-        $this->assertEquals($root, self::$kernel->getRootFile());
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $this->assertTrue(self::$kernel->getRootFile() === self::$kernel->getRootFile());
     }
 
     public function testGetRootHome() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $root = self::$kernel->getFile('/root');
-        $this->assertTrue($root instanceof \enork\File);
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $root = self::$kernel->getFile(self::$kernel->getRootUser(), '/root');
+        $this->assertTrue($root instanceof \stackos\File);
         $this->assertEquals('root', $root->getOwner());
+        $this->assertEquals('/root', $root->getPath());
     }
 
     public function testCreateFile() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         // TODO
     }
 
     public function testGetFileFailedPermissionDenied() {
-        self::$kernel->pushContext(new \enork\kernel\UnprivilegedContext());
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname()));
         try {
-            self::$kernel->getFile('/');
+            self::$kernel->getFile(self::getNoname(), '/');
             $this->fail('Expecting Exception_PermissionDenied');
         }
-        catch(\enork\Exception_PermissionDenied $e) {
+        catch(\stackos\Exception_PermissionDenied $e) {
             // pass
         }
     }
 
 
+    protected static function getNoname() {
+        return new \stackos\User(self::$kernel, 'noname');
+    }
 }

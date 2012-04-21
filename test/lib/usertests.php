@@ -18,7 +18,7 @@ namespace test;
 
 class UserTests extends \PHPUnit_Framework_TestCase {
     /**
-     * @var \enork\Kernel
+     * @var \stackos\Kernel
      */
     private static $kernel;
 
@@ -27,76 +27,76 @@ class UserTests extends \PHPUnit_Framework_TestCase {
     }
 
     private static function resetKernel() {
-        self::$kernel = new \enork\Kernel('http://root:root@127.0.0.1:5984', 'enork');
+        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
         self::$kernel->destroy();
         self::$kernel->init();
     }
 
     public function testGetRootUser() {
         $root = self::$kernel->getUser('root');
-        $this->assertTrue($root instanceof \enork\User);
+        $this->assertTrue($root instanceof \stackos\User);
         $this->assertEquals('/root', $root->getHome());
         $this->assertEquals(array('root'), $root->getGroups());
         $this->assertEquals($root, self::$kernel->getRootUser());
     }
 
     public function testGetUnknownUser() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         try {
             self::$kernel->getUser('unknown');
             $this->fail('Expecting Exception_UserNotFound');
         }
-        catch(\enork\Exception_UserNotFound $e) {
+        catch(\stackos\Exception_UserNotFound $e) {
             // pass
         }
     }
 
     public function testCreateUser() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
     }
 
     public function testCreateuserFailPermissionDenied() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
 
-        self::$kernel->pushContext(new \enork\kernel\UserContext($user));
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UserStrategy(self::$kernel, $user));
         try {
             self::$kernel->createUser($user);
             $this->fail('Expecting Exception_PermissionDenied');
         }
-        catch(\enork\Exception_PermissionDenied $e) {
+        catch(\stackos\Exception_PermissionDenied $e) {
             // pass
         }
     }
 
     public function testCreateUserFailUserExists() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $user = new \enork\User(self::$kernel, 'test', array(), '/home/test');
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
 
         try {
             self::$kernel->createUser($user);
             $this->fail('Expecting Exception_UserExists');
         }
-        catch(\enork\Exception_UserExists $e) {
+        catch(\stackos\Exception_UserExists $e) {
             // pass
         }
     }
 
     public function testGetRootUserLazy() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         $rootUser = self::$kernel->getRootUser();
         $this->assertNotNull($rootUser === self::$kernel->getRootUser());
         $this->assertTrue($rootUser === self::$kernel->getRootUser());
     }
 
-    public function testGetrootFileLazy() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $rootFile = self::$kernel->getrootFile();
-        $this->assertNotNull($rootFile === self::$kernel->getrootFile());
-        $this->assertTrue($rootFile === self::$kernel->getrootFile());
+    public function testGetRootFileLazy() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $rootFile = self::$kernel->getRootFile();
+        $this->assertNotNull($rootFile === self::$kernel->getRootFile());
+        $this->assertTrue($rootFile === self::$kernel->getRootFile());
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace enork\kernel;
+namespace stackos\kernel\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,52 +15,37 @@ namespace enork\kernel;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface Context {
-    /** Read permission.
-     */
-    const PERMISSION_READ = 'r';
-    /** Write permission.
-     */
-    const PERMISSION_WRITE = 'w';
-    /** Execute permission: allows to execute applications enclosed in a file
-     *  Allows transversion into directory (TODO unimplmented)
-     */
-    const PERMISSION_EXECUTE = 'x';
-
-    /** Group context: PERMISSION_\w+ for group $foo
-     */
-    const PERMISSION_TYPE_GROUP = 'g';
-    /** Group context: PERMISSION_\w+ for user $bar
-     */
-    const PERMISSION_TYPE_USER = 'u';
+class PrivilegedStrategy implements Strategy {
 
     /**
      * Check for permission to create a user.
      *
-     * @param User $user the user to be created
-     *
+     * @param \stackos\User $user the user to be created
      * @return bool
      */
-    public function checkUserCreatePermission(\enork\User $user);
+    public function checkUserCreatePermission(\stackos\User $user) {
+        return true;
+    }
 
     /**
      * Check for permission to delete a user.
      *
-     * @param User $user the user to be deleted
-     *
+     * @param \stackos\User $user the user to be deleted
      * @return bool
      */
-    public function checkUserDeletePermission(\enork\User $user);
+    public function checkUserDeletePermission(\stackos\User $user) {
+        return true;
+    }
 
-    /**
-     * Check if a user has permission to access a file in ways of $permission (r/w/x)
+    /** Check if a user has permission to access a document in ways of $permission (r/w/x)
      *
-     * @param File     $file
-     * @param string   $permission
-     *
-     * @internal param string $permit
+     * @param \stackos\User     $user
+     * @param \stackos\Document $document
+     * @param string            $permission
      *
      * @return bool
      */
-    public function checkFilePermission(\enork\File $file, $permission);
+    public function checkDocumentPermission(\stackos\User $user, \stackos\Document $document, $permission) {
+        return true;
+    }
 }

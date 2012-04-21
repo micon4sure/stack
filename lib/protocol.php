@@ -1,5 +1,5 @@
 <?php
-namespace enork;
+namespace stackos;
 
 interface Protocol {
     /**
@@ -16,16 +16,16 @@ interface Protocol {
     /** Get a user by their uname
      *
      * @param string $uname
-     * @return \enork\User
+     * @return \stackos\User
      */
     public function getUser($uname);
 
     /** Create a user in the system
      *
      * @param User $user
-     * @throws \enork\Exception_MissingContext
-     * @throws \enork\Exception_PermissionDenied PERMISSION_DENIED_CANT_CREATE_ROOT_USER
-     * @throws \enork\Exception_UserExists
+     * @throws \stackos\Exception_MissingContext
+     * @throws \stackos\Exception_PermissionDenied PERMISSION_DENIED_CANT_CREATE_ROOT_USER
+     * @throws \stackos\Exception_UserExists
      * @return boolean
      */
     public function createUser(User $user);
@@ -33,9 +33,9 @@ interface Protocol {
     /** Get a files by its path
      *
      * @param string $path
-     * @throws \enork\Exception_MissingContext
-     * @throws \enork\Exception_PermissionDenied
-     * @return \enork\File
+     * @throws \stackos\Exception_MissingContext
+     * @throws \stackos\Exception_PermissionDenied
+     * @return \stackos\File
      */
     public function getFile($path);
 

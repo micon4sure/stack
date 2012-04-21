@@ -1,5 +1,5 @@
 <?php
-namespace enork;
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -39,7 +39,7 @@ class Kernel {
     /**
      * @var array
      */
-    private $contextStack = array();
+    private $securityStrategyStack = array();
 
     /**
      * @var User
@@ -61,41 +61,41 @@ class Kernel {
      * Push a context onto the stack.
      *
      * @param kernel\Context $context
-     * @return \enork\Kernel
+     * @return \stackos\Kernel
      */
-    public function pushContext(kernel\Context $context) {
-        $this->contextStack[] = $context;
+    public function pushSecurityStrategy(\stackos\kernel\security\Strategy $strategy) {
+        $this->securityStrategyStack[] = $strategy;
         return $this;
     }
 
     /**
      * Pop a context off the stack
      *
-     * @return \enork\kernel\Context
+     * @return \stackos\kernel\Context
      */
-    public function popContext() {
-        if (!count($this->contextStack)) {
+    public function popSecurityStrategy() {
+        if (!count($this->securityStrategyStack)) {
             throw new Exception_MissingContext("There is no active context on the stack.");
         }
-        return array_pop($this->contextStack);
+        return array_pop($this->securityStrategyStack);
     }
 
     /**
      * Get the current context from the stack.
      *
-     * @throws\enork\Exception_MissingContext
-     * @return \enork\kernel\Context
+     * @throws\stackos\Exception_MissingContext
+     * @return \stackos\kernel\Context
      */
     public function currentContext() {
-        if (!count($this->contextStack)) {
+        if (!count($this->securityStrategyStack)) {
             throw new Exception_MissingContext("There is no active context on the stack.");
         }
-        return end($this->contextStack);
+        return end($this->securityStrategyStack);
     }
 
     /**
      * Lazy get root user
-     * @return \enork\User
+     * @return \stackos\User
      */
     public function getRootUser() {
         if ($this->rootUser === null) {
@@ -106,11 +106,11 @@ class Kernel {
 
     /**
      * Lazy get root file
-     * @return \enork\File
+     * @return \stackos\File
      */
     public function getRootFile() {
         if ($this->rootFile === null) {
-            $this->rootFile = $this->getFile('/');
+            $this->rootFile = $this->getFile($this->getRootUser(), '/');
         }
         return $this->rootFile;
     }
@@ -120,14 +120,16 @@ class Kernel {
      * Make sure the database exists.
      * If not:
      * + create database
-     * + create filesystem root
      * + create root user
-     * + create root user home
+     * + create /
+     * + create /root
+     * + create /root/users
+     * + create /root/groups
      */
     public function init() {
         if (!$this->couchClient->databaseExists()) {
             $this->couchClient->createDatabase();
-            $this->pushContext(new \enork\kernel\PrivilegedContext());
+            $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
             try {
                 // root user
                 $rootUser = new User($this, 'root', array('root'), '/root');
@@ -142,14 +144,22 @@ class Kernel {
                 $rootHome = new File($this, '/root', $rootUser->getUname());
                 $doc = $this->adapter->fromFile($rootHome);
                 $this->couchClient->storeDoc($doc);
+                // users file
+                $rootHome = new File($this, '/users', $rootUser->getUname());
+                $doc = $this->adapter->fromFile($rootHome);
+                $this->couchClient->storeDoc($doc);
+                // groups file
+                $rootHome = new File($this, '/groups', $rootUser->getUname());
+                $doc = $this->adapter->fromFile($rootHome);
+                $this->couchClient->storeDoc($doc);
             }
             // finally pop context
             catch(\Exception $e) {
                 // roll back context in case of exception
-                $this->popContext();
+                $this->popSecurityStrategy();
                 throw $e;
             }
-            $this->popContext();
+            $this->popSecurityStrategy();
         }
     }
 
@@ -166,7 +176,7 @@ class Kernel {
      * Get a user by their uname
      *
      * @param string $uname
-     * @return \enork\User
+     * @return \stackos\User
      */
     public function getUser($uname) {
         // get document
@@ -183,11 +193,11 @@ class Kernel {
 
     /**
      * @param User $user
-     * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied|\enork\Exception_UserExists
+     * @throws \stackos\Exception_MissingContext|\stackos\Exception_PermissionDenied|\stackos\Exception_UserExists
      */
     public function createUser(User $user) {
 
-        if (!$this->currentContext()->checkUserCreatePermission($user)) {
+        if (!$this->currentContext()->checkDocumentPermission($user, $this->getFile($user, '/users'), \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied");
         }
         $doc = $this->adapter->fromUser($user);
@@ -199,14 +209,13 @@ class Kernel {
         }
     }
 
-    /**
-     * Get a file by its path
+    /** Get a file by its path
      *
      * @param string $path
-     * @throws \enork\Exception_MissingContext|\enork\Exception_PermissionDenied
-     * @return \enork\File
+     * @throws \stackos\Exception_MissingContext|\stackos\Exception_PermissionDenied
+     * @return \stackos\File
      */
-    public function getFile($path) {
+    public function getFile(User $user, $path) {
         try {
             $doc = $this->couchClient->getDoc("file:$path");
         }
@@ -214,7 +223,7 @@ class Kernel {
             throw new Exception_FileNotFound("File '$path' was not found'");
         }
         $file = $this->adapter->toFile($doc);
-        if (!$this->currentContext()->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)) {
+        if (!$this->currentContext()->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)) {
             throw new Exception_PermissionDenied("Permission to receive file '$path' was denied.");
         }
         return $file;
@@ -234,7 +243,7 @@ class Kernel {
             throw new Exception_PermissionDenied("Not allowed to create or delete root file.", Exception_PermissionDenied::PERMISSION_DENIED_CANT_CREATE_ROOT);
         }
         // check file permission on the document
-        if (!$this->currentContext()->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)) {
+        if (!$this->currentContext()->checkFilePermission($file, \stackos\kernel\Context::PERMISSION_TYPE_READ)) {
             throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.", Exception_PermissionDenied::PERMISSION_DENIED_MISSING_PERMISSION);
         }
 

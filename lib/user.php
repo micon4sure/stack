@@ -1,5 +1,5 @@
 <?php
-namespace enork;
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,23 +15,30 @@ namespace enork;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class User extends Document  {
+class User extends Document {
     private $uname;
     private $home;
     private $uber = false;
     private $groups = array();
 
-    public function __construct(Kernel $kernel, $uname, array $groups = array(), $home = null) {
-        parent::__construct($kernel);
+    public function __construct(Kernel $kernel, $uname, array $groups = array(), $home = null, array $permissions = array()) {
+        parent::__construct($kernel, $permissions);
         $this->uname = $uname;
-        if($home === null)
+        if ($home === null) {
             $home = "/home/$uname";
+        }
         $this->groups = $groups;
         $this->home = $home;
     }
 
     public function getUname() {
         return $this->uname;
+    }
+
+    public function addToGroup($name) {
+        if (!in_array($name, $this->groups)) {
+            $this->groups[] = $name;
+        }
     }
 
     public function getGroups() {
@@ -41,6 +48,7 @@ class User extends Document  {
     public function getHome() {
         return $this->home;
     }
+
     public function setHome($home) {
         $this->home = $home;
         return $this;
@@ -49,6 +57,7 @@ class User extends Document  {
     public function getUber() {
         return $this->uber;
     }
+
     public function setUber($uber) {
         $this->uber = $uber;
         return $this;

@@ -8,5 +8,5 @@ include '../external/lean/lean/init.php';
 
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
-$autoload->register('enork', APPLICATION_ROOT . '/lib');
+$autoload->register('stackos', APPLICATION_ROOT . '/lib');
 ?>

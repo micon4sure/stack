@@ -1,5 +1,5 @@
 <?php
-namespace enork;
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -17,10 +17,21 @@ namespace enork;
 
 class Document {
     private $kernel;
-    public function __construct(Kernel $kernel) {
+    private $permissions;
+
+    public function __construct(Kernel $kernel, array $permissions) {
         $this->kernel = $kernel;
+        $this->permissions = $permissions;
     }
     protected function getKernel() {
         return $this->kernel;
+    }
+
+    public function addPermission(\stackos\kernel\security\Permission $permission) {
+        $this->permissions[] = $permission;
+    }
+
+    public function getPermissions() {
+        return $this->permissions;
     }
 }

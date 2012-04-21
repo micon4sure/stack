@@ -1,5 +1,5 @@
 <?php
-namespace enork\kernel;
+namespace stackos\kernel\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,36 +15,35 @@ namespace enork\kernel;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class PrivilegedContext implements \enork\kernel\Context {
+class UserStrategy extends DefaultStrategy {
+    /**
+     * @var \stackos\User
+     */
+    private $user;
 
     /**
-     * Check for permission to create a user.
-     *
-     * @param \enork\User $user the user to be created
-     * @return bool
+     * @param \stackos\User $user
      */
-    public function checkUserCreatePermission(\enork\User $user) {
-        return true;
+    public function __construct(\stackos\Kernel $kernel, \stackos\User $user) {
+        parent::__construct($kernel);
+        $this->user = $user;
     }
 
-    /**
-     * Check for permission to delete a user.
+    /** Check for permission to create a user
      *
-     * @param \enork\User $user the user to be deleted
+     * @param \stackos\User $user
      * @return bool
      */
-    public function checkUserDeletePermission(\enork\User $user) {
-        return true;
+    public function checkUserCreatePermission(\stackos\User $user = null) {
+        parent::checkUserCreatePermission($user or $this->user);
     }
 
-    /**
-     * Check if a user has permission to access a file in ways of $permission (r/w/x)
+    /** Check for permission to delete a user
      *
-     * @param \enork\File  $file
-     * @param string       $permission
+     * @param \stackos\User $user
      * @return bool
      */
-    public function checkFilePermission(\enork\File $file, $permission) {
-        return true;
+    public function checkUserDeletePermission(\stackos\User $user = null) {
+        parent::checkUserCreatePermission($user or $this->user);
     }
 }

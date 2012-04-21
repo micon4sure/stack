@@ -18,7 +18,7 @@ namespace test;
 
 class PermissionTests extends \PHPUnit_Framework_TestCase {
     /**
-     * @var \enork\Kernel
+     * @var \stackos\Kernel
      */
     private static $kernel;
 
@@ -27,7 +27,7 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
     }
 
     private static function resetKernel() {
-        self::$kernel = new \enork\Kernel('http://root:root@127.0.0.1:5984', 'enork');
+        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
         self::$kernel->destroy();
         self::$kernel->init();
     }
@@ -35,10 +35,10 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
     /** Test if $uber has access to $file owned by $user
      */
     public function testCheckUber() {
-        $uber = new \enork\User(self::$kernel, 'uber');
+        $uber = new \stackos\User(self::$kernel, 'uber', array());
         $uber->setUber(true);
-        $user = new \enork\User(self::$kernel, 'user');
-        $file = new \enork\File(self::$kernel, '/ubertest', $user->getUname());
+        $joe = new \stackos\User(self::$kernel, 'user', array());
+        $file = new \stackos\File(self::$kernel, '/ubertest', $joe->getUname(), array());
 
         $this->assertTrue($this->checkPermissions($uber, $file));
     }
@@ -47,42 +47,61 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
      */
     public function testCheckOwner() {
         // create user and file,
-        $owner = new \enork\User(self::$kernel, 'owner', array());
-        $file = new \enork\File(self::$kernel, '/ownertest', $owner->getUname(), array());
-        $context = new \enork\kernel\UserContext($owner);
-        $check = $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)
-              && $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_WRITE);
+        $owner = new \stackos\User(self::$kernel, 'owner', array());
+        $file = new \stackos\File(self::$kernel, '/ownertest', $owner->getUname(), array());
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $owner);
+        $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)
+              && $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_WRITE);
 
-        // test that
+        // test implicit owner file permissions
         $this->assertTrue($check);
 
-        $check = $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_EXECUTE);
-
-        // test that
+        // test owner no implicit execute permission
+        \lean\util\Dump::flat($strategy);
+        $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_EXECUTE);
         $this->assertFalse($check);
     }
 
+    public function testGroupPermission() {
+        $noname = self::getNoname();
+        $file = new \stackos\File(self::$kernel, '/group_permission_test', $noname->getUname());
+
+        $this->assertFalse($this->checkPermissions($noname, $file));
+
+        // add user to group share
+        $noname->addToGroup('share');
+        $file->addPermission(new \stackos\kernel\security\Permission_Group('share', \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ));
+        // and assert that they have permission
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $noname);
+        $check = $strategy->checkDocumentPermission($noname, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ);
+        $this->assertTrue($check);
+    }
+
+    // TODO
     public function checkUserDeletePermission() {
-        $uber = new \enork\User(self::$kernel, 'uber');
+        $uber = new \stackos\User(self::$kernel, 'uber');
         $uber->setUber(true);
-        $user = new \enork\User(self::$kernel, 'user');
+        $user = new \stackos\User(self::$kernel, 'user');
     }
 
     protected function checkPermissions($user, $file) {
         // create new mock context exposing the checkPermissions method
-        $context = new \enork\kernel\UserContext($user);
-        return $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)
-            && $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_WRITE)
-            && $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_EXECUTE);
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $user);
+        return $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_READ)
+            && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_WRITE)
+            && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Strategy::PERMISSION_TYPE_EXECUTE);
     }
 
     public function testPopEmptyContext() {
         try {
-            self::$kernel->popContext();
+            self::$kernel->popSecurityStrategy();
             $this->fail('Expecting Exception_MissingContext');
         }
-        catch (\enork\Exception_MissingContext $e) {
+        catch (\stackos\Exception_MissingContext $e) {
             // pass
         }
+    }
+    protected static function getNoname() {
+        return new \stackos\User(self::$kernel, 'noname');
     }
 }

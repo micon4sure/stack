@@ -1,4 +1,4 @@
-# enork
+# stackos
 * is a protocol to emulate a file system behind a JSON/HTTP API
 * is an implementation of said protocol in PHP5.3 with a backend of couchDB
 * is an application, running productive code against the platform
