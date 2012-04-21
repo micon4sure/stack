@@ -16,7 +16,7 @@
 
 namespace test;
 
-class UserTest extends \PHPUnit_Framework_TestCase {
+class UserTests extends \PHPUnit_Framework_TestCase {
     /**
      * @var \enork\Kernel
      */

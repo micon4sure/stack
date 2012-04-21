@@ -16,13 +16,6 @@ namespace enork;
  */
 
 class Kernel {
-    const PERMISSION_READ = 'r';
-    const PERMISSION_WRITE = 'w';
-    const PERMISSION_EXECUTE = 'x';
-
-    const PERMISSION_TYPE_GROUP = 'g';
-    const PERMISSION_TYPE_USER = 'u';
-
     /**
      * @var \couchClient
      */
@@ -221,7 +214,7 @@ class Kernel {
             throw new Exception_FileNotFound("File '$path' was not found'");
         }
         $file = $this->adapter->toFile($doc);
-        if (!$this->currentContext()->checkFilePermission($file, self::PERMISSION_READ)) {
+        if (!$this->currentContext()->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)) {
             throw new Exception_PermissionDenied("Permission to receive file '$path' was denied.");
         }
         return $file;
@@ -241,7 +234,7 @@ class Kernel {
             throw new Exception_PermissionDenied("Not allowed to create or delete root file.", Exception_PermissionDenied::PERMISSION_DENIED_CANT_CREATE_ROOT);
         }
         // check file permission on the document
-        if (!$this->currentContext()->checkFilePermission($file, self::PERMISSION_READ)) {
+        if (!$this->currentContext()->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)) {
             throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.", Exception_PermissionDenied::PERMISSION_DENIED_MISSING_PERMISSION);
         }
 

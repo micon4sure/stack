@@ -16,6 +16,24 @@ namespace enork\kernel;
  */
 
 interface Context {
+    /** Read permission.
+     */
+    const PERMISSION_READ = 'r';
+    /** Write permission.
+     */
+    const PERMISSION_WRITE = 'w';
+    /** Execute permission: allows to execute applications enclosed in a file
+     *  Allows transversion into directory (TODO unimplmented)
+     */
+    const PERMISSION_EXECUTE = 'x';
+
+    /** Group context: PERMISSION_\w+ for group $foo
+     */
+    const PERMISSION_TYPE_GROUP = 'g';
+    /** Group context: PERMISSION_\w+ for user $bar
+     */
+    const PERMISSION_TYPE_USER = 'u';
+
     /**
      * Check for permission to create a user.
      *

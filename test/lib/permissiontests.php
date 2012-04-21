@@ -16,60 +16,60 @@
 
 namespace test;
 
-class FileTest extends \PHPUnit_Framework_TestCase {
+class PermissionTests extends \PHPUnit_Framework_TestCase {
     /**
      * @var \enork\Kernel
      */
     private static $kernel;
 
-    /**
-     * Reset the kernel before each test.
-     */
     public function setUp() {
         self::resetKernel();
     }
 
-    /**
-     * @static
-     * Destroy the underlying couchDB and rebuild it.
-     */
     private static function resetKernel() {
         self::$kernel = new \enork\Kernel('http://root:root@127.0.0.1:5984', 'enork');
         self::$kernel->destroy();
         self::$kernel->init();
     }
 
-    public function testGetRootFile() {
-        // provoke no context on stack exception
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $root = self::$kernel->getFile('/');
-        $this->assertTrue($root instanceof \enork\File);
-        $this->assertEquals('root', $root->getOwner());
-        $this->assertEquals($root, self::$kernel->getRootFile());
+    /**
+     */
+    public function testCheckUber() {
+        // arrange
+        $user = new \enork\User(self::$kernel, 'root');
+        $context = new KernelTest_Mock_Context($user);
+        self::$kernel->pushContext($context);
+
+        $file = self::$kernel->getRootFile();
+        $context->setUser(self::$kernel->getRootUser());
+
+        // act
+        $check = $context->checkPermissions($file, \enork\kernel\Context::PERMISSION_READ)
+                    && $context->checkPermissions($file, \enork\kernel\Context::PERMISSION_WRITE)
+                    && $context->checkPermissions($file, \enork\kernel\Context::PERMISSION_EXECUTE);
+
+        // assert
+        $this->assertTrue($check);
     }
 
-    public function testGetRootHome() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        $root = self::$kernel->getFile('/root');
-        $this->assertTrue($root instanceof \enork\File);
-        $this->assertEquals('root', $root->getOwner());
-    }
-
-    public function testCreateFile() {
-        self::$kernel->pushContext(new \enork\kernel\PrivilegedContext());
-        // TODO
-    }
-
-    public function testGetFileFailedPermissionDenied() {
-        self::$kernel->pushContext(new \enork\kernel\UnprivilegedContext());
+    public function testPopEmptyContext() {
         try {
-            self::$kernel->getFile('/');
-            $this->fail('Expecting Exception_PermissionDenied');
+            self::$kernel->popContext();
+            $this->fail('Expecting Exception_MissingContext');
         }
-        catch(\enork\Exception_PermissionDenied $e) {
+        catch(\enork\Exception_MissingContext $e) {
             // pass
         }
     }
+}
 
-
+class KernelTest_Mock_Context extends \enork\kernel\UserContext {
+    /**
+     * @param array  $permissions
+     * @param string $requested the requested permission type
+     * @return bool
+     */
+    public function checkPermissions(\enork\File $permissions, $requested) {
+        return parent::checkFilePermission($permissions, $requested);
+    }
 }

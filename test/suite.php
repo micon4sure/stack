@@ -34,9 +34,10 @@ require_once APPLICATION_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
 class EnorkSuite {
     public static function suite() {
         $suite = new \PHPUnit_Framework_TestSuite('enork');
-        $suite->addTestSuite('test\KernelTest');
-        $suite->addTestSuite('test\UserTest');
-        $suite->addTestSuite('test\FileTest');
+        $suite->addTestSuite('test\KernelTests');
+        $suite->addTestSuite('test\UserTests');
+        $suite->addTestSuite('test\FileTests');
+        $suite->addTestSuite('test\PermissionTests');
 
         return $suite;
     }

@@ -28,8 +28,7 @@ class UserContext implements Context {
         $this->setUser($user);
     }
 
-    /**
-     * Set the contextual user.
+    /** Set the contextual user
      *
      * @param \enork\User $user
      */
@@ -38,8 +37,7 @@ class UserContext implements Context {
     }
 
 
-    /**
-     * Check for permission to create a user.
+    /** Check for permission to create a user
      *
      * @param \enork\User $user
      * @return bool
@@ -48,8 +46,7 @@ class UserContext implements Context {
         return $this->user->getUber();
     }
 
-    /**
-     * Check for permission to delete a user.
+    /** Check for permission to delete a user
      *
      * @param \enork\User $user
      * @return bool
@@ -58,8 +55,7 @@ class UserContext implements Context {
         return $this->user->getUber();
     }
 
-    /**
-     * Check if a user has permission to access a file in ways of $permission (r/w/x)
+    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
      * @param \enork\File  $file
      * @param string       $permission
