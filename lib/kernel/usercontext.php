@@ -62,10 +62,10 @@ class UserContext implements Context {
      * @return bool
      */
     public function checkFilePermission(\enork\File $file, $permission) {
-        if ($file->getOwner() == $this->user->getUname()) {
+        // Owner always has read and write access
+        if ($permission != self::PERMISSION_EXECUTE && $file->getOwner() == $this->user->getUname()) {
             return true;
         }
-
         return $this->checkPermissions($file->getPermissions(), $permission);
     }
 

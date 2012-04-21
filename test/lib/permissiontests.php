@@ -32,24 +32,48 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
         self::$kernel->init();
     }
 
-    /**
+    /** Test if $uber has access to $file owned by $user
      */
     public function testCheckUber() {
-        // arrange
-        $user = new \enork\User(self::$kernel, 'root');
-        $context = new KernelTest_Mock_Context($user);
-        self::$kernel->pushContext($context);
+        $uber = new \enork\User(self::$kernel, 'uber');
+        $uber->setUber(true);
+        $user = new \enork\User(self::$kernel, 'user');
+        $file = new \enork\File(self::$kernel, '/ubertest', $user->getUname());
 
-        $file = self::$kernel->getRootFile();
-        $context->setUser(self::$kernel->getRootUser());
+        $this->assertTrue($this->checkPermissions($uber, $file));
+    }
 
-        // act
-        $check = $context->checkPermissions($file, \enork\kernel\Context::PERMISSION_READ)
-                    && $context->checkPermissions($file, \enork\kernel\Context::PERMISSION_WRITE)
-                    && $context->checkPermissions($file, \enork\kernel\Context::PERMISSION_EXECUTE);
+    /** Test if $owner has access to file with empty groups and empty permissions
+     */
+    public function testCheckOwner() {
+        // create user and file,
+        $owner = new \enork\User(self::$kernel, 'owner', array());
+        $file = new \enork\File(self::$kernel, '/ownertest', $owner->getUname(), array());
+        $context = new \enork\kernel\UserContext($owner);
+        $check = $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)
+              && $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_WRITE);
 
-        // assert
+        // test that
         $this->assertTrue($check);
+
+        $check = $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_EXECUTE);
+
+        // test that
+        $this->assertFalse($check);
+    }
+
+    public function checkUserDeletePermission() {
+        $uber = new \enork\User(self::$kernel, 'uber');
+        $uber->setUber(true);
+        $user = new \enork\User(self::$kernel, 'user');
+    }
+
+    protected function checkPermissions($user, $file) {
+        // create new mock context exposing the checkPermissions method
+        $context = new \enork\kernel\UserContext($user);
+        return $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_READ)
+            && $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_WRITE)
+            && $context->checkFilePermission($file, \enork\kernel\Context::PERMISSION_EXECUTE);
     }
 
     public function testPopEmptyContext() {
@@ -57,19 +81,8 @@ class PermissionTests extends \PHPUnit_Framework_TestCase {
             self::$kernel->popContext();
             $this->fail('Expecting Exception_MissingContext');
         }
-        catch(\enork\Exception_MissingContext $e) {
+        catch (\enork\Exception_MissingContext $e) {
             // pass
         }
-    }
-}
-
-class KernelTest_Mock_Context extends \enork\kernel\UserContext {
-    /**
-     * @param array  $permissions
-     * @param string $requested the requested permission type
-     * @return bool
-     */
-    public function checkPermissions(\enork\File $permissions, $requested) {
-        return parent::checkFilePermission($permissions, $requested);
     }
 }

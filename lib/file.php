@@ -21,6 +21,12 @@ class File extends Document {
     private $permissions;
     private $kernel;
 
+    /**
+     * @param Kernel $kernel
+     * @param string $path
+     * @param User   $owner
+     * @param array  $permissions
+     */
     public function __construct(Kernel $kernel, $path, $owner, array $permissions = array()) {
         parent::__construct($kernel);
         $this->path = $path;
@@ -36,7 +42,6 @@ class File extends Document {
     public function getOwner() {
         return $this->owner;
     }
-
     public function setPath($path) {
         $this->path = $path;
     }
@@ -50,6 +55,7 @@ class File extends Document {
     }
 
     /** Get the parent file from the kernel, if any.
+     *
      * @return File
      * @throws Exception_RootHasNoParent
      * @throws Exception_PermissionDenied
