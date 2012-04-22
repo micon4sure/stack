@@ -17,13 +17,13 @@
 // bootstrap
 
 // TODO: configurable
-require_once realpath('/home/klawd/workspace/enork/external/lean/lean/init.php');
+require_once realpath('/home/klawd/workspace/stackos/external/lean/lean/init.php');
 
-define('APPLICATION_ROOT', '/home/klawd/workspace/enork/');
+define('APPLICATION_ROOT', '/home/klawd/workspace/stackos/');
 
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
-$autoload->register('test', '/home/klawd/workspace/enork/test/lib');
+$autoload->register('test', '/home/klawd/workspace/stackos/test/lib');
 $autoload->register('stackos', APPLICATION_ROOT . '/lib');
 
 date_default_timezone_set('Europe/Berlin');

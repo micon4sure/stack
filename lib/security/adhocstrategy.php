@@ -15,6 +15,9 @@ namespace stackos\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Should only be used in unit test environment
+ */
 class AdhocStrategy implements \stackos\security\Strategy {
 
     const CALLBACK_CHECK_USER_CREATE = 'checkUserCreatePermission';

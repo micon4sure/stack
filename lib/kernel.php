@@ -203,7 +203,7 @@ class Kernel {
 
 
     /** Write a file to the file system
-     * Check permissions to write to parent file first
+     * Check permissions to write to parent file
      *
      * @param User $user
      * @param File $file
@@ -234,7 +234,7 @@ class Kernel {
     }
 
     /** Check if a file exists
-     * TODO dont check with exceptions; build fileExists into kernel
+     * TODO dont check with exceptions; make a HEAD request
      *
      * @param $user
      * @param $path

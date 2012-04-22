@@ -66,6 +66,7 @@ class KernelTests extends \StackOSTest {
         }
         $this->assertTrue($kernel->currentStrategy() === $mockStrategy);
     }
+
 }
 
 class KernelTests_Mock_Kernel extends \stackos\Kernel {
