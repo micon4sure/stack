@@ -18,12 +18,12 @@ namespace test;
 
 class UserTests extends \StackOSTest {
     public function testGetUser() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $this->assertTrue(self::$kernel->getUser(new \stackos\User(self::$kernel, 'root'),'root') instanceof \stackos\User);
     }
 
     public function testGetUnknownUser() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         try {
             self::$kernel->getUser(self::getNoname(), 'unknown');
             $this->fail('Expecting Exception_UserNotFound');
@@ -34,13 +34,13 @@ class UserTests extends \StackOSTest {
     }
 
     public function testCreateUser() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
     }
 
     public function testCreateUserFailPermissionDenied() {
-        $adhoc = new \stackos\kernel\security\UnprivilegedStrategy();
+        $adhoc = new \stackos\security\UnprivilegedStrategy();
         self::$kernel->pushSecurityStrategy($adhoc);
 
         try {
@@ -55,12 +55,12 @@ class UserTests extends \StackOSTest {
     }
 
     public function testGetUserPermissionDenied() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         self::$kernel->createUser(self::getNoname(), self::getNoname()->getUname());
         self::$kernel->pullSecurityStrategy();
 
 
-        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
+        $strategy = new \stackos\security\BaseStrategy(self::$kernel);
 
         self::$kernel->pushSecurityStrategy($strategy);
         try {
@@ -75,7 +75,7 @@ class UserTests extends \StackOSTest {
     }
 
     public function testCreateUserUserExists() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
         self::$kernel->createUser($user);
 
@@ -88,8 +88,8 @@ class UserTests extends \StackOSTest {
         }
     }
     public function testCreateUserPermissionDenied() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\UnprivilegedStrategy());
 
         try {
             self::$kernel->createUser(self::getNoname(), self::getNoname());
@@ -103,7 +103,7 @@ class UserTests extends \StackOSTest {
     }
 }
 
-class UserTests_Mock_Strategy_AllFileTrue extends \stackos\kernel\security\BaseStrategy {
+class UserTests_Mock_Strategy_AllFileTrue extends \stackos\security\BaseStrategy {
     public function checkDocumentPermission(\stackos\User $user, \stackos\Document $document, $priviledge) {
         if($document instanceof \stackos\File)
             return true;

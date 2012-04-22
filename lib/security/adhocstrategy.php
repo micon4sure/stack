@@ -1,7 +1,7 @@
 <?php
-namespace stackos\kernel\security;
+namespace stackos\security;
 
-class AdhocStrategy implements \stackos\kernel\security\Strategy {
+class AdhocStrategy implements \stackos\security\Strategy {
 
     const CALLBACK_CHECK_USER_CREATE = 'checkUserCreatePermission';
     const CALLBACK_CHECK_USER_DELETE = 'checkUserDeletePermission';
@@ -10,9 +10,9 @@ class AdhocStrategy implements \stackos\kernel\security\Strategy {
     protected $defaultStrategy;
     protected $callbacks = array();
 
-    public function __construct(\stackos\Kernel$kernel, \stackos\kernel\security\Strategy $defaultStrategy = null) {
+    public function __construct(\stackos\Kernel$kernel, \stackos\security\Strategy $defaultStrategy = null) {
         if($defaultStrategy === null) {
-            $defaultStrategy = new \stackos\kernel\security\BaseStrategy($kernel);
+            $defaultStrategy = new \stackos\security\BaseStrategy($kernel);
         }
         $this->defaultStrategy = $defaultStrategy;
 

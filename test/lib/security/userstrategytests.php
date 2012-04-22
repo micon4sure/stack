@@ -19,15 +19,15 @@ namespace test\security;
 class UserStrategyTests extends \StackOSTest {
 
     public function testPermissionOnRootFileDenied() {
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\security\UserStrategy(self::$kernel, self::getNoname());
         $file = $this->getFile('/', self::getRootUser());
-        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $file, \stackos\kernel\security\Priviledge::WRITE));
+        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $file, \stackos\security\Priviledge::WRITE));
     }
 
     public function testPermissionToRootUserGranted() {
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\security\UserStrategy(self::$kernel, self::getNoname());
         $file = $this->getFile('/', self::getRootUser());
-        $this->assertTrue($strategy->checkDocumentPermission(self::getRootUser(), $file, \stackos\kernel\security\Priviledge::WRITE));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getRootUser(), $file, \stackos\security\Priviledge::WRITE));
     }
 
     public function testGetKernel() {
@@ -36,7 +36,7 @@ class UserStrategyTests extends \StackOSTest {
     }
 
     public function testCheckUserCreatePermission() {
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\security\UserStrategy(self::$kernel, self::getNoname());
         // test if root can create user
         $this->assertTrue($strategy->checkUserCreatePermission(self::getRootUser()));
         // test if noname can not create user
@@ -44,7 +44,7 @@ class UserStrategyTests extends \StackOSTest {
     }
 
     public function testCheckUserDeletePermission() {
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\security\UserStrategy(self::$kernel, self::getNoname());
         // test if root can delete user
         $this->assertTrue($strategy->checkUserDeletePermission(self::getRootUser()));
         // test if noname can not delete user
@@ -52,60 +52,60 @@ class UserStrategyTests extends \StackOSTest {
     }
 
     public function testCheckDocumentUserPermission() {
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\security\UserStrategy(self::$kernel, self::getNoname());
         $document = new \stackos\Document(self::$kernel);
 
         // make sure noname has no permissions on the document
-        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::READ));
+        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::WRITE));
+        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::EXECUTE));
 
         // grant read priviledge
-        $document->addPermission(new \stackos\kernel\security\Permission_User(self::getNoname()->getUname(), \stackos\kernel\security\Priviledge::READ));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $document->addPermission(new \stackos\security\Permission_User(self::getNoname()->getUname(), \stackos\security\Priviledge::READ));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::READ));
+        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::WRITE));
+        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::EXECUTE));
 
         // grant write priviledge
-        $document->addPermission(new \stackos\kernel\security\Permission_User(self::getNoname()->getUname(), \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $document->addPermission(new \stackos\security\Permission_User(self::getNoname()->getUname(), \stackos\security\Priviledge::WRITE));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::READ));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::WRITE));
+        $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::EXECUTE));
 
         // grant execute priviledge
-        $document->addPermission(new \stackos\kernel\security\Permission_User(self::getNoname()->getUname(), \stackos\kernel\security\Priviledge::EXECUTE));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $document->addPermission(new \stackos\security\Permission_User(self::getNoname()->getUname(), \stackos\security\Priviledge::EXECUTE));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::READ));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::WRITE));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::EXECUTE));
     }
 
     public function testCheckDocumentGroupPermission() {
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\security\UserStrategy(self::$kernel, self::getNoname());
         $document = new \stackos\Document(self::$kernel);
         $user = self::getNoname();
         $user->addToGroup('test');
 
         // make sure noname has no permissions on the document
-        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::READ));
+        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::WRITE));
+        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::EXECUTE));
 
         // grant read priviledge
-        $document->addPermission(new \stackos\kernel\security\Permission_Group('test', \stackos\kernel\security\Priviledge::READ));
-        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $document->addPermission(new \stackos\security\Permission_Group('test', \stackos\security\Priviledge::READ));
+        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::READ));
+        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::WRITE));
+        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::EXECUTE));
 
         // grant write priviledge
-        $document->addPermission(new \stackos\kernel\security\Permission_Group('test', \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $document->addPermission(new \stackos\security\Permission_Group('test', \stackos\security\Priviledge::WRITE));
+        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::READ));
+        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::WRITE));
+        $this->assertFalse($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::EXECUTE));
 
         // grant execute priviledge
-        $document->addPermission(new \stackos\kernel\security\Permission_Group('test', \stackos\kernel\security\Priviledge::EXECUTE));
-        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $document->addPermission(new \stackos\security\Permission_Group('test', \stackos\security\Priviledge::EXECUTE));
+        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::READ));
+        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::WRITE));
+        $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\security\Priviledge::EXECUTE));
     }
 }

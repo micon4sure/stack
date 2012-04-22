@@ -1,5 +1,5 @@
 <?php
-namespace stackos\kernel\security;
+namespace stackos\security;
 
 interface Strategy {
     /** Group context: PERMISSION_\w+ for group $foo

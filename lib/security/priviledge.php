@@ -1,5 +1,5 @@
 <?php
-namespace stackos\kernel\security;
+namespace stackos\security;
 
 abstract class Priviledge {
     /** Read permission

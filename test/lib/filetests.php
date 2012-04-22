@@ -19,7 +19,7 @@ namespace test;
 class FileTests extends \StackOSTest {
 
     public function testFileNotFound() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         try {
             self::$kernel->getFile(self::getNoname(), '/noname');
             $this->fail('Expecting Exception_FileNotFound');
@@ -30,13 +30,13 @@ class FileTests extends \StackOSTest {
     }
 
     public function testCreateFile() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $file = new \stackos\File(self::$kernel, '/test', self::getNoname()->getUname());
         self::$kernel->createFile(self::getNoname(), $file);
     }
 
     public function testFileExists() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $file = new \stackos\File(self::$kernel, '/test', self::getNoname()->getUname());
         self::$kernel->createFile(self::getNoname(), $file);
         try {
@@ -48,7 +48,7 @@ class FileTests extends \StackOSTest {
         }
     }
     public function testGetParent() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $user = self::getNoname();
 
         // create files
@@ -61,7 +61,7 @@ class FileTests extends \StackOSTest {
     }
 
     public function testRootHasNoParent() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $user = self::getNoname();
 
         // read /foo/bar
@@ -75,7 +75,7 @@ class FileTests extends \StackOSTest {
     }
 
     public function testOwnerAccess() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $user = self::getNoname();
 
         // check get and set owner
@@ -112,7 +112,7 @@ class FileTests extends \StackOSTest {
         $file = new \stackos\File(self::$kernel, '/foo', self::getNoname('owner')->getUname());
 
         // try and see if file
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\UnprivilegedStrategy());
         try {
             self::$kernel->createFile(self::getNoname('requestant'), $file);
             $this->fail('Expecting Exception_PermissionDenied');
@@ -125,7 +125,7 @@ class FileTests extends \StackOSTest {
     }
 
     public function testGetFilePermissionDenied() {
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\security\UnprivilegedStrategy());
         try {
             self::$kernel->getFile(self::getNoname(), '/');
             $this->fail('Expecting Exception_PermissionDenied');

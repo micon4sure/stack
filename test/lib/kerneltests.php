@@ -77,5 +77,5 @@ class KernelTests_Mock_Kernel extends \stackos\Kernel {
 class KernelTests_Mock_Kernel_Exception extends \stackos\Exception {
 
 }
-class KernelTests_Mock_Strategy extends \stackos\kernel\security\BaseStrategy {
+class KernelTests_Mock_Strategy extends \stackos\security\BaseStrategy {
 }

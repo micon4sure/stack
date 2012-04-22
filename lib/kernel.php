@@ -49,17 +49,17 @@ class Kernel {
 
     /** Push a security strategy onto the stack.
      *
-     * @param \stackos\kernel\security\Strategy $strategy
+     * @param \stackos\security\Strategy $strategy
      * @return \stackos\Kernel
      */
-    public function pushSecurityStrategy(\stackos\kernel\security\Strategy $strategy) {
+    public function pushSecurityStrategy(\stackos\security\Strategy $strategy) {
         $this->securityStrategyStack[] = $strategy;
         return $this;
     }
 
     /** Pull a security strategy off the stack
      *
-     * @return \stackos\kernel\security\Strategy $strategy
+     * @return \stackos\security\Strategy $strategy
      */
     public function pullSecurityStrategy() {
         if (!count($this->securityStrategyStack)) {
@@ -71,7 +71,7 @@ class Kernel {
     /** Get the current security strategy from the stack.
      *
      * @throws\stackos\Exception_MissingSecurityStrategy
-     * @return \stackos\kernel\security\Strategy
+     * @return \stackos\security\Strategy
      */
     public function currentStrategy() {
         if (!count($this->securityStrategyStack)) {
@@ -93,7 +93,7 @@ class Kernel {
     public function init() {
         if (!$this->couchClient->databaseExists()) {
             $this->couchClient->createDatabase();
-            $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+            $this->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
             try {
                 // create root user
                 $rootUser = new User($this, ROOT_UNAME, array('root'), '/root');
@@ -140,7 +140,7 @@ class Kernel {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
 
-        if (!$this->currentStrategy()->checkDocumentPermission($user, new User($this, $uname), \stackos\kernel\security\Priviledge::READ)) {
+        if (!$this->currentStrategy()->checkDocumentPermission($user, new User($this, $uname), \stackos\security\Priviledge::READ)) {
             throw new Exception_PermissionDenied("Permission to read user '$uname' was denied.",
                 Exception_PermissionDenied::PERMISSION_READ_USER_DENIED);
         }
@@ -157,12 +157,16 @@ class Kernel {
         // check if user has write privileges on users file
         $file = new File($this, ROOT_PATH_USERS, new User($this, 'root'));
         $readPermission = $this->currentStrategy()
-            ->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::WRITE);
+            ->checkDocumentPermission($user, $file, \stackos\security\Priviledge::WRITE);
         if (!$readPermission) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied",
                 Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED);
         }
+
+        // adapt user
         $doc = $this->adapter->fromUser($user);
+
+        // save user or throw Exception_UserExists
         try {
             $this->couchClient->storeDoc($doc);
         }
@@ -179,14 +183,18 @@ class Kernel {
      * @throws Exception_FileNotFound|Exception_PermissionDenied
      */
     public function getFile(User $user, $path) {
+        // fetch document from database or throw Exception_FileNotFound
         try {
             $doc = $this->couchClient->getDoc("file:$path");
         }
         catch (\couchNotFoundException $e) {
             throw new Exception_FileNotFound("File '$path' was not found'");
         }
+        // adapt file
         $file = $this->adapter->toFile($doc);
-        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::READ)) {
+
+        // check document permissions
+        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\security\Priviledge::READ)) {
             throw new Exception_PermissionDenied("Permission to read file '$path' was denied.",
                 Exception_PermissionDenied::PERMISSION_READ_FILE_DENIED);
         }
@@ -208,11 +216,12 @@ class Kernel {
         if($exists) {
             throw new Exception_FileExists("The file at '{$file->getPath()}' could not be created. It exists already.");
         }
-        // check for write priviledges on the parent file
-        $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        // get parent with priviledgedStrategy
+        $this->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
         $parent = $file->getParent($user);
-        $this->pullSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
-        $permission = $this->currentStrategy()->checkDocumentPermission($user, $parent, \stackos\kernel\security\Priviledge::WRITE);
+        $this->pullSecurityStrategy(new \stackos\security\PrivilegedStrategy());
+        // check for write priviledges on it
+        $permission = $this->currentStrategy()->checkDocumentPermission($user, $parent, \stackos\security\Priviledge::WRITE);
         if (!$permission) {
             throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.",
                 Exception_PermissionDenied::PERMISSION_CREATE_FILE_DENIED);
@@ -220,7 +229,6 @@ class Kernel {
         // actually write document
         $doc = $this->adapter->fromFile($file);
         $this->couchClient->storeDoc($doc);
-
 
         return $file;
     }
@@ -235,7 +243,7 @@ class Kernel {
     public function fileExists($user, $path) {
         try {
             // file exists always possible
-            $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+            $this->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
             $this->getFile($user, $path);
             $this->pullSecurityStrategy();
             return true;
@@ -277,8 +285,7 @@ class Kernel_Adapter {
         $this->kernel = $kernel;
     }
 
-    /**
-     * Adapt User instance to be saved as a couchdb document
+    /** Adapt User instance to be saved as a couchdb document
      *
      * @param User $user
      * @return \object
@@ -292,8 +299,7 @@ class Kernel_Adapter {
         return $doc;
     }
 
-    /**
-     * Adapt a couchdb document to a User instance
+    /** Adapt a couchdb document to a User instance
      *
      * @param \object $doc
      * @return User
@@ -307,8 +313,7 @@ class Kernel_Adapter {
         return $user;
     }
 
-    /**
-     * Adapt File instance to be saved as a couchdb document
+    /** Adapt File instance to be saved as a couchdb document
      *
      * @param File $file
      * @return \object
@@ -321,8 +326,7 @@ class Kernel_Adapter {
         return $doc;
     }
 
-    /**
-     * Adapt a couchdb document to a File instance
+    /** Adapt a couchdb document to a File instance
      *
      * @param \object $doc
      * @return File

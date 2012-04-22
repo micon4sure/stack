@@ -27,7 +27,7 @@ class Document {
         return $this->kernel;
     }
 
-    public function addPermission(\stackos\kernel\security\Permission $permission) {
+    public function addPermission(\stackos\security\Permission $permission) {
         $this->permissions[] = $permission;
     }
 

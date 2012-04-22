@@ -18,16 +18,16 @@ namespace test\security;
 class AdhocStrategyTests extends \StackOSTest {
 
     public function testDefault() {
-        $adhoc = new \stackos\kernel\security\AdhocStrategy(self::$kernel);
+        $adhoc = new \stackos\security\AdhocStrategy(self::$kernel);
         $uber = $this->getNoname('uber');
         $uber->setUber(true);
         $document =  new \stackos\Document(self::$kernel, array());
-        $adhoc->checkDocumentPermission($uber,$document, \stackos\kernel\security\Priviledge::WRITE);
+        $adhoc->checkDocumentPermission($uber,$document, \stackos\security\Priviledge::WRITE);
     }
 
     public function testUserCreate() {
-        $unprivilegedStrategy = new \stackos\kernel\security\UnprivilegedStrategy();
-        $adhoc = new \stackos\kernel\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
+        $unprivilegedStrategy = new \stackos\security\UnprivilegedStrategy();
+        $adhoc = new \stackos\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
 
         // userCreatePermission
         $this->assertFalse($adhoc->checkUserCreatePermission(self::getNoname()));
@@ -38,8 +38,8 @@ class AdhocStrategyTests extends \StackOSTest {
     }
 
     public function testUserDelete() {
-        $unprivilegedStrategy = new \stackos\kernel\security\UnprivilegedStrategy();
-        $adhoc = new \stackos\kernel\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
+        $unprivilegedStrategy = new \stackos\security\UnprivilegedStrategy();
+        $adhoc = new \stackos\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
 
         // userDeletePermission
         $this->assertFalse($adhoc->checkUserDeletePermission(self::getNoname(), self::getNoname()));
@@ -50,16 +50,16 @@ class AdhocStrategyTests extends \StackOSTest {
     }
 
     public function testAdhocStrategyUserCreate() {
-        $unprivilegedStrategy = new \stackos\kernel\security\UnprivilegedStrategy();
-        $adhoc = new \stackos\kernel\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
+        $unprivilegedStrategy = new \stackos\security\UnprivilegedStrategy();
+        $adhoc = new \stackos\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
         $document = new \stackos\Document(self::$kernel);
 
         // documentPermission
-        $this->assertFalse($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
+        $this->assertFalse($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::READ));
         $adhoc->setCallback('checkDocumentPermission', function(\stackos\User $user, \stackos\Document $document, $permission) {
             return true;
         });
-        $this->assertTrue($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
+        $this->assertTrue($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::READ));
     }
 
 }

@@ -19,22 +19,22 @@ namespace test\security;
 class PriviledgedStrategyTests extends \StackOSTest {
 
     public function testCheckUserCreatePermission() {
-        $strategy = new \stackos\kernel\security\PrivilegedStrategy();
+        $strategy = new \stackos\security\PrivilegedStrategy();
         $this->assertTrue($strategy->checkUserCreatePermission(self::getRootUser()));
     }
 
     public function testCheckUserDeletePermission() {
-        $strategy = new \stackos\kernel\security\PrivilegedStrategy();
+        $strategy = new \stackos\security\PrivilegedStrategy();
         $this->assertTrue($strategy->checkUserDeletePermission(self::getRootUser()));
     }
 
     public function testCheckDocumentUserPermission() {
-        $strategy = new \stackos\kernel\security\PrivilegedStrategy();
+        $strategy = new \stackos\security\PrivilegedStrategy();
         $document = new \stackos\Document(self::$kernel);
 
         // make sure noname has all permissions
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::WRITE));
-        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::EXECUTE));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::READ));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::WRITE));
+        $this->assertTrue($strategy->checkDocumentPermission(self::getNoname(), $document, \stackos\security\Priviledge::EXECUTE));
     }
 }
