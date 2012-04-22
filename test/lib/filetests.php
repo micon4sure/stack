@@ -96,8 +96,15 @@ class FileTests extends \StackOSTest {
         );
     }
 
-    public function testSetPathAccess() {
+    public function testPathAccess() {
+        $file = new \stackos\File(self::$kernel, '/foo', self::getNoname('owner')->getUname());
+        $file->setPath('/foo/bar');
+        $this->assertEquals($file->getPath(), '/foo/bar');
+    }
 
+    public function testGetKernel() {
+        $file = new FileTests_Mock_File(self::$kernel, '/foo', 'root');
+        $this->assertTrue(self::$kernel === $file->getKernel());
     }
 
     // === permissions ===
@@ -129,7 +136,7 @@ class FileTests extends \StackOSTest {
     }
 }
 
-class FileTests_Mock_Document extends \stackos\Document {
+class FileTests_Mock_File extends \stackos\File {
     public function getKernel() {
         return parent::getKernel();
     }

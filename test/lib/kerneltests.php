@@ -16,22 +16,7 @@
 
 namespace test;
 
-class KernelTests extends \PHPUnit_Framework_TestCase {
-    /**
-     * @var \stackos\Kernel
-     */
-    private static $kernel;
-
-    public function setUp() {
-        self::resetKernel();
-    }
-
-    private static function resetKernel() {
-        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
-        self::$kernel->destroy();
-        self::$kernel->init();
-    }
-
+class KernelTests extends \StackOSTest {
     public function testNoContextOnStack() {
         try {
             self::$kernel->getFile(new \stackos\User(self::$kernel, 'noname'), '/');
@@ -51,4 +36,46 @@ class KernelTests extends \PHPUnit_Framework_TestCase {
             // pass
         }
     }
+
+    /** Assert that the security stack does not get corrupted here
+     */
+    public function testInitStrategyStack() {
+        $kernel = self::$kernel;
+        $mockStrategy = new KernelTests_Mock_Strategy($kernel);
+        $kernel->pushSecurityStrategy($mockStrategy);
+        $kernel->destroy();
+        $this->assertTrue($kernel->currentStrategy() === $mockStrategy);
+        $kernel->init();
+        $this->assertTrue($kernel->currentStrategy() === $mockStrategy);
+    }
+
+    /** Assert that the security stack does not get corrupted when an exception occurs
+     * @test whitebox
+     */
+    public function testInitStrategyStackException() {
+        $kernel = new KernelTests_Mock_Kernel('http://root:root@127.0.0.1:5984', 'stackos');
+        $mockStrategy = new KernelTests_Mock_Strategy($kernel);
+        $kernel->pushSecurityStrategy($mockStrategy);
+        $kernel->destroy();
+        $this->assertTrue($kernel->currentStrategy() === $mockStrategy);
+        try {
+            // mock kernel will throw an exception
+            $kernel->init();
+            $this->fail('Expecting KernelTests_Mock_Kernel_Exception');
+        } catch(KernelTests_Mock_Kernel_Exception $e) {
+            // pass
+        }
+        $this->assertTrue($kernel->currentStrategy() === $mockStrategy);
+    }
+}
+
+class KernelTests_Mock_Kernel extends \stackos\Kernel {
+    protected function getAdapter() {
+        throw new KernelTests_Mock_Kernel_Exception('Testing finally');
+    }
+}
+class KernelTests_Mock_Kernel_Exception extends \stackos\Exception {
+
+}
+class KernelTests_Mock_Strategy extends \stackos\kernel\security\BaseStrategy {
 }

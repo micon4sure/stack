@@ -98,14 +98,14 @@ class Kernel {
                 // create root user
                 $rootUser = new User($this, ROOT_UNAME, array('root'), '/root');
                 $rootUser->setUber(true);
-                $doc = $this->adapter->fromUser($rootUser);
-                $this->couchClient->storeDoc($doc);
+                $doc = $this->getAdapter()->fromUser($rootUser);
+                $this->getCouchClient()->storeDoc($doc);
                 // create root directories
                 $initDirs = array(ROOT_PATH, ROOT_PATH_HOME, ROOT_PATH_USERS, ROOT_PATH_GROUPS);
                 foreach($initDirs as $dir) {
                     $file = new File($this, $dir, ROOT_UNAME);
-                    $doc = $this->adapter->fromFile($file);
-                    $this->couchClient->storeDoc($doc);
+                    $doc = $this->getAdapter()->fromFile($file);
+                    $this->getCouchClient()->storeDoc($doc);
                 }
             }
             // finally pop strategy
@@ -120,8 +120,8 @@ class Kernel {
     /** Destroy the database.
      */
     public function destroy() {
-        if ($this->couchClient->databaseExists()) {
-            $this->couchClient->deleteDatabase();
+        if ($this->getCouchClient()->databaseExists()) {
+            $this->getCouchClient()->deleteDatabase();
         }
     }
 
@@ -244,6 +244,20 @@ class Kernel {
             $this->pullSecurityStrategy();
             return false;
         }
+    }
+
+    /**
+     * @return Kernel_Adapter
+     */
+    protected function getAdapter() {
+        return $this->adapter;
+    }
+
+    /**
+     * @return \couchClient
+     */
+    protected function getCouchClient() {
+        return $this->couchClient;
     }
 }
 
