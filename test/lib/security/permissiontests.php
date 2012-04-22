@@ -54,7 +54,7 @@ class PermissionTests extends \StackOSTest {
 
         // add user to group share
         $noname->addToGroup('share');
-        $file->addPermission(new \stackos\security\Permission_Group('share', \stackos\security\Priviledge::READ));
+        $file->addPermission(\stackos\security\Permission_Group::create('share', \stackos\security\Priviledge::READ));
         // and assert that they have permission
         $strategy = new \stackos\security\BaseStrategy(self::$kernel);
         $check = $strategy->checkDocumentPermission($noname, $file, \stackos\security\Priviledge::READ);

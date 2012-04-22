@@ -81,3 +81,9 @@ class Exception_RootHasNoParent extends Exception {
         parent::__construct($message, $code, $previous);
     }
 }
+
+class Exception_UnknownEntityType extends Exception {
+    public function __construct($message = '', $code = 800, \Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}

@@ -15,18 +15,27 @@ namespace stackos\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Permission {
+abstract class Permission {
     /**
      * @var string he type of holder [user/group]
      */
-    private $holderType;
+    private $entity;
     private $holder;
     private $priviledge;
 
-    public function __construct($holder, $priviledge, $holderType) {
+    /**
+     * @param string $entity
+     * @param \stackos\User $holder
+     * @param string $priviledge
+     */
+    protected function __construct($entity, $holder, $priviledge) {
+        $this->entity = $entity;
         $this->holder = $holder;
         $this->priviledge = $priviledge;
-        $this->holderType = $holderType;
+    }
+
+    public function getEntity() {
+        return $this->entity;
     }
 
     public function getHolder() {
@@ -36,20 +45,16 @@ class Permission {
     public function getPriviledge() {
         return $this->priviledge;
     }
-
-    public function getHolderType() {
-        return $this->holderType;
-    }
 }
 
 class Permission_Group extends Permission {
-    public function __construct($holder, $priviledge) {
-        parent::__construct($holder, $priviledge, Strategy::PERMISSION_HOLDER_TYPE_GROUP);
+    public static function create($group, $priviledge) {
+        return new self(Strategy::PERMISSION_ENTITY_GROUP, $group, $priviledge);
     }
 }
 
 class Permission_User extends Permission {
-    public function __construct($holder, $priviledge) {
-        parent::__construct($holder, $priviledge, Strategy::PERMISSION_HOLDER_TYPE_USER);
+    public static function create($user, $priviledge) {
+        return new self(Strategy::PERMISSION_ENTITY_USER, $user, $priviledge);
     }
 }

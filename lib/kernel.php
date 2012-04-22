@@ -154,10 +154,10 @@ class Kernel {
      * @throws \stackos\Exception_MissingSecurityStrategy|\stackos\Exception_PermissionDenied|\stackos\Exception_UserExists
      */
     public function createUser(User $user) {
-        // check if user has write privileges on users file
-        $file = new File($this, ROOT_PATH_USERS, new User($this, 'root'));
-        $readPermission = $this->currentStrategy()
-            ->checkDocumentPermission($user, $file, \stackos\security\Priviledge::WRITE);
+        // check if user has write privileges on ROOT_PATH_USERS
+        $file = new File($this, ROOT_PATH_USERS, new User($this, ROOT_UNAME));
+        $strategy = $this->currentStrategy();
+        $readPermission = $strategy->checkDocumentPermission($user, $file, \stackos\security\Priviledge::WRITE);
         if (!$readPermission) {
             throw new Exception_PermissionDenied("The permission to create the user has been denied",
                 Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED);
@@ -322,7 +322,7 @@ class Kernel_Adapter {
         $doc = new \stdClass;
         $doc->_id = 'file:' . $file->getPath();
         $doc->owner = 'user:' . $file->getOwner();
-        $doc->permissions = $file->getPermissions();
+        $doc->permissions = $this->fromPermissions($file->getPermissions());
         return $doc;
     }
 
@@ -334,6 +334,40 @@ class Kernel_Adapter {
     public function toFile($doc) {
         $path = \lean\Text::offsetLeft($doc->_id, 'file:');
         $owner = \lean\Text::offsetLeft($doc->owner, 'user:');
-        return new File($this->kernel, $path, $owner, $doc->permissions);
+        return new File($this->kernel, $path, $owner, $this->toPermissions($doc->permissions));
+    }
+
+    public function toPermissions(array $raw) {
+        $permissions = array();
+        foreach($raw as $permission) {
+            $permissions[] = $this->toPermission($permission);
+        }
+        return $permissions;
+    }
+    public function toPermission($raw) {
+        switch($raw->entity) {
+            case security\Strategy::PERMISSION_ENTITY_GROUP:
+                return \stackos\security\Permission_Group::create($raw->holder, $raw->priviledge, $raw->entity);
+
+            case security\Strategy::PERMISSION_ENTITY_USER:
+                return \stackos\security\Permission_User::create($raw->holder, $raw->priviledge, $raw->entity);
+            default:
+                throw new Exception_UnknownEntityType("Entitytype '{$raw->entity}' unrecognized.");
+        }
+    }
+
+    public function fromPermissions(array $permissions) {
+        $raw = array();
+        foreach($permissions as $permission) {
+            $raw[] = $this->fromPermission($permission);
+        }
+        return $raw;
+    }
+    public function fromPermission(\stackos\security\Permission $permission) {
+        $raw = new \stdClass();
+        $raw->holder = $permission->getHolder();
+        $raw->entity = $permission->getEntity();
+        $raw->priviledge = $permission->getPriviledge();
+        return $raw;
     }
 }

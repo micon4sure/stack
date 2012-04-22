@@ -51,7 +51,7 @@ class KernelTests extends \StackOSTest {
     /** Assert that the security stack does not get corrupted when an exception occurs
      * @test whitebox
      */
-    public function testInitStrategyStackException() {
+    public function testDestroyAndInitStrategyStackException() {
         $kernel = new KernelTests_Mock_Kernel('http://root:root@127.0.0.1:5984', 'stackos');
         $mockStrategy = new KernelTests_Mock_Strategy($kernel);
         $kernel->pushSecurityStrategy($mockStrategy);
@@ -66,7 +66,6 @@ class KernelTests extends \StackOSTest {
         }
         $this->assertTrue($kernel->currentStrategy() === $mockStrategy);
     }
-
 }
 
 class KernelTests_Mock_Kernel extends \stackos\Kernel {

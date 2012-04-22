@@ -82,8 +82,9 @@ class BaseStrategy implements Strategy {
         $check = $document instanceof \stackos\File
             && $document->getOwner() == $user->getUname()
             && $priviledge != Priviledge::EXECUTE;
-        if($check)
+        if ($check) {
             return true;
+        }
 
         // check for permissions inside document
         foreach ($document->getPermissions() as $permission) {
@@ -93,12 +94,12 @@ class BaseStrategy implements Strategy {
             }
 
             // check if user is in group permission is valid for
-            if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_GROUP) {
+            if ($permission->getEntity() == self::PERMISSION_ENTITY_GROUP) {
                 return (bool)array_intersect($user->getGroups(), $user->getGroups());
             }
             // check if user has an explicit permission
-            else if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_USER) {
-                return $permission->getHolder() == $user->getUname();
+            else if ($permission->getEntity() == self::PERMISSION_ENTITY_USER) {
+                return $permission->getHolder()->getUname() == $user->getUname();
             }
         }
         return false;
