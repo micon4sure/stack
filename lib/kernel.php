@@ -156,7 +156,8 @@ class Kernel {
         }
 
         if (!$this->currentStrategy()->checkDocumentPermission($user, new User($this, $uname), \stackos\kernel\security\Priviledge::READ)) {
-            throw new Exception_PermissionDenied("Permission to read user '$uname' was denied.");
+            throw new Exception_PermissionDenied("Permission to read user '$uname' was denied.",
+                Exception_PermissionDenied::PERMISSION_READ_USER_DENIED);
         }
 
         // return user abstracted via User instance
@@ -168,9 +169,13 @@ class Kernel {
      * @throws \stackos\Exception_MissingSecurityStrategy|\stackos\Exception_PermissionDenied|\stackos\Exception_UserExists
      */
     public function createUser(User $user) {
-
-        if (!$this->currentStrategy()->checkDocumentPermission($user, $this->getFile($user, ROOT_PATH_USERS), \stackos\kernel\security\Priviledge::READ)) {
-            throw new Exception_PermissionDenied("The permission to create the user has been denied");
+        // check if user has write privileges on users file
+        $file = new File($this, ROOT_PATH_USERS, new User($this, 'root'));
+        $readPermission = $this->currentStrategy()
+            ->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::WRITE);
+        if (!$readPermission) {
+            throw new Exception_PermissionDenied("The permission to create the user has been denied",
+                Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED);
         }
         $doc = $this->adapter->fromUser($user);
         try {
@@ -197,7 +202,8 @@ class Kernel {
         }
         $file = $this->adapter->toFile($doc);
         if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::READ)) {
-            throw new Exception_PermissionDenied("Permission to receive file '$path' was denied.");
+            throw new Exception_PermissionDenied("Permission to read file '$path' was denied.",
+                Exception_PermissionDenied::PERMISSION_READ_FILE_DENIED);
         }
         return $file;
     }
@@ -212,17 +218,20 @@ class Kernel {
      * @throws Exception_PermissionDenied
      */
     public function createFile(User $user, File $file) {
-        $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        // check if file exists
         $exists = $this->fileExists($user, $file->getPath());
-        $this->pullSecurityStrategy();
         if($exists) {
             throw new Exception_FileExists("The file at '{$file->getPath()}' could not be created. It exists already.");
         }
-        // check file permission on the document
-        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::WRITE)) {
-            throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.", Exception_PermissionDenied::PERMISSION_DENIED_MISSING_PERMISSION);
+        // check for write priviledges on the parent file
+        $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $parent = $file->getParent($user);
+        $this->pullSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        $permission = $this->currentStrategy()->checkDocumentPermission($user, $parent, \stackos\kernel\security\Priviledge::WRITE);
+        if (!$permission) {
+            throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.",
+                Exception_PermissionDenied::PERMISSION_CREATE_FILE_DENIED);
         }
-
         // actually write document
         $doc = $this->adapter->fromFile($file);
         $this->couchClient->storeDoc($doc);
@@ -240,10 +249,14 @@ class Kernel {
      */
     public function fileExists($user, $path) {
         try {
+            // file exists always possible
+            $this->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
             $this->getFile($user, $path);
+            $this->pullSecurityStrategy();
             return true;
         }
         catch(Exception_FileNotFound $e) {
+            $this->pullSecurityStrategy();
             return false;
         }
     }

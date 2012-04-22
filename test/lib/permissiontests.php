@@ -17,15 +17,6 @@
 namespace test;
 
 class PermissionTests extends \StackOSTest {
-    public function setUp() {
-        self::resetKernel();
-    }
-
-    private static function resetKernel() {
-        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
-        self::$kernel->destroy();
-        self::$kernel->init();
-    }
 
     /** Test if $uber has access to $file owned by $user
      */
@@ -87,5 +78,17 @@ class PermissionTests extends \StackOSTest {
         catch (\stackos\Exception_MissingSecurityStrategy $e) {
             // pass
         }
+    }
+
+    public function testAdhocStrategy() {
+        $unprivilegedStrategy = new \stackos\kernel\security\UnprivilegedStrategy();
+        $adhoc = new \stackos\kernel\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
+        $document = new \stackos\Document(self::$kernel);
+        $this->assertFalse($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
+
+        $adhoc->setCallback('checkDocumentPermission', function(\stackos\User $user, \stackos\Document $document, $permission) {
+            return true;
+        });
+        $this->assertTrue($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
     }
 }

@@ -15,7 +15,7 @@ namespace stackos\kernel\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class UserStrategy extends DefaultStrategy {
+class UserStrategy extends BaseStrategy {
     /**
      * @var \stackos\User
      */
@@ -35,7 +35,7 @@ class UserStrategy extends DefaultStrategy {
      * @return bool
      */
     public function checkUserCreatePermission(\stackos\User $user = null) {
-        parent::checkUserCreatePermission($user or $this->user);
+        return parent::checkUserCreatePermission($user or $this->user);
     }
 
     /** Check for permission to delete a user
@@ -44,6 +44,17 @@ class UserStrategy extends DefaultStrategy {
      * @return bool
      */
     public function checkUserDeletePermission(\stackos\User $user = null) {
-        parent::checkUserCreatePermission($user or $this->user);
+        return parent::checkUserCreatePermission($user or $this->user);
+    }
+    /** Check if a user has permission to access a document in ways of $permission (r/w/x)
+     *
+     * @param \stackos\User     $user
+     * @param \stackos\Document $document
+     * @param string            $priviledge
+     *
+     * @return bool
+     */
+    public function checkDocumentPermission(\stackos\User $user, \stackos\Document $document, $priviledge) {
+        return parent::checkDocumentPermission($this->user, $document, $priviledge);
     }
 }

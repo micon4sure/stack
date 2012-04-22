@@ -15,13 +15,15 @@
  */
 
 // bootstrap
-require_once realpath('../external/lean/lean/init.php');
 
-define('APPLICATION_ROOT', realpath('..'));
+// TODO: configurable
+require_once realpath('/home/klawd/workspace/enork/external/lean/lean/init.php');
+
+define('APPLICATION_ROOT', '/home/klawd/workspace/enork/');
 
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
-$autoload->register('test', __DIR__ . '/lib');
+$autoload->register('test', '/home/klawd/workspace/enork/test/lib');
 $autoload->register('stackos', APPLICATION_ROOT . '/lib');
 
 date_default_timezone_set('Europe/Berlin');
@@ -37,8 +39,25 @@ class StackOSTest extends \PHPUnit_Framework_TestCase {
      */
     protected static $kernel;
 
-    protected static function getNoname() {
-        return new \stackos\User(self::$kernel, 'noname');
+    protected static function getNoname($postfix = '') {
+        return new \stackos\User(self::$kernel, 'noname' . $postfix);
+    }
+    protected static function getRoot() {
+        $root = new \stackos\User(self::$kernel, 'root');
+        $root->setUber(true);
+        return $root;
+    }
+    protected static function getFile($path, $owner) {
+        return new \stackos\File(self::$kernel, $path, $owner);
+    }
+    public function setUp() {
+        self::resetKernel();
+    }
+
+    protected static function resetKernel() {
+        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
+        self::$kernel->destroy();
+        self::$kernel->init();
     }
 }
 
@@ -49,6 +68,7 @@ class StackOSSuite {
         $suite->addTestSuite('test\UserTests');
         $suite->addTestSuite('test\FileTests');
         $suite->addTestSuite('test\PermissionTests');
+        $suite->addTestSuite('test\BaseStrategyTests');
 
         return $suite;
     }

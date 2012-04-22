@@ -14,7 +14,7 @@ namespace stackos\kernel\security;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-class DefaultStrategy implements Strategy {
+class BaseStrategy implements Strategy {
     /**
      * @var \stackos\Kernel
      */
@@ -65,8 +65,9 @@ class DefaultStrategy implements Strategy {
 
     /** Check if a user has permission to access a document in ways of $permission (r/w/x)
      *
-     * @param Document $document
-     * @param string   $priviledge
+     * @param \stackos\User     $user
+     * @param \stackos\Document $document
+     * @param string            $priviledge
      *
      * @return bool
      */
@@ -77,7 +78,10 @@ class DefaultStrategy implements Strategy {
         }
 
         // grant owner all priviledges except execute
-        if($document->getOwner() == $user->getUname() && $priviledge != Priviledge::EXECUTE)
+        $check = $document instanceof \stackos\File
+            && $document->getOwner() == $user->getUname()
+            && $priviledge != Priviledge::EXECUTE;
+        if($check)
             return true;
 
         foreach ($document->getPermissions() as $permission) {

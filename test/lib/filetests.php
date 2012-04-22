@@ -18,22 +18,6 @@ namespace test;
 
 class FileTests extends \StackOSTest {
 
-    /**
-     * Reset the kernel before each test.
-     */
-    public function setUp() {
-        self::resetKernel();
-    }
-
-    /**
-     * @static
-     * Destroy the underlying couchDB and rebuild it.
-     */
-    private static function resetKernel() {
-        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
-        self::$kernel->destroy();
-        self::$kernel->init();
-    }
     public function testCreateFile() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         $file = new \stackos\File(self::$kernel, '/test', self::getNoname()->getUname());
@@ -53,8 +37,21 @@ class FileTests extends \StackOSTest {
         }
     }
 
-    public function testCreateFilePermissionDenied() {
+    public function testCreateFilePermissionDeniedCantWriteParent() {
+        $file = new \stackos\File(self::$kernel, '/foo', self::getNoname('owner')->getUname());
 
+        // try and see if file
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
+        \lean\util\Dump::create(3)->methods()->goes(self::$kernel->currentStrategy());
+        try {
+            self::$kernel->createFile(self::getNoname('requestant'), $file);
+            $this->fail('Expecting Exception_PermissionDenied');
+        }
+        catch(\stackos\Exception_PermissionDenied $e) {
+            if($e->getCode() != \stackos\Exception_PermissionDenied::PERMISSION_CREATE_FILE_DENIED)
+                throw $e;
+            // pass
+        }
     }
 
     public function testGetFilePermissionDenied() {

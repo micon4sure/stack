@@ -17,16 +17,6 @@
 namespace test;
 
 class UserTests extends \StackOSTest {
-    public function setUp() {
-        self::resetKernel();
-    }
-
-    private static function resetKernel() {
-        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
-        self::$kernel->destroy();
-        self::$kernel->init();
-    }
-
     public function testGetUser() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
         $this->assertTrue(self::$kernel->getUser(new \stackos\User(self::$kernel, 'root'),'root') instanceof \stackos\User);
@@ -50,27 +40,38 @@ class UserTests extends \StackOSTest {
     }
 
     public function testCreateUserFailPermissionDenied() {
-        $user = new \stackos\User(self::$kernel, 'test', array(), '/home/test');
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy);
+        $userStrategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+
+        $adhoc = new \stackos\kernel\security\UnprivilegedStrategy();
+        self::$kernel->pushSecurityStrategy($adhoc);
+
         try {
-            self::$kernel->createUser($user);
-            $this->fail('Expecting Exception_PermissionDenied');
+            self::$kernel->createUser(new \stackos\User(self::$kernel, 'noname2'));
+            $this->fail('Expecting Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED');
         }
         catch(\stackos\Exception_PermissionDenied $e) {
+            if($e->getCode() != \stackos\Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED)
+                throw $e;
             // pass
         }
     }
 
     public function testGetUserPermissionDenied() {
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
-        self::$kernel->createUser(self::getNoname());
-        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
+        self::$kernel->createUser(self::getNoname(), self::getNoname()->getUname());
+        self::$kernel->pullSecurityStrategy();
 
+
+        $userStrategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+
+        self::$kernel->pushSecurityStrategy($userStrategy);
         try {
             self::$kernel->getUser(self::getNoname(), self::getNoname()->getUname());
-            $this->fail('Expecting Exception_PermissionDenied');
+            $this->fail('Expecting Exception_PermissionDenied::PERMISSION_READ_USER_DENIED');
         }
         catch(\stackos\Exception_PermissionDenied $e) {
+            if($e->getCode() != \stackos\Exception_PermissionDenied::PERMISSION_READ_USER_DENIED)
+                throw $e;
             // pass
         }
     }
@@ -87,5 +88,27 @@ class UserTests extends \StackOSTest {
         catch(\stackos\Exception_UserExists $e) {
             // pass
         }
+    }
+    public function testCreateUserPermissionDenied() {
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\PrivilegedStrategy());
+        self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
+
+        try {
+            self::$kernel->createUser(self::getNoname(), self::getNoname());
+            $this->fail('Expecting Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED');
+        }
+        catch(\stackos\Exception_PermissionDenied $e) {
+            if($e->getCode() != \stackos\Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED)
+                throw $e;
+            // pass
+        }
+    }
+}
+
+class UserTests_Mock_Strategy_AllFileTrue extends \stackos\kernel\security\BaseStrategy {
+    public function checkDocumentPermission(\stackos\User $user, \stackos\Document $document, $priviledge) {
+        if($document instanceof \stackos\File)
+            return true;
+        return parent::checkDocumentPermission($user, $document, $priviledge);
     }
 }
