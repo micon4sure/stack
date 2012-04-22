@@ -32,6 +32,7 @@ class Exception_FileNotFound extends Exception {
         parent::__construct($message, $code, $previous);
     }
 }
+
 class Exception_FileExists extends Exception {
     public function __construct($message = '', $code = 300, \Exception $previous = null) {
         parent::__construct($message, $code, $previous);
@@ -48,6 +49,7 @@ class Exception_PermissionDenied extends Exception {
     public function __construct($message = '', $code = 500, \Exception $previous = null) {
         parent::__construct($message, $code, $previous);
     }
+
     const PERMISSION_DENIED_CREDENTIALS_REVOKED = 501;
 
     const PERMISSION_CREATE_FILE_DENIED = 502;
@@ -74,7 +76,7 @@ class Exception_MissingSecurityStrategy extends Exception {
     }
 }
 
-class Exception_RootHasNoParent extends Exception{
+class Exception_RootHasNoParent extends Exception {
     public function __construct($message = '', $code = 700, \Exception $previous = null) {
         parent::__construct($message, $code, $previous);
     }

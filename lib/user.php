@@ -16,11 +16,30 @@ namespace stackos;
  */
 
 class User extends Document {
+    /**
+     * @var string
+     */
     private $uname;
+    /**
+     * @var null|string
+     */
     private $home;
+    /**
+     * @var bool
+     */
     private $uber = false;
+    /**
+     * @var array
+     */
     private $groups = array();
 
+    /**
+     * @param Kernel $kernel
+     * @param string $uname
+     * @param array  $groups
+     * @param string $home
+     * @param array  $permissions
+     */
     public function __construct(Kernel $kernel, $uname, array $groups = array(), $home = null, array $permissions = array()) {
         parent::__construct($kernel, $permissions);
         $this->uname = $uname;
@@ -31,28 +50,47 @@ class User extends Document {
         $this->home = $home;
     }
 
+    /**
+     * @return string
+     */
     public function getUname() {
         return $this->uname;
     }
 
+    /**
+     * @param string $name
+     */
     public function addToGroup($name) {
         if (!in_array($name, $this->groups)) {
             $this->groups[] = $name;
         }
     }
 
+    /**
+     * @return array
+     */
     public function getGroups() {
         return $this->groups;
     }
 
+    /**
+     * @return string
+     */
     public function getHome() {
         return $this->home;
     }
 
+    /**
+     * @return bool
+     */
     public function getUber() {
         return $this->uber;
     }
 
+    /**
+     * @param bool $uber
+     * @return User
+     */
     public function setUber($uber) {
         $this->uber = $uber;
         return $this;

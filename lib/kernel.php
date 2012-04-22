@@ -102,14 +102,14 @@ class Kernel {
                 $this->getCouchClient()->storeDoc($doc);
                 // create root directories
                 $initDirs = array(ROOT_PATH, ROOT_PATH_HOME, ROOT_PATH_USERS, ROOT_PATH_GROUPS);
-                foreach($initDirs as $dir) {
+                foreach ($initDirs as $dir) {
                     $file = new File($this, $dir, ROOT_UNAME);
                     $doc = $this->getAdapter()->fromFile($file);
                     $this->getCouchClient()->storeDoc($doc);
                 }
             }
-            // finally pop strategy
-            catch(\Exception $e) {
+                // finally pop strategy
+            catch (\Exception $e) {
                 $this->pullSecurityStrategy();
                 throw $e;
             }
@@ -177,7 +177,7 @@ class Kernel {
 
     /** Get a file by its path
      *
-     * @param User $user
+     * @param User   $user
      * @param string $path
      * @return File
      * @throws Exception_FileNotFound|Exception_PermissionDenied
@@ -213,7 +213,7 @@ class Kernel {
     public function createFile(User $user, File $file) {
         // check if file exists
         $exists = $this->fileExists($user, $file->getPath());
-        if($exists) {
+        if ($exists) {
             throw new Exception_FileExists("The file at '{$file->getPath()}' could not be created. It exists already.");
         }
         // get parent with priviledgedStrategy
@@ -248,7 +248,7 @@ class Kernel {
             $this->pullSecurityStrategy();
             return true;
         }
-        catch(Exception_FileNotFound $e) {
+        catch (Exception_FileNotFound $e) {
             $this->pullSecurityStrategy();
             return false;
         }

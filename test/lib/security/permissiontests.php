@@ -36,7 +36,7 @@ class PermissionTests extends \StackOSTest {
         $file = new \stackos\File(self::$kernel, '/ownertest', $owner->getUname(), array());
         $strategy = new \stackos\security\BaseStrategy(self::$kernel);
         $check = $strategy->checkDocumentPermission($owner, $file, \stackos\security\Priviledge::READ)
-              && $strategy->checkDocumentPermission($owner, $file, \stackos\security\Priviledge::WRITE);
+            && $strategy->checkDocumentPermission($owner, $file, \stackos\security\Priviledge::WRITE);
 
         // test implicit owner file permissions
         $this->assertTrue($check);

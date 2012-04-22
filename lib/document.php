@@ -19,10 +19,11 @@ class Document {
     private $kernel;
     private $permissions;
 
-    public function __construct(Kernel $kernel, array $permissions=array()) {
+    public function __construct(Kernel $kernel, array $permissions = array()) {
         $this->kernel = $kernel;
         $this->permissions = $permissions;
     }
+
     protected function getKernel() {
         return $this->kernel;
     }

@@ -14,6 +14,7 @@ namespace stackos\security;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+
 class BaseStrategy implements Strategy {
     /**
      * @var \stackos\Kernel

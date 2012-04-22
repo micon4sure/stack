@@ -40,6 +40,7 @@ class File extends Document {
     public function getOwner() {
         return $this->owner;
     }
+
     public function setPath($path) {
         $this->path = $path;
     }

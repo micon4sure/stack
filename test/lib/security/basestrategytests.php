@@ -15,7 +15,6 @@ namespace test\security;
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
 class BaseStrategyTests extends \StackOSTest {
 
     public function testPermissionOnRootFileDenied() {
