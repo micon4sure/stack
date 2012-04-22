@@ -28,16 +28,6 @@ class Kernel {
     private $couchClient;
 
     /**
-     * @var User;
-     */
-    private $rootUser;
-
-    /**
-     * @var File
-     */
-    private $rootFile;
-
-    /**
      * @var Kernel_Adapter
      */
     private $adapter;
@@ -46,11 +36,6 @@ class Kernel {
      * @var array
      */
     private $securityStrategyStack = array();
-
-    /**
-     * @var User
-     */
-    private $user;
 
     /** Create the kernel.
      *
@@ -62,9 +47,9 @@ class Kernel {
         $this->adapter = new Kernel_Adapter($this);
     }
 
-    /** Push a context onto the stack.
+    /** Push a security strategy onto the stack.
      *
-     * @param kernel\Context $context
+     * @param \stackos\kernel\security\Strategy $strategy
      * @return \stackos\Kernel
      */
     public function pushSecurityStrategy(\stackos\kernel\security\Strategy $strategy) {
@@ -72,9 +57,9 @@ class Kernel {
         return $this;
     }
 
-    /** Pop a context off the stack
+    /** Pull a security strategy off the stack
      *
-     * @return \stackos\kernel\Context
+     * @return \stackos\kernel\security\Strategy $strategy
      */
     public function pullSecurityStrategy() {
         if (!count($this->securityStrategyStack)) {
@@ -83,10 +68,10 @@ class Kernel {
         return array_pop($this->securityStrategyStack);
     }
 
-    /** Get the current context from the stack.
+    /** Get the current security strategy from the stack.
      *
      * @throws\stackos\Exception_MissingSecurityStrategy
-     * @return \stackos\kernel\Context
+     * @return \stackos\kernel\security\Strategy
      */
     public function currentStrategy() {
         if (!count($this->securityStrategyStack)) {

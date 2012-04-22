@@ -2,6 +2,9 @@
 namespace stackos\kernel\security;
 
 class Permission {
+    /**
+     * @var string he type of holder [user/group]
+     */
     private $holderType;
     private $holder;
     private $priviledge;

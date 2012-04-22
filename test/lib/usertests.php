@@ -40,8 +40,6 @@ class UserTests extends \StackOSTest {
     }
 
     public function testCreateUserFailPermissionDenied() {
-        $userStrategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
-
         $adhoc = new \stackos\kernel\security\UnprivilegedStrategy();
         self::$kernel->pushSecurityStrategy($adhoc);
 
@@ -62,9 +60,9 @@ class UserTests extends \StackOSTest {
         self::$kernel->pullSecurityStrategy();
 
 
-        $userStrategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
 
-        self::$kernel->pushSecurityStrategy($userStrategy);
+        self::$kernel->pushSecurityStrategy($strategy);
         try {
             self::$kernel->getUser(self::getNoname(), self::getNoname()->getUname());
             $this->fail('Expecting Exception_PermissionDenied::PERMISSION_READ_USER_DENIED');

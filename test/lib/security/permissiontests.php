@@ -34,7 +34,7 @@ class PermissionTests extends \StackOSTest {
         // create user and file,
         $owner = new \stackos\User(self::$kernel, 'owner', array());
         $file = new \stackos\File(self::$kernel, '/ownertest', $owner->getUname(), array());
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $owner);
+        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
         $check = $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Priviledge::READ)
               && $strategy->checkDocumentPermission($owner, $file, \stackos\kernel\security\Priviledge::WRITE);
 
@@ -56,14 +56,14 @@ class PermissionTests extends \StackOSTest {
         $noname->addToGroup('share');
         $file->addPermission(new \stackos\kernel\security\Permission_Group('share', \stackos\kernel\security\Priviledge::READ));
         // and assert that they have permission
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $noname);
+        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
         $check = $strategy->checkDocumentPermission($noname, $file, \stackos\kernel\security\Priviledge::READ);
         $this->assertTrue($check);
     }
 
     protected function checkPermissions($user, $file) {
         // create new mock context exposing the checkPermissions method
-        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, $user);
+        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
         return $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::READ)
             && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::WRITE)
             && $strategy->checkDocumentPermission($user, $file, \stackos\kernel\security\Priviledge::EXECUTE);

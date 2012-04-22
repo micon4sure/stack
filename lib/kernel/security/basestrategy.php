@@ -41,9 +41,9 @@ class BaseStrategy implements Strategy {
      * @return bool
      */
     public function checkUserCreatePermission(\stackos\User $user) {
-        $this->getKernel()->pushSecurityStrategy(new PrivilegedContext());
+        $this->getKernel()->pushSecurityStrategy(new PrivilegedStrategy());
         $file = $this->getKernel()->getFile($user, '/root/users');
-        $check = $this->checkDocumentPermission($user, $file, Kernel_Priviledge::WRITE);
+        $check = $this->checkDocumentPermission($user, $file, Priviledge::WRITE);
         $this->getKernel()->pullSecurityStrategy();
         return $check;
     }
@@ -56,9 +56,9 @@ class BaseStrategy implements Strategy {
      * @return bool
      */
     public function checkUserDeletePermission(\stackos\User $user) {
-        $this->getKernel()->pushSecurityStrategy(new PrivilegedContext());
+        $this->getKernel()->pushSecurityStrategy(new PrivilegedStrategy());
         $file = $this->getKernel()->getFile($user, '/root/users');
-        $check = $this->checkDocumentPermission($user, $file, Kernel_Priviledge::WRITE);
+        $check = $this->checkDocumentPermission($user, $file, Priviledge::WRITE);
         $this->getKernel()->pullSecurityStrategy();
         return $check;
     }
@@ -77,13 +77,14 @@ class BaseStrategy implements Strategy {
             return true;
         }
 
-        // grant owner all priviledges except execute
+        // grant file owner all priviledges except execute
         $check = $document instanceof \stackos\File
             && $document->getOwner() == $user->getUname()
             && $priviledge != Priviledge::EXECUTE;
         if($check)
             return true;
 
+        // check for permissions inside document
         foreach ($document->getPermissions() as $permission) {
             // check if this permission has been requested
             if ($permission->getPriviledge() != $priviledge) {
@@ -92,7 +93,7 @@ class BaseStrategy implements Strategy {
 
             // check if user is in group permission is valid for
             if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_GROUP) {
-                return in_array($user->getUname(), $user->getGroups());
+                return (bool)array_intersect($user->getGroups(), $user->getGroups());
             }
             // check if user has an explicit permission
             else if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_USER) {

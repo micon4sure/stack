@@ -15,7 +15,7 @@ namespace test\security;
     * OTHER DEALINGS IN THE SOFTWARE.
     */
 
-class AdhocStrategyTest extends \StackOSTest {
+class AdhocStrategyTests extends \StackOSTest {
 
     public function testDefault() {
         $adhoc = new \stackos\kernel\security\AdhocStrategy(self::$kernel);

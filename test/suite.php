@@ -39,15 +39,17 @@ class StackOSTest extends \PHPUnit_Framework_TestCase {
      */
     protected static $kernel;
 
-    protected static function getNoname($postfix = '') {
-        return new \stackos\User(self::$kernel, 'noname' . $postfix);
+    protected static function getNoname($name = '') {
+        return new \stackos\User(self::$kernel, $name ?: 'noname');
     }
-    protected static function getRoot() {
+    protected static function getRootUser() {
         $root = new \stackos\User(self::$kernel, 'root');
         $root->setUber(true);
         return $root;
     }
-    protected static function getFile($path, $owner) {
+    protected static function getFile($path, $owner = null) {
+        if($owner === null)
+            $owner = 'noname';
         return new \stackos\File(self::$kernel, $path, $owner);
     }
     public function setUp() {
@@ -67,9 +69,13 @@ class StackOSSuite {
         $suite->addTestSuite('test\KernelTests');
         $suite->addTestSuite('test\UserTests');
         $suite->addTestSuite('test\FileTests');
+        $suite->addTestSuite('test\DocumentTests');
+
         $suite->addTestSuite('test\security\PermissionTests');
+        $suite->addTestSuite('test\security\PriviledgedStrategyTests');
+        $suite->addTestSuite('test\security\UnpriviledgedStrategyTests');
         $suite->addTestSuite('test\security\BaseStrategyTests');
-        $suite->addTestSuite('test\security\AdhocStrategyTest');
+        $suite->addTestSuite('test\security\AdhocStrategyTests');
 
         return $suite;
     }

@@ -16,16 +16,16 @@ namespace test\security;
 */
 
 
-class BaseStrategyTests extends \StackOSTest {
+class UserStrategyTests extends \StackOSTest {
 
     public function testPermissionOnRootFileDenied() {
-        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
         $file = $this->getFile('/', self::getRootUser());
         $this->assertFalse($strategy->checkDocumentPermission(self::getNoname(), $file, \stackos\kernel\security\Priviledge::WRITE));
     }
 
     public function testPermissionToRootUserGranted() {
-        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel, self::getNoname());
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
         $file = $this->getFile('/', self::getRootUser());
         $this->assertTrue($strategy->checkDocumentPermission(self::getRootUser(), $file, \stackos\kernel\security\Priviledge::WRITE));
     }
@@ -36,15 +36,15 @@ class BaseStrategyTests extends \StackOSTest {
     }
 
     public function testCheckUserCreatePermission() {
-        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
         // test if root can create user
         $this->assertTrue($strategy->checkUserCreatePermission(self::getRootUser()));
         // test if noname can not create user
-        $this->assertFalse($strategy->checkUserCreatePermission(self::getNoname()));
+        $this->assertFalse($strategy->checkUserCreatePermission());
     }
 
     public function testCheckUserDeletePermission() {
-        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
         // test if root can delete user
         $this->assertTrue($strategy->checkUserDeletePermission(self::getRootUser()));
         // test if noname can not delete user
@@ -52,7 +52,7 @@ class BaseStrategyTests extends \StackOSTest {
     }
 
     public function testCheckDocumentUserPermission() {
-        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
         $document = new \stackos\Document(self::$kernel);
 
         // make sure noname has no permissions on the document
@@ -80,7 +80,7 @@ class BaseStrategyTests extends \StackOSTest {
     }
 
     public function testCheckDocumentGroupPermission() {
-        $strategy = new \stackos\kernel\security\BaseStrategy(self::$kernel);
+        $strategy = new \stackos\kernel\security\UserStrategy(self::$kernel, self::getNoname());
         $document = new \stackos\Document(self::$kernel);
         $user = self::getNoname();
         $user->addToGroup('test');
@@ -107,11 +107,5 @@ class BaseStrategyTests extends \StackOSTest {
         $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::READ));
         $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::WRITE));
         $this->assertTrue($strategy->checkDocumentPermission($user, $document, \stackos\kernel\security\Priviledge::EXECUTE));
-    }
-}
-
-class BaseStrategyTests_Mock_Strategy extends \stackos\kernel\security\BaseStrategy {
-    public function getKernel() {
-        return parent::getKernel();
     }
 }
