@@ -67,8 +67,9 @@ class StackOSSuite {
         $suite->addTestSuite('test\KernelTests');
         $suite->addTestSuite('test\UserTests');
         $suite->addTestSuite('test\FileTests');
-        $suite->addTestSuite('test\PermissionTests');
-        $suite->addTestSuite('test\BaseStrategyTests');
+        $suite->addTestSuite('test\security\PermissionTests');
+        $suite->addTestSuite('test\security\BaseStrategyTests');
+        $suite->addTestSuite('test\security\AdhocStrategyTest');
 
         return $suite;
     }

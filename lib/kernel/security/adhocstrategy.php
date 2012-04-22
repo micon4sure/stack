@@ -23,13 +23,12 @@ class AdhocStrategy implements \stackos\kernel\security\Strategy {
 
     /** Check for permission to create a user.
      *
-     * @param User $user the user to be created
-     *
+     * @param \stackos\User $user
      * @return bool
      */
     public function checkUserCreatePermission(\stackos\User $user) {
         if(array_key_exists(self::CALLBACK_CHECK_USER_CREATE, $this->callbacks)) {
-            return call_user_func(array($this->defaultStrategy, $this->callbacks[self::CALLBACK_CHECK_USER_CREATE]), $user);
+            return call_user_func($this->callbacks[self::CALLBACK_CHECK_USER_CREATE], $user);
         }
         return $this->defaultStrategy->checkUserCreatePermission($user);
     }
@@ -42,7 +41,7 @@ class AdhocStrategy implements \stackos\kernel\security\Strategy {
      */
     public function checkUserDeletePermission(\stackos\User $user) {
         if(array_key_exists(self::CALLBACK_CHECK_USER_DELETE, $this->callbacks)) {
-            return call_user_func(array($this->defaultStrategy, $this->callbacks[self::CALLBACK_CHECK_USER_CREATE]), $user);
+            return call_user_func($this->callbacks[self::CALLBACK_CHECK_USER_DELETE], $user);
         }
         return $this->defaultStrategy->checkUserDeletePermission($user);
     }

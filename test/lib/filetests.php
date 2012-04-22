@@ -42,7 +42,6 @@ class FileTests extends \StackOSTest {
 
         // try and see if file
         self::$kernel->pushSecurityStrategy(new \stackos\kernel\security\UnprivilegedStrategy());
-        \lean\util\Dump::create(3)->methods()->goes(self::$kernel->currentStrategy());
         try {
             self::$kernel->createFile(self::getNoname('requestant'), $file);
             $this->fail('Expecting Exception_PermissionDenied');

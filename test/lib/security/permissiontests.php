@@ -1,4 +1,5 @@
 <?php
+namespace test\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -13,8 +14,6 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-
-namespace test;
 
 class PermissionTests extends \StackOSTest {
 
@@ -78,17 +77,5 @@ class PermissionTests extends \StackOSTest {
         catch (\stackos\Exception_MissingSecurityStrategy $e) {
             // pass
         }
-    }
-
-    public function testAdhocStrategy() {
-        $unprivilegedStrategy = new \stackos\kernel\security\UnprivilegedStrategy();
-        $adhoc = new \stackos\kernel\security\AdhocStrategy(self::$kernel, $unprivilegedStrategy);
-        $document = new \stackos\Document(self::$kernel);
-        $this->assertFalse($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
-
-        $adhoc->setCallback('checkDocumentPermission', function(\stackos\User $user, \stackos\Document $document, $permission) {
-            return true;
-        });
-        $this->assertTrue($adhoc->checkDocumentPermission(self::getNoname(), $document, \stackos\kernel\security\Priviledge::READ));
     }
 }
