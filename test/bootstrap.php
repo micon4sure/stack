@@ -1,5 +1,4 @@
 <?php
-namespace test;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,15 +14,38 @@ namespace test;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DocumentTests extends \StackOSTest {
-    public function testGetKernel() {
-        $document = new DocumentTests_Mock_Document(self::$kernel);
-        $this->assertTrue(self::$kernel === $document->getKernel());
-    }
-}
+date_default_timezone_set('Europe/Berlin');
 
-class DocumentTests_Mock_Document extends \stackos\Document {
-    public function getKernel() {
-        return parent::getKernel();
+define('SO_TEST_ROOT', __DIR__);
+
+// initialize lean
+require '../external/lean/lean/init.php';
+$autoload = new \lean\Autoload();
+$autoload->loadLean();
+$autoload->register('stackos', SO_TEST_ROOT . '/../lib');
+$autoload->register('sotest', SO_TEST_ROOT);
+
+
+require_once SO_TEST_ROOT . '/../external/PHP-on-Couch/lib/couch.php';
+require_once SO_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchClient.php';
+require_once SO_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
+
+class StackOSTest extends \PHPUnit_Framework_TestCase {
+    /**
+     * @var \stackos\Kernel
+     */
+    private static $kernel;
+
+    public static function setUpBeforeClass() {
+        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
+    }
+
+    public function setUp() {
+        $this->getKernel()->destroy();
+        $this->getKernel()->init();
+    }
+
+    protected function getKernel() {
+        return self::$kernel;
     }
 }

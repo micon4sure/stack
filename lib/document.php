@@ -1,5 +1,6 @@
 <?php
 namespace stackos;
+
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,24 +16,80 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Abstraction of a file in the system
+ */
 class Document {
+    /**
+     * @var Kernel
+     */
     private $kernel;
-    private $permissions;
+    /**
+     * @var string
+     */
+    private $path;
+    /**
+     * @var null|string
+     */
+    private $revision;
+    /**
+     * @var string
+     */
+    private $owner;
 
-    public function __construct(Kernel $kernel, array $permissions = array()) {
+    /**
+     * @param Kernel $kernel
+     * @param string $path
+     * @param string $owner
+     * @param string $revision
+     */
+    public function __construct(Kernel $kernel, $path, $owner, $revision = null) {
         $this->kernel = $kernel;
-        $this->permissions = $permissions;
+        $this->path = $path;
+        $this->owner = $owner;
+        $this->revision = $revision;
     }
 
+    /**
+     * @return Kernel
+     */
     protected function getKernel() {
         return $this->kernel;
     }
 
-    public function addPermission(\stackos\security\Permission $permission) {
-        $this->permissions[] = $permission;
+    /**
+     * Save the document in the database
+     */
+    public function save() {
+        $this->kernel->writeDocument($this);
     }
 
-    public function getPermissions() {
-        return $this->permissions;
+    /**
+     * @return string
+     */
+    public function getPath() {
+        return $this->path;
+    }
+
+    /**
+     * Return the revision of the document or null if it has not been saved yet
+     * @return null|string
+     */
+    public function getRevision() {
+        return $this->revision;
+    }
+
+    /**
+     * @param $owner
+     */
+    public function setOwner($owner) {
+        $this->owner = $owner;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOwner() {
+        return $this->owner;
     }
 }

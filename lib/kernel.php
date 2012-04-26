@@ -21,6 +21,9 @@ const ROOT_PATH_HOME = '/root';
 const ROOT_PATH_USERS = '/root/users';
 const ROOT_PATH_GROUPS = '/root/groups';
 
+/**
+ * Interface to the file system
+ */
 class Kernel {
     /**
      * @var \couchClient
@@ -28,346 +31,66 @@ class Kernel {
     private $couchClient;
 
     /**
-     * @var Kernel_Adapter
-     */
-    private $adapter;
-
-    /**
-     * @var array
-     */
-    private $securityStrategyStack = array();
-
-    /** Create the kernel.
-     *
      * @param string $dsn
      * @param string $dbName
      */
     public function __construct($dsn, $dbName) {
         $this->couchClient = new \couchClient($dsn, $dbName);
-        $this->adapter = new Kernel_Adapter($this);
+        $this->adapter = new \stackos\module\Adapter_Document($this);
     }
 
-    /** Push a security strategy onto the stack.
-     *
-     * @param \stackos\security\Strategy $strategy
-     * @return \stackos\Kernel
+    /**
+     * @param string $path
+     * @return Document
+     * @throws Exception_DocumentNotFound
      */
-    public function pushSecurityStrategy(\stackos\security\Strategy $strategy) {
-        $this->securityStrategyStack[] = $strategy;
-        return $this;
-    }
-
-    /** Pull a security strategy off the stack
-     *
-     * @return \stackos\security\Strategy $strategy
-     */
-    public function pullSecurityStrategy() {
-        if (!count($this->securityStrategyStack)) {
-            throw new Exception_MissingSecurityStrategy("There is no active context on the stack.");
+    public function readDocument($path) {
+        try {
+            $doc = $this->couchClient->getDoc("sodoc:$path");
+        } catch(\couchNotFoundException $e) {
+            throw new Exception_DocumentNotFound("Document at path '$path' could not be found", Exception_DocumentNotFound::CODE, $e);
         }
-        return array_pop($this->securityStrategyStack);
+        return $this->adapter->fromDatabase($doc);
     }
 
-    /** Get the current security strategy from the stack.
-     *
-     * @throws\stackos\Exception_MissingSecurityStrategy
-     * @return \stackos\security\Strategy
+    /**
+     * @param Document $document
      */
-    public function currentStrategy() {
-        if (!count($this->securityStrategyStack)) {
-            throw new Exception_MissingSecurityStrategy("There is no active context on the stack.");
-        }
-        return end($this->securityStrategyStack);
+    public function writeDocument(Document $document) {
+        $doc = $this->adapter->toDatabase($document);
+        $this->couchClient->storeDoc($doc);
     }
 
-    /** Initialize the kernel.
-     * Make sure the database exists.
-     * If not:
-     * + create database
-     * + create root user
-     * + create /
-     * + create /root
-     * + create /root/users
-     * + create /root/groups
+    /**
+     * @param Document $document
+     */
+    public function deleteDocument(Document $document) {
+        $this->couchClient->deleteDoc($this->adapter->toDatabase($document));
+    }
+
+    /**
+     * Create the database and write system files
      */
     public function init() {
-        if (!$this->couchClient->databaseExists()) {
-            $this->couchClient->createDatabase();
-            $this->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
-            try {
-                // create root user
-                $rootUser = new User($this, ROOT_UNAME, array('root'), '/root');
-                $rootUser->setUber(true);
-                $doc = $this->getAdapter()->fromUser($rootUser);
-                $this->getCouchClient()->storeDoc($doc);
-                // create root directories
-                $initDirs = array(ROOT_PATH, ROOT_PATH_HOME, ROOT_PATH_USERS, ROOT_PATH_GROUPS);
-                foreach ($initDirs as $dir) {
-                    $file = new File($this, $dir, ROOT_UNAME);
-                    $doc = $this->getAdapter()->fromFile($file);
-                    $this->getCouchClient()->storeDoc($doc);
-                }
-            }
-                // finally pop strategy
-            catch (\Exception $e) {
-                $this->pullSecurityStrategy();
-                throw $e;
-            }
-            $this->pullSecurityStrategy();
+        $this->couchClient->createDatabase();
+        $files = array(
+            ROOT_PATH,
+            ROOT_PATH_HOME,
+            ROOT_PATH_USERS,
+            ROOT_PATH_GROUPS
+        );
+        foreach ($files as $path) {
+            $document = new Document($this, $path, ROOT_UNAME);
+            $this->writeDocument($document);
         }
     }
 
-    /** Destroy the database.
+    /**
+     * Delete the database (if exists)
      */
     public function destroy() {
-        if ($this->getCouchClient()->databaseExists()) {
-            $this->getCouchClient()->deleteDatabase();
+        if ($this->couchClient->databaseExists()) {
+            $this->couchClient->deleteDatabase();
         }
-    }
-
-    /** Get a user by their uname
-     *
-     * @param \stackos\User $user
-     * @param string        $uname
-     * @return \stackos\User
-     */
-    public function getUser(User $user, $uname) {
-        // get document
-        try {
-            $doc = $this->couchClient->getDoc("user:$uname");
-        }
-        catch (\couchNotFoundException $e) {
-            throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
-        }
-
-        if (!$this->currentStrategy()->checkDocumentPermission($user, new User($this, $uname), \stackos\security\Priviledge::READ)) {
-            throw new Exception_PermissionDenied("Permission to read user '$uname' was denied.",
-                Exception_PermissionDenied::PERMISSION_READ_USER_DENIED);
-        }
-
-        // return user abstracted via User instance
-        return $this->adapter->toUser($doc);
-    }
-
-    /**
-     * @param User $user
-     * @throws \stackos\Exception_MissingSecurityStrategy|\stackos\Exception_PermissionDenied|\stackos\Exception_UserExists
-     */
-    public function createUser(User $user) {
-        // check if user has write privileges on ROOT_PATH_USERS
-        $file = new File($this, ROOT_PATH_USERS, new User($this, ROOT_UNAME));
-        $strategy = $this->currentStrategy();
-        $readPermission = $strategy->checkDocumentPermission($user, $file, \stackos\security\Priviledge::WRITE);
-        if (!$readPermission) {
-            throw new Exception_PermissionDenied("The permission to create the user has been denied",
-                Exception_PermissionDenied::PERMISSION_CREATE_USER_DENIED);
-        }
-
-        // adapt user
-        $doc = $this->adapter->fromUser($user);
-
-        // save user or throw Exception_UserExists
-        try {
-            $this->couchClient->storeDoc($doc);
-        }
-        catch (\couchConflictException $e) {
-            throw new Exception_UserExists("Could not create user with uname '{$user->getUname()}'. Already exists.");
-        }
-    }
-
-    /** Get a file by its path
-     *
-     * @param User   $user
-     * @param string $path
-     * @return File
-     * @throws Exception_FileNotFound|Exception_PermissionDenied
-     */
-    public function getFile(User $user, $path) {
-        // fetch document from database or throw Exception_FileNotFound
-        try {
-            $doc = $this->couchClient->getDoc("file:$path");
-        }
-        catch (\couchNotFoundException $e) {
-            throw new Exception_FileNotFound("File '$path' was not found'");
-        }
-        // adapt file
-        $file = $this->adapter->toFile($doc);
-
-        // check document permissions
-        if (!$this->currentStrategy()->checkDocumentPermission($user, $file, \stackos\security\Priviledge::READ)) {
-            throw new Exception_PermissionDenied("Permission to read file '$path' was denied.",
-                Exception_PermissionDenied::PERMISSION_READ_FILE_DENIED);
-        }
-        return $file;
-    }
-
-
-    /** Write a file to the file system
-     * Check permissions to write to parent file
-     *
-     * @param User $user
-     * @param File $file
-     * @return File
-     * @throws Exception_PermissionDenied
-     */
-    public function createFile(User $user, File $file) {
-        // check if file exists
-        $exists = $this->fileExists($user, $file->getPath());
-        if ($exists) {
-            throw new Exception_FileExists("The file at '{$file->getPath()}' could not be created. It exists already.");
-        }
-        // get parent with priviledgedStrategy
-        $this->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
-        $parent = $file->getParent($user);
-        $this->pullSecurityStrategy(new \stackos\security\PrivilegedStrategy());
-        // check for write priviledges on it
-        $permission = $this->currentStrategy()->checkDocumentPermission($user, $parent, \stackos\security\Priviledge::WRITE);
-        if (!$permission) {
-            throw new Exception_PermissionDenied("Permission to create file at path '{$file->getPath()}' was denied.",
-                Exception_PermissionDenied::PERMISSION_CREATE_FILE_DENIED);
-        }
-        // actually write document
-        $doc = $this->adapter->fromFile($file);
-        $this->couchClient->storeDoc($doc);
-
-        return $file;
-    }
-
-    /** Check if a file exists
-     * TODO dont check with exceptions; make a HEAD request
-     *
-     * @param $user
-     * @param $path
-     * @return bool
-     */
-    public function fileExists($user, $path) {
-        try {
-            // file exists always possible
-            $this->pushSecurityStrategy(new \stackos\security\PrivilegedStrategy());
-            $this->getFile($user, $path);
-            $this->pullSecurityStrategy();
-            return true;
-        }
-        catch (Exception_FileNotFound $e) {
-            $this->pullSecurityStrategy();
-            return false;
-        }
-    }
-
-    /**
-     * @return Kernel_Adapter
-     */
-    protected function getAdapter() {
-        return $this->adapter;
-    }
-
-    /**
-     * @return \couchClient
-     */
-    protected function getCouchClient() {
-        return $this->couchClient;
-    }
-}
-
-/**
- * Adapts from and to couchDB documents to instances of the appropriate type
- */
-class Kernel_Adapter {
-    /**
-     * @var Kernel
-     */
-    private $kernel;
-
-    /**
-     * @param Kernel $kernel
-     */
-    public function __construct(Kernel $kernel) {
-        $this->kernel = $kernel;
-    }
-
-    /** Adapt User instance to be saved as a couchdb document
-     *
-     * @param User $user
-     * @return \object
-     */
-    public function fromUser(User $user) {
-        $doc = new \stdClass;
-        $doc->_id = 'user:' . $user->getUname();
-        $doc->home = 'file:' . $user->getHome();
-        $doc->groups = $user->getGroups();
-        $doc->uber = $user->getUber();
-        return $doc;
-    }
-
-    /** Adapt a couchdb document to a User instance
-     *
-     * @param \object $doc
-     * @return User
-     */
-    public function toUser($doc) {
-        // cut prefixes and create user
-        $uname = \lean\Text::offsetLeft($doc->_id, 'user:');
-        $home = \lean\Text::offsetLeft($doc->home, 'file:');
-        $user = new User($this->kernel, $uname, $doc->groups, $home);
-        $user->setUber($doc->uber);
-        return $user;
-    }
-
-    /** Adapt File instance to be saved as a couchdb document
-     *
-     * @param File $file
-     * @return \object
-     */
-    public function fromFile(File $file) {
-        $doc = new \stdClass;
-        $doc->_id = 'file:' . $file->getPath();
-        $doc->owner = 'user:' . $file->getOwner();
-        $doc->permissions = $this->fromPermissions($file->getPermissions());
-        return $doc;
-    }
-
-    /** Adapt a couchdb document to a File instance
-     *
-     * @param \object $doc
-     * @return File
-     */
-    public function toFile($doc) {
-        $path = \lean\Text::offsetLeft($doc->_id, 'file:');
-        $owner = \lean\Text::offsetLeft($doc->owner, 'user:');
-        return new File($this->kernel, $path, $owner, $this->toPermissions($doc->permissions));
-    }
-
-    public function toPermissions(array $raw) {
-        $permissions = array();
-        foreach($raw as $permission) {
-            $permissions[] = $this->toPermission($permission);
-        }
-        return $permissions;
-    }
-    public function toPermission($raw) {
-        switch($raw->entity) {
-            case security\Strategy::PERMISSION_ENTITY_GROUP:
-                return \stackos\security\Permission_Group::create($raw->holder, $raw->priviledge, $raw->entity);
-
-            case security\Strategy::PERMISSION_ENTITY_USER:
-                return \stackos\security\Permission_User::create($raw->holder, $raw->priviledge, $raw->entity);
-            default:
-                throw new Exception_UnknownEntityType("Entitytype '{$raw->entity}' unrecognized.");
-        }
-    }
-
-    public function fromPermissions(array $permissions) {
-        $raw = array();
-        foreach($permissions as $permission) {
-            $raw[] = $this->fromPermission($permission);
-        }
-        return $raw;
-    }
-    public function fromPermission(\stackos\security\Permission $permission) {
-        $raw = new \stdClass();
-        $raw->holder = $permission->getHolder();
-        $raw->entity = $permission->getEntity();
-        $raw->priviledge = $permission->getPriviledge();
-        return $raw;
     }
 }
