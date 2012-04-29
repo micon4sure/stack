@@ -15,50 +15,18 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Exception extends \Exception {
-
-}
-
-/**
- * An exception in the couchDB abstraction layer occured
- */
-class Exception_Couch extends Exception {
-}
-
-/**
- * A document could not be found
- */
-class Exception_DocumentNotFound extends Exception_Couch {
-}
-
-/**
- * A module that was registered by name was not found
- */
-class Exception_ModuleNotFound extends Exception_Couch {
-}
-
-/**
- * A database document had a module name in meta but no data under module
- */
-class Exception_ModuleDataNotFound extends Exception_Couch {
-}
-
-/**
- * A module in a document was not of the expected type
- */
-class Exception_UnexpectedModuleType extends Exception_Couch {
-}
-
-/**
- * A document could not be found
- */
-class Exception_ModuleConflict extends Exception_Couch {
-    public function __construct($message, $code = self::MODULE_WITH_NAME_ALREADY_REGISTERED, $previous = null) {
-        parent::__construct($message, $code, $previous);
-    }
-    const MODULE_WITH_NAME_ALREADY_REGISTERED = 200;
-}
-
-
-class Exception_ModuleFactoryNotCallable extends Exception_Couch {
-}
+interface DocumentAccess {
+    /**
+     * @param string $path
+     * @return \stdClass
+     * @throws Exception_DocumentNotFound
+     */
+    public function readDocument($path);
+    /**
+     * @param Document $document
+     */
+    public function writeDocument($document);
+    /**
+     * @param Document $document
+     */
+    public function deleteDocument($document);}

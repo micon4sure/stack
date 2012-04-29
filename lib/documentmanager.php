@@ -18,17 +18,28 @@ namespace stackos;
 const ROOT_UNAME = 'root';
 const ROOT_PATH = '/';
 const ROOT_PATH_HOME = '/root';
+const ROOT_PATH_SYSTEM = '/root/system';
 const ROOT_PATH_USERS = '/root/users';
 const ROOT_PATH_GROUPS = '/root/groups';
 
 /**
- * Interface to the file system
+ * Interface to the document system
  */
-class Kernel {
+class DocumentManager implements DocumentAccess {
     /**
      * @var \couchClient
      */
     private $couchClient;
+
+    /**
+     * @var \stackos\module\Adapter
+     */
+    protected $adapter;
+
+    /**
+     * @var array
+     */
+    private $moduleFactories = array();
 
     /**
      * @param string $dsn
@@ -36,7 +47,28 @@ class Kernel {
      */
     public function __construct($dsn, $dbName) {
         $this->couchClient = new \couchClient($dsn, $dbName);
-        $this->adapter = new \stackos\module\Adapter_Document($this);
+    }
+
+    public function registerModule($name, $moduleFactory) {
+        if(!is_callable($moduleFactory))
+            throw new Exception_ModuleFactoryNotCallable("The modulefactory '$name' is not callable");
+        if(array_key_exists($name, $this->moduleFactories))
+            throw new Exception_ModuleConflict("Module with name '$name' is already registered", Exception_ModuleConflict::MODULE_WITH_NAME_ALREADY_REGISTERED);
+        $this->moduleFactories[$name] = $moduleFactory;
+    }
+
+    public function getModuleFactory($name) {
+        return $this->moduleFactories[$name];
+    }
+
+    /**
+     * Lazy adapter loader.
+     * Deriving classes are encouraged to overwrite this and use the protected $adapter variable if doing so
+     *
+     * @return module\Adapter_Document
+     */
+    protected function getAdapter() {
+        return $this->adapter ?: $this->adapter = new \stackos\module\Adapter_Document($this);
     }
 
     /**
@@ -48,23 +80,23 @@ class Kernel {
         try {
             $doc = $this->couchClient->getDoc("sodoc:$path");
         } catch(\couchNotFoundException $e) {
-            throw new Exception_DocumentNotFound("Document at path '$path' could not be found", Exception_DocumentNotFound::CODE, $e);
+            throw new Exception_DocumentNotFound("Document at path '$path' could not be found", null, $e);
         }
-        return $this->adapter->fromDatabase($doc);
+        return $this->getAdapter()->fromDatabase($doc);
     }
 
     /**
      * @param Document $document
      */
-    public function writeDocument(Document $document) {
-        $doc = $this->adapter->toDatabase($document);
+    public function writeDocument($document) {
+        $doc = $this->getAdapter()->toDatabase($document);
         $this->couchClient->storeDoc($doc);
     }
 
     /**
      * @param Document $document
      */
-    public function deleteDocument(Document $document) {
+    public function deleteDocument($document) {
         $this->couchClient->deleteDoc($this->adapter->toDatabase($document));
     }
 
@@ -75,6 +107,7 @@ class Kernel {
         $this->couchClient->createDatabase();
         $files = array(
             ROOT_PATH,
+            ROOT_PATH_SYSTEM,
             ROOT_PATH_HOME,
             ROOT_PATH_USERS,
             ROOT_PATH_GROUPS
@@ -92,5 +125,11 @@ class Kernel {
         if ($this->couchClient->databaseExists()) {
             $this->couchClient->deleteDatabase();
         }
+    }
+
+    public function createModule($name, $data) {
+        if(!isset($this->moduleFactories[$name]))
+            throw new Exception_ModuleNotFound();
+        return call_user_func($this->moduleFactories[$name], $data);
     }
 }

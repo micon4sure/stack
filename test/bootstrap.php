@@ -32,20 +32,20 @@ require_once SO_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
 
 class StackOSTest extends \PHPUnit_Framework_TestCase {
     /**
-     * @var \stackos\Kernel
+     * @var \stackos\DocumentManager
      */
-    private static $kernel;
+    private static $manager;
 
     public static function setUpBeforeClass() {
-        self::$kernel = new \stackos\Kernel('http://root:root@127.0.0.1:5984', 'stackos');
+        self::$manager = new \stackos\DocumentManager('http://root:root@127.0.0.1:5984', 'stackos');
     }
 
     public function setUp() {
-        $this->getKernel()->destroy();
-        $this->getKernel()->init();
+        $this->getManager()->destroy();
+        $this->getManager()->init();
     }
 
-    protected function getKernel() {
-        return self::$kernel;
+    protected function getManager() {
+        return self::$manager;
     }
 }

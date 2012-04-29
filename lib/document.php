@@ -1,6 +1,5 @@
 <?php
 namespace stackos;
-
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -17,53 +16,123 @@ namespace stackos;
  */
 
 /**
- * Abstraction of a file in the system
+ * Indicates that a class knows how to convert objects of its type from and to json
+ */
+interface Document_JSONizable {
+    public function fromJSON();
+    public function toJSON();
+}
+
+/**
+ * Abstraction of a document in the file system
  */
 class Document {
     /**
-     * @var Kernel
+     * @var DocumentAccess
      */
-    private $kernel;
-    /**
-     * @var string
-     */
-    private $path;
-    /**
-     * @var null|string
-     */
-    private $revision;
-    /**
-     * @var string
-     */
-    private $owner;
+    private $manager;
 
     /**
-     * @param Kernel $kernel
+     * @var Document_Meta
+     */
+    private $documentMeta;
+
+    /**
+     * @var \stackos\module\BaseModule
+     */
+    private $module;
+
+    /**
+     * @param DocumentAccess $access
      * @param string $path
      * @param string $owner
      * @param string $revision
      */
-    public function __construct(Kernel $kernel, $path, $owner, $revision = null) {
-        $this->kernel = $kernel;
-        $this->path = $path;
-        $this->owner = $owner;
-        $this->revision = $revision;
+    public function __construct(DocumentAccess $access, $path, $owner, $revision = null) {
+        $this->manager = $access;
+        $this->documentMeta = new Document_Meta($this, $path, $owner, $revision);
     }
 
     /**
-     * @return Kernel
+     * @return DocumentManager
      */
-    protected function getKernel() {
-        return $this->kernel;
+    protected function getManager() {
+        return $this->manager;
+    }
+
+    public function setModule(\stackos\module\BaseModule $module) {
+        $this->module = $module;
+    }
+
+    public function getModule() {
+        return $this->module;
     }
 
     /**
      * Save the document in the database
      */
     public function save() {
-        $this->kernel->writeDocument($this);
+        $this->manager->writeDocument($this);
     }
 
+    public function getPath() {
+        return $this->documentMeta->getPath();
+    }
+
+    public function getRevision() {
+        return $this->documentMeta->getRevision();
+    }
+
+    public function getOwner() {
+        return $this->documentMeta->getOwner();
+    }
+}
+
+/**
+ * Meta information about the document
+ * - owner
+ * - path
+ * - revision
+ * - (permissions)
+ * - creationTime
+ * - manipulationTime
+ */
+class Document_Meta {
+    /**
+     * @var Document
+     */
+    private $document;
+    /**
+     * @var string
+     */
+    private $path;
+    /**
+     * @var string
+     */
+    private $owner;
+    /**
+      * @var null|string
+      */
+    private $revision;
+
+    /**
+     * @param Document $document
+     * @param string $path
+     * @param string $owner
+     * @param null $revision
+     */
+    public function __construct(Document $document, $path, $owner, $revision = null) {
+        $this->revision = $revision;
+        $this->document = $document;
+        $this->setPath($path);
+        $this->setOwner($owner);
+    }
+    /**
+     * @param string $path
+     */
+    public function setPath($path) {
+        $this->path = $path;
+    }
     /**
      * @return string
      */

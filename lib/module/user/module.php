@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stackos\module\user;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,50 +15,12 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Exception extends \Exception {
+class Module extends \stackos\module\BaseModule {
+    public function checkCredentials($name, $password) {
 
-}
-
-/**
- * An exception in the couchDB abstraction layer occured
- */
-class Exception_Couch extends Exception {
-}
-
-/**
- * A document could not be found
- */
-class Exception_DocumentNotFound extends Exception_Couch {
-}
-
-/**
- * A module that was registered by name was not found
- */
-class Exception_ModuleNotFound extends Exception_Couch {
-}
-
-/**
- * A database document had a module name in meta but no data under module
- */
-class Exception_ModuleDataNotFound extends Exception_Couch {
-}
-
-/**
- * A module in a document was not of the expected type
- */
-class Exception_UnexpectedModuleType extends Exception_Couch {
-}
-
-/**
- * A document could not be found
- */
-class Exception_ModuleConflict extends Exception_Couch {
-    public function __construct($message, $code = self::MODULE_WITH_NAME_ALREADY_REGISTERED, $previous = null) {
-        parent::__construct($message, $code, $previous);
     }
-    const MODULE_WITH_NAME_ALREADY_REGISTERED = 200;
-}
 
-
-class Exception_ModuleFactoryNotCallable extends Exception_Couch {
+    public function getName() {
+        return 'stackos.user';
+    }
 }

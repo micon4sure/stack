@@ -15,39 +15,41 @@ namespace sotest\kernel;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class FileTest extends \StackOSTest {
+class DocumentManagerTest extends \StackOSTest {
 
     /**
      * Test if the initial files are being written
      */
     public function testInitialFiles() {
-        $kernel = $this->getKernel();
+        $manager = $this->getManager();
 
         // assert that initial files exist
-        $this->assertTrue($kernel->readDocument(\stackos\ROOT_PATH) instanceof \stackos\Document);
-        $this->assertTrue($kernel->readDocument(\stackos\ROOT_PATH_USERS) instanceof \stackos\Document);
-        $this->assertTrue($kernel->readDocument(\stackos\ROOT_PATH_GROUPS) instanceof \stackos\Document);
-        $this->assertTrue($kernel->readDocument(\stackos\ROOT_PATH_HOME) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH) instanceof \stackos\Document);
+        $this->assertEquals(\stackos\ROOT_UNAME, $manager->readDocument(\stackos\ROOT_PATH)->getOwner());
+
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_USERS) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_GROUPS) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_HOME) instanceof \stackos\Document);
     }
 
     /**
      * Test read* write* and deleteDocument
      */
     public function testReadWriteDelete() {
-        $kernel = $this->getKernel();
+        $manager = $this->getManager();
 
         // write the document
-        $document = new \stackos\Document($kernel, '/foo', \stackos\ROOT_UNAME);
-        $kernel->writeDocument($document);
+        $document = new \stackos\Document($manager, '/foo', \stackos\ROOT_UNAME);
+        $manager->writeDocument($document);
 
         // assert that the written document matches the read
-        $this->assertEquals($document->getOwner(), $kernel->readDocument('/foo')->getOwner());
-        $this->assertEquals($document->getPath(), $kernel->readDocument('/foo')->getPath());
+        $this->assertEquals($document->getOwner(), $manager->readDocument('/foo')->getOwner());
+        $this->assertEquals($document->getPath(), $manager->readDocument('/foo')->getPath());
 
         // delete file and assert that it's gone
-        $kernel->deleteDocument($kernel->readDocument('/foo'));
+        $manager->deleteDocument($manager->readDocument('/foo'));
         try {
-            $kernel->readDocument('/foo');
+            $manager->readDocument('/foo');
             $this->fail();
         } catch(\stackos\Exception_DocumentNotFound $e) {
             // pass
@@ -58,12 +60,12 @@ class FileTest extends \StackOSTest {
      * Test Document's save method
      */
     public function testSave() {
-        $kernel = $this->getKernel();
-        $document = new \stackos\Document($kernel, '/foo', \stackos\ROOT_UNAME);
+        $manager = $this->getManager();
+        $document = new \stackos\Document($manager, '/foo', \stackos\ROOT_UNAME);
         $document->save();
 
         // assert that the written document matches the read
-        $this->assertEquals($document->getOwner(), $kernel->readDocument('/foo')->getOwner());
-        $this->assertEquals($document->getPath(), $kernel->readDocument('/foo')->getPath());
+        $this->assertEquals($document->getOwner(), $manager->readDocument('/foo')->getOwner());
+        $this->assertEquals($document->getPath(), $manager->readDocument('/foo')->getPath());
     }
 }

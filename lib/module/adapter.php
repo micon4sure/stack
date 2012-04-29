@@ -1,26 +1,26 @@
 <?php
 namespace stackos\module;
-
-/*
- * Copyright (C) 2012 Michael Saller
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions
- * of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- */
+    /*
+    * Copyright (C) 2012 Michael Saller
+    * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+    * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+    * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+    * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+    * The above copyright notice and this permission notice shall be included in all copies or substantial portions
+    * of the Software.
+    * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+    * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+    * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+    * OTHER DEALINGS IN THE SOFTWARE.
+    */
 
 /**
  * Describes the interface of an adapter that will adapt a document to a database compatible format and back
  */
 interface Adapter {
     public function fromDatabase($doc);
+
     public function toDatabase(\stackos\Document $doc);
 }
 
@@ -29,18 +29,20 @@ interface Adapter {
  */
 class Adapter_Document implements Adapter {
     /**
-     * @var \stackos\Kernel
+     * @var \stackos\DocumentManager
      */
-    private $kernel;
+    private $manager;
 
     /**
-     * @param \stackos\Kernel $kernel
+     * @param \stackos\DocumentManager $manager
      */
-    public function __construct(\stackos\Kernel $kernel) {
-        $this->kernel = $kernel;
+    public function __construct(\stackos\DocumentManager $manager) {
+        $this->manager = $manager;
     }
 
     /**
+     * Adapt a stdClass object to a Document instance.
+     *
      * @param $doc
      * @return \stackos\Document
      */
@@ -48,11 +50,19 @@ class Adapter_Document implements Adapter {
         // cut prefix from path
         $id = \lean\Text::offsetLeft($doc->_id, 'sodoc:');
         $revision = isset($doc->_rev) ? $doc->_rev : null;
-        $document = new \stackos\Document($this->kernel, $id, \stackos\ROOT_UNAME, $revision);
+        $document = new \stackos\Document($this->manager, $id, $doc->meta->owner, $revision);
+
+        // load module if module name exists
+        if (isset($doc->module->name)) {
+            $module = $this->manager->createModule($doc->module->name, $doc->module);
+            $document->setModule($module);
+        }
         return $document;
     }
 
     /**
+     * Adapt a Document instance to a stdClass object
+     *
      * @param \stackos\Document $document
      * @return \stdClass
      */
@@ -60,10 +70,21 @@ class Adapter_Document implements Adapter {
         $doc = new \stdClass();
         // prepend prefix to path
         $doc->_id = 'sodoc:' . $document->getPath();
-        if($document->getRevision() !== null) {
+        if ($document->getRevision() !== null) {
             $doc->_rev = $document->getRevision();
         }
-        $doc->owner = $document->getOwner();
+
+        // create new database doc
+        // - meta
+        $doc->meta = new \stdClass;
+        $doc->meta->owner = $document->getOwner();
+        // - module
+        if ($document->getModule() instanceof BaseModule) {
+            $doc->module = $document->getModule()->getData();
+        }
+        else {
+            $doc->module = null;
+        }
         return $doc;
     }
 }
