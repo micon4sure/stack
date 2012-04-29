@@ -1,5 +1,5 @@
 <?php
-namespace stackos\module;
+namespace stackos;
     /*
     * Copyright (C) 2012 Michael Saller
     * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -79,7 +79,7 @@ class Adapter_Document implements Adapter {
         $doc->meta = new \stdClass;
         $doc->meta->owner = $document->getOwner();
         // - module
-        if ($document->getModule() instanceof BaseModule) {
+        if ($document->getModule() instanceof \stackos\module\BaseModule) {
             $doc->module = $document->getModule()->getData();
         }
         else {

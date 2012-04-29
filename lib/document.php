@@ -43,13 +43,13 @@ class Document {
     private $module;
 
     /**
-     * @param DocumentAccess $access
+     * @param DocumentAccess $manager
      * @param string $path
      * @param string $owner
      * @param string $revision
      */
-    public function __construct(DocumentAccess $access, $path, $owner, $revision = null) {
-        $this->manager = $access;
+    public function __construct(DocumentManager $manager, $path, $owner, $revision = null) {
+        $this->manager = $manager;
         $this->documentMeta = new Document_Meta($this, $path, $owner, $revision);
     }
 

@@ -49,26 +49,42 @@ class DocumentManager implements DocumentAccess {
         $this->couchClient = new \couchClient($dsn, $dbName);
     }
 
-    public function registerModule($name, $moduleFactory) {
+    /**
+     * Register a module factory callable
+     *
+     * @param string $name
+     * @param \Closure $moduleFactory
+     * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable
+     */
+    public function registerModuleFactory($name, $moduleFactory) {
         if(!is_callable($moduleFactory))
             throw new Exception_ModuleFactoryNotCallable("The modulefactory '$name' is not callable");
         if(array_key_exists($name, $this->moduleFactories))
             throw new Exception_ModuleConflict("Module with name '$name' is already registered", Exception_ModuleConflict::MODULE_WITH_NAME_ALREADY_REGISTERED);
         $this->moduleFactories[$name] = $moduleFactory;
     }
-
-    public function getModuleFactory($name) {
-        return $this->moduleFactories[$name];
+    /**
+     * Create a module instance via a registered factory callable
+     *
+     * @param $name
+     * @param $data
+     * @return mixed
+     * @throws Exception_ModuleNotFound
+     */
+    public function createModule($name, $data) {
+        if(!isset($this->moduleFactories[$name]))
+            throw new Exception_ModuleNotFound();
+        return call_user_func($this->moduleFactories[$name], $data);
     }
 
     /**
      * Lazy adapter loader.
      * Deriving classes are encouraged to overwrite this and use the protected $adapter variable if doing so
      *
-     * @return module\Adapter_Document
+     * @return Adapter_Document
      */
     protected function getAdapter() {
-        return $this->adapter ?: $this->adapter = new \stackos\module\Adapter_Document($this);
+        return $this->adapter ?: $this->adapter = new Adapter_Document($this);
     }
 
     /**
@@ -125,11 +141,5 @@ class DocumentManager implements DocumentAccess {
         if ($this->couchClient->databaseExists()) {
             $this->couchClient->deleteDatabase();
         }
-    }
-
-    public function createModule($name, $data) {
-        if(!isset($this->moduleFactories[$name]))
-            throw new Exception_ModuleNotFound();
-        return call_user_func($this->moduleFactories[$name], $data);
     }
 }

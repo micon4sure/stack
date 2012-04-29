@@ -15,6 +15,6 @@ namespace stackos\module\group;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Module {
-
+class Module extends \stackos\module\BaseModule {
+    const NAME = 'stackos.group';
 }

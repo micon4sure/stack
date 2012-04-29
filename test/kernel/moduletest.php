@@ -18,7 +18,7 @@ class ModuleTest extends StackOSTest {
     public function testContainsModule() {
         $manager = $this->getManager();
 
-        $manager->registerModule('stackos.user', function($data) {
+        $manager->registerModuleFactory('stackos.user', function($data) {
             return new \stackos\module\user\Module($data);
         });
 
@@ -29,5 +29,39 @@ class ModuleTest extends StackOSTest {
 
         $module = $manager->readDocument(\stackos\ROOT_PATH_USERS . '/foo')->getModule();
         $this->assertTrue($module instanceof \stackos\module\user\Module);
+    }
+
+    public function testData() {
+        $manager = $this->getManager();
+
+        $manager->registerModuleFactory('stackos.user', function($data) {
+            return new \stackos\module\user\Module($data);
+        });
+
+        // create the document
+        $document = new \stackos\Document($manager, \stackos\ROOT_PATH_USERS . '/foo', \stackos\ROOT_UNAME);
+        // create module, set data to it  and place it in document
+        $module = $manager->createModule('stackos.user', null);
+        $module->setData((object)array('foo'=>'bar'));
+        $document->setModule($module);
+        // write document
+        $manager->writeDocument($document);
+        //read document
+        $doc = $manager->readDocument(\stackos\ROOT_PATH_USERS . '/foo');
+        $this->assertTrue($doc->getModule() instanceof \stackos\module\user\Module);
+        $this->assertEquals('bar', $doc->getModule()->getData()->foo);
+    }
+
+    /**
+     * @expectedException stackos\Exception_ModuleConflict
+     */
+    public function testModuleConflict() {
+        $manager = $this->getManager();
+        $manager->registerModuleFactory('stackos.user', function($data) {
+            return new \stackos\module\user\Module($data);
+        });
+        $manager->registerModuleFactory('stackos.user', function($data) {
+            return new \stackos\module\user\Module($data);
+        });
     }
 }

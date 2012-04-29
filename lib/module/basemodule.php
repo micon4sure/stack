@@ -16,14 +16,19 @@ namespace stackos\module;
  */
 
 abstract class BaseModule {
-    private $data;
+    protected $data;
 
     public function __construct($data) {
         $this->data = $data;
     }
 
-    public function getData() {
-        $this->data['name'] = $this->getName();
+    /**
+     * final to ensure that name always is in data
+     *
+     * @return mixed
+     */
+    public final function getData() {
+        $this->data->name = $this->getName();
         return $this->data;
     }
 
@@ -31,5 +36,7 @@ abstract class BaseModule {
         $this->data = $data;
     }
 
-    public abstract function getName();
+    public function getName() {
+        return static::NAME;
+    }
 }

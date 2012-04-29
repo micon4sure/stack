@@ -68,4 +68,29 @@ class DocumentManagerTest extends \StackOSTest {
         $this->assertEquals($document->getOwner(), $manager->readDocument('/foo')->getOwner());
         $this->assertEquals($document->getPath(), $manager->readDocument('/foo')->getPath());
     }
+
+    public function testCreateModule() {
+        $manager = $this->getManager();
+        // mock
+        $manager->registerModuleFactory(DocumentManagerTest_Mock_Module::NAME, function($data) {
+            return new DocumentManagerTest_Mock_Module($data);
+        });
+        $module = $manager->createModule(DocumentManagerTest_Mock_Module::NAME, (object)array('foo' => 'bar'));
+        $this->assertTrue($module instanceof DocumentManagerTest_Mock_Module);
+        // user
+        $manager->registerModuleFactory(\stackos\module\user\Module::NAME, function($data) {
+            return new \stackos\module\user\Module($data);
+        });
+        $module = $manager->createModule(\stackos\module\user\Module::NAME, (object)array('foo' => 'bar'));
+        $this->assertTrue($module instanceof \stackos\module\user\Module);
+        // group
+        $manager->registerModuleFactory(\stackos\module\group\Module::NAME, function($data) {
+            return new \stackos\module\group\Module($data);
+        });
+        $module = $manager->createModule(\stackos\module\group\Module::NAME, (object)array('foo' => 'bar'));
+        $this->assertTrue($module instanceof \stackos\module\group\Module);
+    }
+}
+class DocumentManagerTest_Mock_Module extends \stackos\module\BaseModule {
+    const NAME='stackos.test.module.create';
 }

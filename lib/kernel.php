@@ -1,4 +1,5 @@
 <?php
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -14,35 +15,33 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-date_default_timezone_set('Europe/Berlin');
+class Kernel implements DocumentAccess {
+    private $docbase;
 
-define('STOS_TEST_ROOT', __DIR__);
-
-// initialize lean
-require '../external/lean/lean/init.php';
-$autoload = new \lean\Autoload();
-$autoload->loadLean();
-$autoload->register('stackos', STOS_TEST_ROOT . '/../lib');
-$autoload->register('sotest', STOS_TEST_ROOT);
-
-
-require_once STOS_TEST_ROOT . '/../external/PHP-on-Couch/lib/couch.php';
-require_once STOS_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchClient.php';
-require_once STOS_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
-
-class StackOSTest extends \PHPUnit_Framework_TestCase {
-    private $manager;
-
-    public function setUp() {
-        $this->manager = new \stackos\DocumentManager('http://root:root@127.0.0.1:5984', 'stackos');
-        $this->getManager()->destroy();
-        $this->getManager()->init();
+    public function __construct(DocumentAccess $docbase) {
+        $this->docbase = $docbase;
     }
 
     /**
-     * @return \stackos\DocumentManager
+     * @param string $path
+     * @return \stdClass
+     * @throws Exception_DocumentNotFound
      */
-    protected function getManager() {
-        return $this->manager;
+    public function readDocument($path) {
+        return $this->docbase->readDocument($path);
+    }
+
+    /**
+     * @param Document $document
+     */
+    public function writeDocument($document) {
+        return $this->docbase->writeDocument($document);
+    }
+
+    /**
+     * @param Document $document
+     */
+    public function deleteDocument($document) {
+        return $this->docbase->deleteDocument($document);
     }
 }

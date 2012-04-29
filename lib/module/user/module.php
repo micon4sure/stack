@@ -16,11 +16,9 @@ namespace stackos\module\user;
  */
 
 class Module extends \stackos\module\BaseModule {
+    const NAME = 'stackos.user';
+
     public function checkCredentials($name, $password) {
 
-    }
-
-    public function getName() {
-        return 'stackos.user';
     }
 }
