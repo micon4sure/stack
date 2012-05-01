@@ -15,9 +15,38 @@
  */
 
 class GroupModuleTest extends StackOSTest {
-    public function testGroupModule() {
-        $group = new stackos\module\GroupModule('foo');
-        $this->assertEquals('foo', $group->getGname());
-    }
+    public function testNamechange() {
+        $gname = 'foo';
+        $path = '/bar';
+        // check for plain set and get
+        $group = new stackos\module\GroupModule($gname);
+        // save in a document, read again, check for correct gname
+        $this->assertEquals($gname, $group->getGname());
+        $document = new \stackos\Document($this->getManager(), $path, $group->getGname());
+        $document->setModule($group);
+        $this->assertEquals(
+            $gname,
+            $document->getModule()->getGname()
+        );
+        $document->save();
 
+        // reread document, check gname
+        $document = $this->getManager()->readDocument($path);
+        $this->assertEquals(
+            $gname,
+            $document->getModule()->getGname()
+        );
+
+        // again, with new uname
+        $new = 'qux';
+        $document = $this->getManager()->readDocument($path);
+        $document->getModule()->setGname($new);
+        $document->save();
+        // reread document, check new
+        $document = $this->getManager()->readDocument($path);
+        $this->assertEquals(
+            $new,
+            $document->getModule()->getGname()
+        );
+    }
 }

@@ -28,16 +28,16 @@ class GroupModule extends \stackos\module\BaseModule {
         return $this->gname;
     }
     public function setGname($gname) {
-        $this->data->gname = $gname;
+        $this->gname = $gname;
     }
     protected function export($data) {
-        return (object)array('gname' => $this->gname, 'home' => $this->home);
+        return (object)array('gname' => $this->gname);
     }
 
     public static function create($data) {
         if(!isset($data->gname))
             throw new \InvalidArgumentException('Group name missing.');
-        return new static($data->gname, $data->home);
+        return new static($data->gname);
     }
 
     public function __toString() {

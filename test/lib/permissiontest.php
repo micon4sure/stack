@@ -96,14 +96,12 @@ class PermissionTests extends \StackOSTest {
         $this->checkAllPriviledges($security, $user, $document);
 
         // save document, retry for all priviledges
-        \lean\util\Dump::all($document->getPermissions());
         $document->save();
         $savedDocument = $this->getManager()->readDocument($path);
         $this->assertEquals(
             $document->getPermissions(),
             $savedDocument->getPermissions());
 
-        \lean\util\Dump::all($savedDocument->getPermissions());
         $this->checkAllPriviledges($security, $user, $savedDocument);
     }
     public function checkAllPriviledges($security, $user, $document) {
