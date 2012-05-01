@@ -21,11 +21,11 @@ class GroupModule extends \stackos\module\BaseModule {
     private $gname;
 
     public function __construct($gname) {
-        $this->ggname = $gname;
+        $this->gname = $gname;
     }
 
     public function getGname() {
-        return isset($this->data->gname) ? $this->data->gname : null;
+        return $this->gname;
     }
     public function setGname($gname) {
         $this->data->gname = $gname;
@@ -38,5 +38,9 @@ class GroupModule extends \stackos\module\BaseModule {
         if(!isset($data->gname))
             throw new \InvalidArgumentException('Group name missing.');
         return new static($data->gname, $data->home);
+    }
+
+    public function __toString() {
+        return $this->getGname();
     }
 }

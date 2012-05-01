@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stackos\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,30 +15,37 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface Security {
-    /** Check if a user has permission to access a document in ways of $permission (r/w/x)
-     *
-     * @param \stackos\module\UserModule $user
-     * @param \stackos\Document          $document
-     * @param string                     $priviledge
-     *
-     * @return bool
-     */
-    public function checkDocumentPermission(\stackos\module\UserModule $user, \stackos\Document $document, $priviledge);
+class Permission {
+    private $entity;
+    private $holder;
+    private $priviledge;
+
+    public function __construct($holder, $priviledge, $entity) {
+        $this->holder = $holder;
+        $this->priviledge = $priviledge;
+        $this->entity = $entity;
+    }
+
+    public function getHolder() {
+        return $this->holder;
+    }
+    public function getPriviledge() {
+        return $this->priviledge;
+    }
+    public function getEntity() {
+        return $this->entity;
+    }
 }
 
-abstract class Security_Priviledge {
-    /** Read permission
-     */
-    const READ = 'r';
-    /** Write permission
-     */
-    const WRITE = 'w';
-    /** Execute permission: allows to execute applications enclosed in a file
-     * Allows transversion into directory (TODO unimplemented)
-     */
-    const EXECUTE = 'x';
-    /** Delete permission
-     */
-    const DELETE = 'd';
+class Permission_Group extends Permission {
+    const ENTITY_ID = 'g';
+    public function __construct($holder, $priviledge) {
+        parent::__construct($holder, $priviledge, self::ENTITY_ID);
+    }
+}
+class Permission_User extends Permission {
+    const ENTITY_ID = 'u';
+    public function __construct($holder, $priviledge) {
+        parent::__construct($holder, $priviledge, self::ENTITY_ID);
+    }
 }

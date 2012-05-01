@@ -16,6 +16,8 @@
 
 class GroupModuleTest extends StackOSTest {
     public function testGroupModule() {
+        $group = new stackos\module\GroupModule('foo');
+        $this->assertEquals('foo', $group->getGname());
     }
 
 }

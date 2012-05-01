@@ -21,6 +21,7 @@ class UserModule extends \stackos\module\BaseModule {
     private $uber = false;
     private $uname;
     private $home;
+    private $groups = array();
 
     public function __construct($uname, $home) {
         $this->setUname($uname);
@@ -51,8 +52,20 @@ class UserModule extends \stackos\module\BaseModule {
         return $this->home;
     }
 
+    public function addToGroup(GroupModule $group) {
+        $this->groups[] = $group->getGname();
+    }
+
+    public function getGroups() {
+        return $this->groups;
+    }
+
     protected function export($data) {
-        return (object)array('uname' => $this->getUname(), 'home' => $this->getHome(), 'uber' => $this->isUber());
+        return (object)array(
+            'uname' => $this->getUname(),
+            'home' => $this->getHome(),
+            'uber' => $this->isUber(),
+            'groups' => $this->groups);
     }
 
     public static function create($data) {

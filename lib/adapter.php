@@ -52,6 +52,20 @@ class Adapter_Document implements Adapter {
         $revision = isset($doc->_rev) ? $doc->_rev : null;
         $document = new \stackos\Document($this->manager, $id, $doc->meta->owner, $revision);
 
+        // add permissions
+        foreach ($doc->meta->permissions as $permission) {
+            if ($permission->entity == \stackos\security\Permission_User::ENTITY_ID) {
+                // user
+                $document->addPermission(new \stackos\security\Permission_User($permission->holder, $permission->priviledge));
+            }
+        else if ($permission->entity == \stackos\security\Permission_Group::ENTITY_ID) {
+            // group
+                $document->addPermission(new \stackos\security\Permission_Group($permission->holder, $permission->priviledge));
+            }
+            else
+                throw new Exception('Unknown entity in permission');
+        }
+
         // load module if module name exists
         if (isset($doc->module->name)) {
             $module = $this->manager->createModule($doc->module->name, $doc->module);
@@ -77,15 +91,23 @@ class Adapter_Document implements Adapter {
         // create new database doc
         // - meta
         $doc->meta = new \stdClass;
+        // -- permissions
+        $permissions = $document->getPermissions();
+        $doc->meta->permissions = array();
+        foreach ($permissions as $permission) {
+            $doc->meta->permissions[] = array(
+                'holder' => $permission->getHolder(),
+                'entity' => $permission->getEntity(),
+                'priviledge' => $permission->getPriviledge());
+        }
         $doc->meta->owner = $document->getOwner();
-        // - module
+        // -- module
         if ($document->getModule() instanceof \stackos\module\BaseModule) {
             $doc->module = $document->getModule()->getData();
         }
-    else {
-        $doc->module = null;
-    }
-        #\lean\util\Dump::deep(2, $doc, $document->getModule());
+        else {
+            $doc->module = null;
+        }
         return $doc;
     }
 }

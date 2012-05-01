@@ -15,11 +15,11 @@ namespace stackos\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DefaultSecurity {
+class DefaultSecurity implements \stackos\Security {
     /** Check if a user has permission to access a document in ways of $permission (r/w/x)
      *
      * @param Document $document
-     * @param string $priviledge
+     * @param string   $priviledge
      *
      * @return bool
      */
@@ -30,22 +30,25 @@ class DefaultSecurity {
         }
 
         // grant owner all priviledges except execute
-        if($document->getOwner() == $user->getUname() && $priviledge != Priviledge::EXECUTE)
+        if ($document->getOwner() == $user->getUname() && $priviledge != \stackos\Security_Priviledge::EXECUTE) {
             return true;
+        }
 
+        // check individual user and group permissions
         foreach ($document->getPermissions() as $permission) {
-            // check if this permission has been requested
+            // check priviledge name
             if ($permission->getPriviledge() != $priviledge) {
                 continue;
             }
-
-            // check if user is in group permission is valid for
-            if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_GROUP) {
-                return in_array($user->getUname(), $user->getGroups());
+            // check if user has a group permission
+            if ($permission->getEntity() == \stackos\security\Permission_Group::ENTITY_ID) {
+                if (in_array($permission->getHolder(), $user->getGroups()))
+                    return true;
             }
             // check if user has an explicit permission
-            else if ($permission->getHolderType() == self::PERMISSION_HOLDER_TYPE_USER) {
-                return $permission->getHolder() == $user->getUname();
+            else if ($permission->getEntity() == \stackos\security\Permission_User::ENTITY_ID) {
+                if ($permission->getHolder() == $user->getUname())
+                    return true;
             }
         }
         return false;

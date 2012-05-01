@@ -60,10 +60,16 @@ class Document {
         return $this->manager;
     }
 
+    /**
+     * @param module\BaseModule $module
+     */
     public function setModule(\stackos\module\BaseModule $module) {
         $this->module = $module;
     }
 
+    /**
+     * @return module\BaseModule
+     */
     public function getModule() {
         return $this->module;
     }
@@ -75,16 +81,44 @@ class Document {
         $this->manager->writeDocument($this);
     }
 
+    /**
+     * meta
+     * @return string
+     */
     public function getPath() {
         return $this->documentMeta->getPath();
     }
 
+    /**
+     * meta
+     * @return null|string
+     */
     public function getRevision() {
         return $this->documentMeta->getRevision();
     }
 
+    /**
+     * meta
+     * @return string
+     */
     public function getOwner() {
         return $this->documentMeta->getOwner();
+    }
+
+    /**
+     * meta
+     * @param security\Permission $permission
+     */
+    public function addPermission(\stackos\security\Permission $permission) {
+        $this->documentMeta->addPermission($permission);
+    }
+
+    /**
+     * meta
+     * @return array
+     */
+    public function getPermissions() {
+        return $this->documentMeta->getPermissions();
     }
 }
 
@@ -114,6 +148,10 @@ class Document_Meta {
       * @var null|string
       */
     private $revision;
+    /**
+     * @var array
+     */
+    private $permissions = array();
 
     /**
      * @param Document $document
@@ -160,5 +198,12 @@ class Document_Meta {
      */
     public function getOwner() {
         return $this->owner;
+    }
+
+    public function getPermissions() {
+        return $this->permissions;
+    }
+    public function addPermission(\stackos\security\Permission $permission) {
+        $this->permissions[] = $permission;
     }
 }
