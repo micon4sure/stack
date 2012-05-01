@@ -27,10 +27,10 @@ class DocumentManagerTest extends \StackOSTest {
         $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH) instanceof \stackos\Document);
         $this->assertEquals(\stackos\ROOT_UNAME, $manager->readDocument(\stackos\ROOT_PATH)->getOwner());
 
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_USERS) instanceof \stackos\Document);
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_USERS_ROOT) instanceof \stackos\Document);
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_GROUPS) instanceof \stackos\Document);
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_HOME) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_USERS) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_USERS_ROOT) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_GROUPS) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_HOME) instanceof \stackos\Document);
     }
 
     /**
@@ -72,20 +72,14 @@ class DocumentManagerTest extends \StackOSTest {
 
     public function testCreateModule() {
         $manager = $this->getManager();
-        // mock
-        $manager->registerModuleFactory(DocumentManagerTest_Mock_Module::NAME, function($data) {
-            return new DocumentManagerTest_Mock_Module($data);
-        });
-        $module = $manager->createModule(DocumentManagerTest_Mock_Module::NAME, (object)array('foo' => 'bar'));
-        $this->assertTrue($module instanceof DocumentManagerTest_Mock_Module);
-        // user
-        $module = $manager->createModule(\stackos\module\UserModule::NAME, (object)array('foo' => 'bar'));
+
+        // test manager's ability to create valid modules
+        // - user
+        $user = new \stackos\module\UserModule('foo', '/foo');
+        $module = $manager->createModule(\stackos\module\UserModule::NAME, (object)array('uname' => 'foo', 'home' => '/foo/bar'));
         $this->assertTrue($module instanceof \stackos\module\UserModule);
-        // group
-        $module = $manager->createModule(\stackos\module\GroupModule::NAME, (object)array('foo' => 'bar'));
+        // - group
+        $module = $manager->createModule(\stackos\module\GroupModule::NAME, (object)array('gname' => 'QUX'));
         $this->assertTrue($module instanceof \stackos\module\GroupModule);
     }
-}
-class DocumentManagerTest_Mock_Module extends \stackos\module\BaseModule {
-    const NAME='stackos.test.module.create';
 }

@@ -17,11 +17,12 @@ namespace stackos;
 
 const ROOT_UNAME = 'root';
 const ROOT_PATH = '/';
-const ROOT_PATH_HOME = '/root';
-const ROOT_PATH_SYSTEM = '/root/system';
-const ROOT_PATH_GROUPS = '/root/groups';
-const ROOT_PATH_USERS = '/root/users';
-const ROOT_PATH_USERS_ROOT = '/root/users/root';
+const ROOT_PATH_HOME = '/home';
+const ROOT_USER_PATH_HOME = '/root';
+const ROOT_USER_PATH_SYSTEM = '/root/system';
+const ROOT_USER_PATH_GROUPS = '/root/groups';
+const ROOT_USER_PATH_USERS = '/root/users';
+const ROOT_USER_PATH_USERS_ROOT = '/root/users/root';
 
 /**
  * Interface to the document system
@@ -64,6 +65,16 @@ class DocumentManager implements DocumentAccess {
             throw new Exception_ModuleConflict("Module with name '$name' is already registered", Exception_ModuleConflict::MODULE_WITH_NAME_ALREADY_REGISTERED);
         $this->moduleFactories[$name] = $moduleFactory;
     }
+
+    /**
+     * Register a module class bei their class name.
+     * Register module with the NAME constant of the class and the static method create as factory
+     * @param string $name
+     */
+    public function registerModule($name) {
+        $this->registerModuleFactory($name::NAME, array($name, 'create'));
+    }
+
     /**
      * Create a module instance via a registered factory callable
      *
@@ -124,17 +135,17 @@ class DocumentManager implements DocumentAccess {
         $this->couchClient->createDatabase();
         $files = array(
             ROOT_PATH,
-            ROOT_PATH_SYSTEM,
-            ROOT_PATH_HOME,
-            ROOT_PATH_USERS,
-            ROOT_PATH_GROUPS
+            ROOT_USER_PATH_SYSTEM,
+            ROOT_USER_PATH_HOME,
+            ROOT_USER_PATH_USERS,
+            ROOT_USER_PATH_GROUPS
         );
         foreach ($files as $path) {
             $document = new Document($this, $path, ROOT_UNAME);
             $this->writeDocument($document);
         }
-        $document = new Document($this, ROOT_PATH_USERS_ROOT, ROOT_UNAME);
-        $document->setModule(new \stackos\module\UserModule());
+        $document = new Document($this, ROOT_USER_PATH_USERS_ROOT, ROOT_UNAME);
+        $document->setModule(new \stackos\module\UserModule(ROOT_UNAME, ROOT_USER_PATH_HOME));
         $this->writeDocument($document);
     }
 

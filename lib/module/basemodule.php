@@ -30,9 +30,18 @@ abstract class BaseModule {
      * @return mixed
      */
     public final function getData() {
-        $this->data->name = $this->getName();
-        return $this->data;
+        $data = $this->export($this->data);
+        $data->name = $this->getName();
+        return $data;
     }
+
+    /**
+     * Create JSONizable data
+     *
+     * @abstract
+     * @return \stdClass
+     */
+    protected abstract function export($data);
 
     public function setData($data) {
         $this->data = $data;

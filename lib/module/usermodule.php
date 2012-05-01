@@ -17,4 +17,47 @@ namespace stackos\module;
 
 class UserModule extends \stackos\module\BaseModule {
     const NAME = 'stackos.user';
+
+    private $uber = false;
+    private $uname;
+    private $home;
+
+    public function __construct($uname, $home) {
+        $this->setUname($uname);
+        $this->setHome($home);
+    }
+
+    public function isUber() {
+        return isset($this->data->uber) ? $this->data->uber : false;
+    }
+    public function setUber($uber) {
+        $this->uber = $uber;
+        return $this;
+    }
+
+    public function getUname() {
+        return $this->uname;
+    }
+    public function setUname($uname) {
+        $this->uname = $uname;
+        return $this;
+    }
+
+    public function setHome($home) {
+        $this->home = $home;
+        return $this;
+    }
+    public function getHome() {
+        return $this->home;
+    }
+
+    protected function export($data) {
+        return (object)array('uname' => $this->getUname(), 'home' => $this->getHome());
+    }
+
+    public static function create($data) {
+        if(!isset($data->uname, $data->home))
+            throw new \InvalidArgumentException('User parameters are missing data. Need uname and home.');
+        return new static($data->uname, $data->home);
+    }
 }

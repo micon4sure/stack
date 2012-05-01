@@ -19,38 +19,39 @@ class ModuleTest extends StackOSTest {
         $manager = $this->getManager();
 
         // write the document
-        $document = new \stackos\Document($manager, \stackos\ROOT_PATH_USERS . '/foo', \stackos\ROOT_UNAME);
-        $document->setModule($manager->createModule('stackos.user', null));
+        $document = new \stackos\Document($manager, \stackos\ROOT_USER_PATH_USERS . '/foo', \stackos\ROOT_UNAME);
+        $module = new \stackos\module\UserModule('foo', \stackos\ROOT_UNAME, \stackos\ROOT_PATH_HOME . '/foo');
+        $document->setModule($manager->createModule('stackos.user', $module));
         $manager->writeDocument($document);
 
-        $module = $manager->readDocument(\stackos\ROOT_PATH_USERS . '/foo')->getModule();
+        $module = $manager->readDocument(\stackos\ROOT_USER_PATH_USERS . '/foo')->getModule();
         $this->assertTrue($module instanceof \stackos\module\UserModule);
     }
 
     public function testData() {
-        #\lean\util\Dump::flat('==========');
         $manager = $this->getManager();
         // create the document
-        $document = new \stackos\Document($manager, \stackos\ROOT_PATH_USERS . '/foo', \stackos\ROOT_UNAME);
+        $document = new \stackos\Document($manager, \stackos\ROOT_USER_PATH_HOME . '/plain', \stackos\ROOT_UNAME);
         // create module, set data to it  and place it in document
-        $module = $manager->createModule('stackos.user', null);
+        $module = $manager->createModule('stackos.plain', new \stackos\module\PlainModule(null));
         $module->setData((object)array('foo'=>'bar'));
         $document->setModule($module);
         // write document
         $manager->writeDocument($document);
         //read document
-        $doc = $manager->readDocument(\stackos\ROOT_PATH_USERS . '/foo');
-        $this->assertTrue($doc->getModule() instanceof \stackos\module\UserModule);
+        $doc = $manager->readDocument(\stackos\ROOT_USER_PATH_HOME . '/plain');
+        $this->assertTrue($doc->getModule() instanceof \stackos\module\PlainModule);
         $this->assertEquals('bar', $document->getModule()->getData()->foo);
     }
 
     /**
+     * Register a module that has already been registered.
      * @expectedException stackos\Exception_ModuleConflict
      */
     public function testModuleConflict() {
         $manager = $this->getManager();
         $manager->registerModuleFactory('stackos.user', function($data) {
-            return new \stackos\module\UserModule($data);
+
         });
     }
 }
