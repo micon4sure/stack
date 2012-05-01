@@ -28,7 +28,7 @@ class UserModule extends \stackos\module\BaseModule {
     }
 
     public function isUber() {
-        return isset($this->data->uber) ? $this->data->uber : false;
+        return $this->uber;
     }
     public function setUber($uber) {
         $this->uber = $uber;
@@ -52,12 +52,15 @@ class UserModule extends \stackos\module\BaseModule {
     }
 
     protected function export($data) {
-        return (object)array('uname' => $this->getUname(), 'home' => $this->getHome());
+        return (object)array('uname' => $this->getUname(), 'home' => $this->getHome(), 'uber' => $this->isUber());
     }
 
     public static function create($data) {
         if(!isset($data->uname, $data->home))
-            throw new \InvalidArgumentException('User parameters are missing data. Need uname and home.');
-        return new static($data->uname, $data->home);
+        throw new \InvalidArgumentException('User parameters are missing data. Need uname and home.');
+        $instance = new static($data->uname, $data->home);
+        $uber = isset($data->uber) ? $data->uber : false;
+        $instance->setUber($uber);
+        return $instance;
     }
 }

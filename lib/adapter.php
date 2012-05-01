@@ -48,7 +48,7 @@ class Adapter_Document implements Adapter {
      */
     public function fromDatabase($doc) {
         // cut prefix from path
-        $id = \lean\Text::offsetLeft($doc->_id, 'sodoc:');
+        $id = \lean\Text::offsetLeft($doc->_id, 'stack:/');
         $revision = isset($doc->_rev) ? $doc->_rev : null;
         $document = new \stackos\Document($this->manager, $id, $doc->meta->owner, $revision);
 
@@ -69,7 +69,7 @@ class Adapter_Document implements Adapter {
     public function toDatabase(\stackos\Document $document) {
         $doc = new \stdClass();
         // prepend prefix to path
-        $doc->_id = 'sodoc:' . $document->getPath();
+        $doc->_id = 'stack:/' . $document->getPath();
         if ($document->getRevision() !== null) {
             $doc->_rev = $document->getRevision();
         }

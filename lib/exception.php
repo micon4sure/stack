@@ -62,3 +62,26 @@ class Exception_ModuleConflict extends Exception_Couch {
 
 class Exception_ModuleFactoryNotCallable extends Exception_Couch {
 }
+
+class Exception_InvalidModule extends \Exception {
+    private $moduleName;
+    private $module;
+    private $data;
+    public function __construct($moduleName, $module, $data) {
+        $this->moduleName = $moduleName;
+        $this->module = $module;
+        $this->data = $data;
+    }
+
+    public function getData() {
+        return $this->data;
+    }
+
+    public function getModule() {
+        return $this->module;
+    }
+
+    public function getModuleName() {
+        return $this->moduleName;
+    }
+}

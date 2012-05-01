@@ -84,9 +84,15 @@ class DocumentManager implements DocumentAccess {
      * @throws Exception_ModuleNotFound
      */
     public function createModule($name, $data) {
+        // call module factory to create module
         if(!isset($this->moduleFactories[$name]))
             throw new Exception_ModuleNotFound();
-        return call_user_func($this->moduleFactories[$name], $data);
+        $module = call_user_func($this->moduleFactories[$name], $data);
+        // check for validity
+        if(!$module instanceof \stackos\module\BaseModule) {
+            throw new \stackos\Exception_InvalidModule($name, $module, $data);
+        }
+        return $module;
     }
 
     /**
@@ -106,7 +112,7 @@ class DocumentManager implements DocumentAccess {
      */
     public function readDocument($path) {
         try {
-            $doc = $this->couchClient->getDoc("sodoc:$path");
+            $doc = $this->couchClient->getDoc("stack:/$path");
         } catch(\couchNotFoundException $e) {
             throw new Exception_DocumentNotFound("Document at path '$path' could not be found", null, $e);
         }

@@ -21,4 +21,21 @@ class UserModuleTest extends StackOSTest {
         $this->assertEquals('foo', $user->getUname());
         $this->assertEquals($home, $user->getHome());
     }
+
+    public function testUber() {
+        // check for plain set and get
+        $home = \stackos\ROOT_PATH_HOME . '/foo';
+        $user = new stackos\module\UserModule('foo', $home);
+        $user->setUber(true);
+
+        // save in a document, read again, check for uber
+        $this->assertEquals(true, $user->isUber());
+        $document = new \stackos\Document($this->getManager(), '/bar', $user->getUname());
+        $document->setModule($user);
+        $document->save();
+
+        $document = $this->getManager()->readDocument('/bar');
+        \lean\util\Dump::deep($document->getModule());
+        $this->assertTrue($document->getModule()->isUber());
+    }
 }
