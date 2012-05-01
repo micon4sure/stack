@@ -18,7 +18,9 @@ namespace stackos\module;
 abstract class BaseModule {
     protected $data;
 
-    public function __construct($data) {
+    public function __construct($data = null) {
+        if($data = null)
+            $data = new \stdClass();
         $this->data = $data;
     }
 

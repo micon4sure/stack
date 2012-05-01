@@ -19,8 +19,9 @@ const ROOT_UNAME = 'root';
 const ROOT_PATH = '/';
 const ROOT_PATH_HOME = '/root';
 const ROOT_PATH_SYSTEM = '/root/system';
-const ROOT_PATH_USERS = '/root/users';
 const ROOT_PATH_GROUPS = '/root/groups';
+const ROOT_PATH_USERS = '/root/users';
+const ROOT_PATH_USERS_ROOT = '/root/users/root';
 
 /**
  * Interface to the document system
@@ -132,6 +133,9 @@ class DocumentManager implements DocumentAccess {
             $document = new Document($this, $path, ROOT_UNAME);
             $this->writeDocument($document);
         }
+        $document = new Document($this, ROOT_PATH_USERS_ROOT, ROOT_UNAME);
+        $document->setModule(new \stackos\module\UserModule());
+        $this->writeDocument($document);
     }
 
     /**

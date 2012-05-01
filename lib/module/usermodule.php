@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stackos\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,19 +15,6 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface DocumentAccess {
-    /**
-     * @param string $path
-     * @return \stdClass
-     * @throws Exception_DocumentNotFound
-     */
-    public function readDocument($path);
-    /**
-     * @param Document $document
-     * @return void
-     */
-    public function writeDocument($document);
-    /**
-     * @param Document $document
-     */
-    public function deleteDocument($document);}
+class UserModule extends \stackos\module\BaseModule {
+    const NAME = 'stackos.user';
+}

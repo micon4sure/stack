@@ -21,7 +21,7 @@
 
     <testsuites>
         <testsuite name="kernel">
-            <directory suffix="test.php">kernel</directory>
+            <directory suffix="test.php">main</directory>
         </testsuite>
     </testsuites>
     <logging>

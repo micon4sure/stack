@@ -15,19 +15,27 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface DocumentAccess {
-    /**
-     * @param string $path
-     * @return \stdClass
-     * @throws Exception_DocumentNotFound
+interface Security {
+    /** Check if a user has permission to access a document in ways of $permission (r/w/x)
+     *
+     * @param \stackos\module\UserModule $user
+     * @param \stackos\Document          $document
+     * @param string                     $priviledge
+     *
+     * @return bool
      */
-    public function readDocument($path);
-    /**
-     * @param Document $document
-     * @return void
+    public function checkDocumentPermission(\stackos\module\UserModule $user, \stackos\Document $document, $priviledge);
+}
+
+abstract class Security_Priviledge {
+    /** Read permission
      */
-    public function writeDocument($document);
-    /**
-     * @param Document $document
+    const READ = 'r';
+    /** Write permission
      */
-    public function deleteDocument($document);}
+    const WRITE = 'w';
+    /** Execute permission: allows to execute applications enclosed in a file
+     * Allows transversion into directory (TODO unimplemented)
+     */
+    const EXECUTE = 'x';
+}

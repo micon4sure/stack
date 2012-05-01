@@ -82,9 +82,10 @@ class Adapter_Document implements Adapter {
         if ($document->getModule() instanceof \stackos\module\BaseModule) {
             $doc->module = $document->getModule()->getData();
         }
-        else {
-            $doc->module = null;
-        }
+    else {
+        $doc->module = null;
+    }
+        #\lean\util\Dump::deep(2, $doc, $document->getModule());
         return $doc;
     }
 }

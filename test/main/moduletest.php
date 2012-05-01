@@ -18,26 +18,18 @@ class ModuleTest extends StackOSTest {
     public function testContainsModule() {
         $manager = $this->getManager();
 
-        $manager->registerModuleFactory('stackos.user', function($data) {
-            return new \stackos\module\user\Module($data);
-        });
-
         // write the document
         $document = new \stackos\Document($manager, \stackos\ROOT_PATH_USERS . '/foo', \stackos\ROOT_UNAME);
         $document->setModule($manager->createModule('stackos.user', null));
         $manager->writeDocument($document);
 
         $module = $manager->readDocument(\stackos\ROOT_PATH_USERS . '/foo')->getModule();
-        $this->assertTrue($module instanceof \stackos\module\user\Module);
+        $this->assertTrue($module instanceof \stackos\module\UserModule);
     }
 
     public function testData() {
+        #\lean\util\Dump::flat('==========');
         $manager = $this->getManager();
-
-        $manager->registerModuleFactory('stackos.user', function($data) {
-            return new \stackos\module\user\Module($data);
-        });
-
         // create the document
         $document = new \stackos\Document($manager, \stackos\ROOT_PATH_USERS . '/foo', \stackos\ROOT_UNAME);
         // create module, set data to it  and place it in document
@@ -48,8 +40,8 @@ class ModuleTest extends StackOSTest {
         $manager->writeDocument($document);
         //read document
         $doc = $manager->readDocument(\stackos\ROOT_PATH_USERS . '/foo');
-        $this->assertTrue($doc->getModule() instanceof \stackos\module\user\Module);
-        $this->assertEquals('bar', $doc->getModule()->getData()->foo);
+        $this->assertTrue($doc->getModule() instanceof \stackos\module\UserModule);
+        $this->assertEquals('bar', $document->getModule()->getData()->foo);
     }
 
     /**
@@ -58,10 +50,7 @@ class ModuleTest extends StackOSTest {
     public function testModuleConflict() {
         $manager = $this->getManager();
         $manager->registerModuleFactory('stackos.user', function($data) {
-            return new \stackos\module\user\Module($data);
-        });
-        $manager->registerModuleFactory('stackos.user', function($data) {
-            return new \stackos\module\user\Module($data);
+            return new \stackos\module\UserModule($data);
         });
     }
 }

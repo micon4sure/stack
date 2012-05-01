@@ -15,19 +15,44 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface DocumentAccess {
+class Gate implements DocumentAccess {
+    private $docbase;
+    private $securityStack = array();
+
+    public function __construct(DocumentAccess $docbase) {
+        $this->docbase = $docbase;
+    }
+
+    public function pushSecurity(Security $security) {
+        array_push($this->securityStack, $security);
+    }
+    public function pullSecurity() {
+        return array_pop($this->securityStack);
+    }
+    protected function currentSecurity() {
+        return end($this->securityStack);
+    }
+
     /**
      * @param string $path
      * @return \stdClass
      * @throws Exception_DocumentNotFound
      */
-    public function readDocument($path);
-    /**
-     * @param Document $document
-     * @return void
-     */
-    public function writeDocument($document);
+    public function readDocument($path) {
+        return $this->docbase->readDocument($path);
+    }
+
     /**
      * @param Document $document
      */
-    public function deleteDocument($document);}
+    public function writeDocument($document) {
+        $this->docbase->writeDocument($document);
+    }
+
+    /**
+     * @param Document $document
+     */
+    public function deleteDocument($document) {
+        return $this->docbase->deleteDocument($document);
+    }
+}

@@ -36,6 +36,14 @@ class StackOSTest extends \PHPUnit_Framework_TestCase {
     public function setUp() {
         $this->manager = new \stackos\DocumentManager('http://root:root@127.0.0.1:5984', 'stackos');
         $this->getManager()->destroy();
+        // add user factory
+        $this->getManager()->registerModuleFactory(\stackos\module\UserModule::NAME, function($data) {
+            return new \stackos\module\UserModule($data);
+        });
+        // add group factory
+        $this->manager->registerModuleFactory(\stackos\module\GroupModule::NAME, function($data) {
+            return new \stackos\module\GroupModule($data);
+        });
         $this->getManager()->init();
     }
 

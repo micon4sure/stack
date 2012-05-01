@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stackos\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,19 +15,16 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface DocumentAccess {
-    /**
-     * @param string $path
-     * @return \stdClass
-     * @throws Exception_DocumentNotFound
+class UnpriviledgedSecurity implements \stackos\Security {
+    /** Check if a user has permission to access a document in ways of $permission (r/w/x)
+     *
+     * @param \stackos\module\UserModule $user
+     * @param \stackos\Document          $document
+     * @param string                     $priviledge
+     *
+     * @return bool
      */
-    public function readDocument($path);
-    /**
-     * @param Document $document
-     * @return void
-     */
-    public function writeDocument($document);
-    /**
-     * @param Document $document
-     */
-    public function deleteDocument($document);}
+    public function checkDocumentPermission(\stackos\module\UserModule $user, \stackos\Document $document, $priviledge) {
+        return false;
+    }
+}

@@ -28,6 +28,7 @@ class DocumentManagerTest extends \StackOSTest {
         $this->assertEquals(\stackos\ROOT_UNAME, $manager->readDocument(\stackos\ROOT_PATH)->getOwner());
 
         $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_USERS) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_USERS_ROOT) instanceof \stackos\Document);
         $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_GROUPS) instanceof \stackos\Document);
         $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH_HOME) instanceof \stackos\Document);
     }
@@ -78,17 +79,11 @@ class DocumentManagerTest extends \StackOSTest {
         $module = $manager->createModule(DocumentManagerTest_Mock_Module::NAME, (object)array('foo' => 'bar'));
         $this->assertTrue($module instanceof DocumentManagerTest_Mock_Module);
         // user
-        $manager->registerModuleFactory(\stackos\module\user\Module::NAME, function($data) {
-            return new \stackos\module\user\Module($data);
-        });
-        $module = $manager->createModule(\stackos\module\user\Module::NAME, (object)array('foo' => 'bar'));
-        $this->assertTrue($module instanceof \stackos\module\user\Module);
+        $module = $manager->createModule(\stackos\module\UserModule::NAME, (object)array('foo' => 'bar'));
+        $this->assertTrue($module instanceof \stackos\module\UserModule);
         // group
-        $manager->registerModuleFactory(\stackos\module\group\Module::NAME, function($data) {
-            return new \stackos\module\group\Module($data);
-        });
-        $module = $manager->createModule(\stackos\module\group\Module::NAME, (object)array('foo' => 'bar'));
-        $this->assertTrue($module instanceof \stackos\module\group\Module);
+        $module = $manager->createModule(\stackos\module\GroupModule::NAME, (object)array('foo' => 'bar'));
+        $this->assertTrue($module instanceof \stackos\module\GroupModule);
     }
 }
 class DocumentManagerTest_Mock_Module extends \stackos\module\BaseModule {

@@ -1,5 +1,5 @@
 <?php
-namespace stackos\module\group;
+namespace stackos\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,6 +15,6 @@ namespace stackos\module\group;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Module extends \stackos\module\BaseModule {
+class GroupModule extends \stackos\module\BaseModule {
     const NAME = 'stackos.group';
 }
