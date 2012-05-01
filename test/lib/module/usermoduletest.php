@@ -1,4 +1,5 @@
 <?php
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -17,7 +18,7 @@
 class UserModuleTest extends StackOSTest {
     public function testUserModule() {
         $home = \stackos\ROOT_PATH_HOME . '/foo';
-        $user = new stackos\module\UserModule('foo', $home);
+        $user = new module\UserModule('foo', $home);
         $this->assertEquals('foo', $user->getUname());
         $this->assertEquals($home, $user->getHome());
     }
@@ -25,7 +26,7 @@ class UserModuleTest extends StackOSTest {
     public function testUber() {
         // check for plain set and get
         $home = \stackos\ROOT_PATH_HOME . '/foo';
-        $user = new stackos\module\UserModule('foo', $home);
+        $user = new module\UserModule('foo', $home);
         $user->setUber(true);
 
         // save in a document, read again, check for uber

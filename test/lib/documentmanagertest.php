@@ -1,5 +1,5 @@
 <?php
-namespace sotest\kernel;
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,7 +15,7 @@ namespace sotest\kernel;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DocumentManagerTest extends \StackOSTest {
+class DocumentManagerTest extends StackOSTest {
 
     /**
      * Test if the initial files are being written
@@ -79,7 +79,7 @@ class DocumentManagerTest extends \StackOSTest {
         $module = $manager->createModule(\stackos\module\UserModule::NAME, (object)array('uname' => 'foo', 'home' => '/foo/bar'));
         $this->assertTrue($module instanceof \stackos\module\UserModule);
         // - group
-        $module = $manager->createModule(\stackos\module\GroupModule::NAME, (object)array('gname' => 'QUX'));
+        $module = $manager->createModule(\stackos\module\GroupModule::NAME, (object)array('gname' => 'qux'));
         $this->assertTrue($module instanceof \stackos\module\GroupModule);
     }
 }

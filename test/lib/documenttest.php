@@ -1,5 +1,5 @@
 <?php
-namespace sotest\kernel;
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,7 +15,7 @@ namespace sotest\kernel;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DocumentTest extends \StackOSTest {
+class DocumentTest extends StackOSTest {
     /**
      * Test Document's save method
      */

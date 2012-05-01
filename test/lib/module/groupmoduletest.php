@@ -1,4 +1,5 @@
 <?php
+namespace stackos;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -19,10 +20,10 @@ class GroupModuleTest extends StackOSTest {
         $gname = 'foo';
         $path = '/bar';
         // check for plain set and get
-        $group = new stackos\module\GroupModule($gname);
+        $group = new module\GroupModule($gname);
         // save in a document, read again, check for correct gname
         $this->assertEquals($gname, $group->getGname());
-        $document = new \stackos\Document($this->getManager(), $path, $group->getGname());
+        $document = new Document($this->getManager(), $path, $group->getGname());
         $document->setModule($group);
         $this->assertEquals(
             $gname,
