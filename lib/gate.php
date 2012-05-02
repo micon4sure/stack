@@ -16,19 +16,37 @@ namespace stackos;
  */
 
 class Gate implements DocumentAccess {
-    private $docbase;
+    /**
+     * @var DocumentAccess
+     */
+    private $access;
+    /**
+     * @var array
+     */
     private $securityStack = array();
 
-    public function __construct(DocumentAccess $docbase) {
-        $this->docbase = $docbase;
+    /**
+     * @param DocumentAccess $access
+     */
+    public function __construct(DocumentAccess $access) {
+        $this->access = $access;
     }
 
+    /**
+     * @param Security $security
+     */
     public function pushSecurity(Security $security) {
         array_push($this->securityStack, $security);
     }
+    /**
+     * @return  Security
+     */
     public function pullSecurity() {
         return array_pop($this->securityStack);
     }
+    /**
+     * @return  Security
+     */
     protected function currentSecurity() {
         return end($this->securityStack);
     }
@@ -39,20 +57,23 @@ class Gate implements DocumentAccess {
      * @throws Exception_DocumentNotFound
      */
     public function readDocument($path) {
-        return $this->docbase->readDocument($path);
+        $document = $this->access->readDocument($path);
+        if(!$this->currentSecurity()->checkDocumentPermission($document)) {
+
+        }
     }
 
     /**
      * @param Document $document
      */
     public function writeDocument($document) {
-        $this->docbase->writeDocument($document);
+        $this->access->writeDocument($document);
     }
 
     /**
      * @param Document $document
      */
     public function deleteDocument($document) {
-        return $this->docbase->deleteDocument($document);
+        return $this->access->deleteDocument($document);
     }
 }

@@ -24,7 +24,7 @@ class PriviledgedSecurity implements \stackos\Security {
      *
      * @return bool
      */
-    public function checkDocumentPermission(\stackos\module\UserModule $user, \stackos\Document $document, $priviledge) {
+    public function checkDocumentPermission(\stackos\Document $document, $priviledge) {
         return true;
     }
 }

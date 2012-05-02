@@ -16,6 +16,15 @@ namespace stackos\security;
  */
 
 class DefaultSecurity implements \stackos\Security {
+    /**
+     * @var \stackos\module\UserModule
+     */
+    private $user;
+
+    public function __construct(\stackos\module\UserModule $user) {
+        $this->user = $user;
+    }
+
     /** Check if a user has permission to access a document in ways of $permission (r/w/x)
      *
      * @param Document $document
@@ -23,14 +32,14 @@ class DefaultSecurity implements \stackos\Security {
      *
      * @return bool
      */
-    public function checkDocumentPermission(\stackos\module\UserModule $user, \stackos\Document $document, $priviledge) {
+    public function checkDocumentPermission(\stackos\Document $document, $priviledge) {
         // grant uber all priviledges
-        if ($user->isUber()) {
+        if ($this->user->isUber()) {
             return true;
         }
 
         // grant owner all priviledges except execute
-        if ($document->getOwner() == $user->getUname() && $priviledge != \stackos\Security_Priviledge::EXECUTE) {
+        if ($document->getOwner() == $this->user->getUname() && $priviledge != \stackos\Security_Priviledge::EXECUTE) {
             return true;
         }
 
@@ -42,12 +51,12 @@ class DefaultSecurity implements \stackos\Security {
             }
             // check if user has a group permission
             if ($permission->getEntity() == \stackos\security\Permission_Group::ENTITY_ID) {
-                if (in_array($permission->getHolder(), $user->getGroups()))
+                if (in_array($permission->getHolder(), $this->user->getGroups()))
                     return true;
             }
             // check if user has an explicit permission
             else if ($permission->getEntity() == \stackos\security\Permission_User::ENTITY_ID) {
-                if ($permission->getHolder() == $user->getUname())
+                if ($permission->getHolder() == $this->user->getUname())
                     return true;
             }
         }
