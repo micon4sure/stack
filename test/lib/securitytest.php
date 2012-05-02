@@ -18,13 +18,13 @@ namespace stackos;
 class SecurityTest extends StackOSTest {
     public function testPriviledged() {
         $security = new \stackos\security\PriviledgedSecurity();
-        $check = $security->checkDocumentPermission(new SecurityTest_Mock_UserModule(), new SecurityTest_Mock_Document(), \stackos\Security_Priviledge::READ);
+        $check = $security->checkDocumentPermission(new SecurityTest_Mock_Document(), \stackos\Security_Priviledge::READ);
         $this->assertTrue($check);
     }
 
     public function testUnpriviledged() {
         $security = new \stackos\security\UnpriviledgedSecurity();
-        $check = $security->checkDocumentPermission(new SecurityTest_Mock_UserModule(), new SecurityTest_Mock_Document(), \stackos\Security_Priviledge::READ);
+        $check = $security->checkDocumentPermission(new SecurityTest_Mock_Document(), \stackos\Security_Priviledge::READ);
         $this->assertFalse($check);
     }
 }
