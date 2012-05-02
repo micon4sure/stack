@@ -85,3 +85,6 @@ class Exception_InvalidModule extends \Exception {
         return $this->moduleName;
     }
 }
+
+class Exception_PermissionDenied extends Exception {
+}

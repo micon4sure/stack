@@ -55,25 +55,39 @@ class Gate implements DocumentAccess {
      * @param string $path
      * @return \stdClass
      * @throws Exception_DocumentNotFound
+     * @throws Exception_PermissionDenied
      */
     public function readDocument($path) {
         $document = $this->access->readDocument($path);
-        if(!$this->currentSecurity()->checkDocumentPermission($document)) {
-
+        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::READ)) {
+            throw new Exception_PermissionDenied("READ (r) permission to document at path '$path' was denied.");
         }
+        return $document;
     }
 
     /**
      * @param Document $document
      */
     public function writeDocument($document) {
+        // check permission
+        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::WRITE)) {
+            $path = $document->getPath();
+            throw new Exception_PermissionDenied("WRITE (w) permission to document at path '$path' was denied.");
+        }
         $this->access->writeDocument($document);
+        return $document;
     }
 
     /**
      * @param Document $document
+     * @return void
      */
     public function deleteDocument($document) {
+        // check permission
+        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::WRITE)) {
+            $path = $document->getPath();
+            throw new Exception_PermissionDenied("WRITE (w) permission to document at path '$path' was denied.");
+        }
         return $this->access->deleteDocument($document);
     }
 }
