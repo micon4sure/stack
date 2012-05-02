@@ -1,5 +1,5 @@
 <?php
-namespace stackos\module;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,39 +15,17 @@ namespace stackos\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-abstract class BaseModule {
-    protected $data;
-
-    public function __construct($data = null) {
-        if($data = null)
-            $data = new \stdClass();
-        $this->data = $data;
-    }
-
+class DocumentTest extends StackOSTest {
     /**
-     * final to ensure that name always is in data
-     *
-     * @return mixed
+     * Test Document's save method
      */
-    public final function getData() {
-        $data = $this->export($this->data);
-        $data->name = $this->getName();
-        return $data;
-    }
+    public function testSave() {
+        $manager = $this->getManager();
+        $document = new \stack\filesystem\Document($manager, '/foo', \stack\filesystem\ROOT_UNAME);
+        $document->save();
 
-    /**
-     * Create JSONizable data
-     *
-     * @abstract
-     * @return \stdClass
-     */
-    protected abstract function export($data);
-
-    public function setData($data) {
-        $this->data = $data;
-    }
-
-    public function getName() {
-        return static::NAME;
+        // assert that the written document matches the read
+        $this->assertEquals($document->getOwner(), $manager->readDocument('/foo')->getOwner());
+        $this->assertEquals($document->getPath(), $manager->readDocument('/foo')->getPath());
     }
 }

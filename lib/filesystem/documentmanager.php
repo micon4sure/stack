@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -34,7 +34,7 @@ class DocumentManager implements DocumentAccess {
     private $couchClient;
 
     /**
-     * @var \stackos\module\Adapter
+     * @var \stack\filesystem\module\Adapter
      */
     protected $adapter;
 
@@ -89,8 +89,8 @@ class DocumentManager implements DocumentAccess {
             throw new Exception_ModuleNotFound();
         $module = call_user_func($this->moduleFactories[$name], $data);
         // check for validity
-        if(!$module instanceof \stackos\module\BaseModule) {
-            throw new \stackos\Exception_InvalidModule($name, $module, $data);
+        if(!$module instanceof \stack\filesystem\module\BaseModule) {
+            throw new \stack\filesystem\Exception_InvalidModule($name, $module, $data);
         }
         return $module;
     }
@@ -151,7 +151,7 @@ class DocumentManager implements DocumentAccess {
             $this->writeDocument($document);
         }
         $document = new Document($this, ROOT_USER_PATH_USERS_ROOT, ROOT_UNAME);
-        $document->setModule(new \stackos\module\UserModule(ROOT_UNAME, ROOT_USER_PATH_HOME));
+        $document->setModule(new \stack\filesystem\module\UserModule(ROOT_UNAME, ROOT_USER_PATH_HOME));
         $this->writeDocument($document);
     }
 

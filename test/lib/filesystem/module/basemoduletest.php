@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,17 +15,8 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DocumentTest extends StackOSTest {
-    /**
-     * Test Document's save method
-     */
-    public function testSave() {
-        $manager = $this->getManager();
-        $document = new \stackos\Document($manager, '/foo', \stackos\ROOT_UNAME);
-        $document->save();
+class BaseModuleTest extends StackOSTest {
+    public function testBaseModule() {
 
-        // assert that the written document matches the read
-        $this->assertEquals($document->getOwner(), $manager->readDocument('/foo')->getOwner());
-        $this->assertEquals($document->getPath(), $manager->readDocument('/foo')->getPath());
     }
 }

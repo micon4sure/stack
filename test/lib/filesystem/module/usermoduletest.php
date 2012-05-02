@@ -1,5 +1,5 @@
 <?php
-namespace stackos\module;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,32 +15,28 @@ namespace stackos\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class GroupModule extends \stackos\module\BaseModule {
-    const NAME = 'stackos.group';
-
-    private $gname;
-
-    public function __construct($gname) {
-        $this->gname = $gname;
+class UserModuleTest extends StackOSTest {
+    public function testUserModule() {
+        $home = \stack\filesystem\ROOT_PATH_HOME . '/foo';
+        $user = new module\UserModule('foo', $home);
+        $this->assertEquals('foo', $user->getUname());
+        $this->assertEquals($home, $user->getHome());
     }
 
-    public function getGname() {
-        return $this->gname;
-    }
-    public function setGname($gname) {
-        $this->gname = $gname;
-    }
-    protected function export($data) {
-        return (object)array('gname' => $this->gname);
-    }
+    public function testUber() {
+        // check for plain set and get
+        $home = \stack\filesystem\ROOT_PATH_HOME . '/foo';
+        $user = new module\UserModule('foo', $home);
+        $user->setUber(true);
 
-    public static function create($data) {
-        if(!isset($data->gname))
-            throw new \InvalidArgumentException('Group name missing.');
-        return new static($data->gname);
-    }
+        // save in a document, read again, check for uber
+        $this->assertEquals(true, $user->isUber());
+        $document = new \stack\filesystem\Document($this->getManager(), '/bar', $user->getUname());
+        $document->setModule($user);
+        $document->save();
 
-    public function __toString() {
-        return $this->getGname();
+        $document = $this->getManager()->readDocument('/bar');
+        \lean\util\Dump::deep($document->getModule());
+        $this->assertTrue($document->getModule()->isUber());
     }
 }

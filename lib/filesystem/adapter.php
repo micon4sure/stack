@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
     /*
     * Copyright (C) 2012 Michael Saller
     * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -21,7 +21,7 @@ namespace stackos;
 interface Adapter {
     public function fromDatabase($doc);
 
-    public function toDatabase(\stackos\Document $doc);
+    public function toDatabase(\stack\filesystem\Document $doc);
 }
 
 /**
@@ -29,14 +29,14 @@ interface Adapter {
  */
 class Adapter_Document implements Adapter {
     /**
-     * @var \stackos\DocumentManager
+     * @var \stack\filesystem\DocumentManager
      */
     private $manager;
 
     /**
-     * @param \stackos\DocumentManager $manager
+     * @param \stack\filesystem\DocumentManager $manager
      */
-    public function __construct(\stackos\DocumentManager $manager) {
+    public function __construct(\stack\filesystem\DocumentManager $manager) {
         $this->manager = $manager;
     }
 
@@ -44,23 +44,23 @@ class Adapter_Document implements Adapter {
      * Adapt a stdClass object to a Document instance.
      *
      * @param $doc
-     * @return \stackos\Document
+     * @return \stack\filesystem\Document
      */
     public function fromDatabase($doc) {
         // cut prefix from path
         $id = \lean\Text::offsetLeft($doc->_id, 'stack:/');
         $revision = isset($doc->_rev) ? $doc->_rev : null;
-        $document = new \stackos\Document($this->manager, $id, $doc->meta->owner, $revision);
+        $document = new \stack\filesystem\Document($this->manager, $id, $doc->meta->owner, $revision);
 
         // add permissions
         foreach ($doc->meta->permissions as $permission) {
-            if ($permission->entity == \stackos\security\Permission_User::ENTITY_ID) {
+            if ($permission->entity == \stack\filesystem\security\Permission_User::ENTITY_ID) {
                 // user
-                $document->addPermission(new \stackos\security\Permission_User($permission->holder, $permission->priviledge));
+                $document->addPermission(new \stack\filesystem\security\Permission_User($permission->holder, $permission->priviledge));
             }
-        else if ($permission->entity == \stackos\security\Permission_Group::ENTITY_ID) {
+        else if ($permission->entity == \stack\filesystem\security\Permission_Group::ENTITY_ID) {
             // group
-                $document->addPermission(new \stackos\security\Permission_Group($permission->holder, $permission->priviledge));
+                $document->addPermission(new \stack\filesystem\security\Permission_Group($permission->holder, $permission->priviledge));
             }
             else
                 throw new Exception('Unknown entity in permission');
@@ -77,10 +77,10 @@ class Adapter_Document implements Adapter {
     /**
      * Adapt a Document instance to a stdClass object
      *
-     * @param \stackos\Document $document
+     * @param \stack\filesystem\Document $document
      * @return \stdClass
      */
-    public function toDatabase(\stackos\Document $document) {
+    public function toDatabase(\stack\filesystem\Document $document) {
         $doc = new \stdClass();
         // prepend prefix to path
         $doc->_id = 'stack:/' . $document->getPath();
@@ -102,7 +102,7 @@ class Adapter_Document implements Adapter {
         }
         $doc->meta->owner = $document->getOwner();
         // -- module
-        if ($document->getModule() instanceof \stackos\module\BaseModule) {
+        if ($document->getModule() instanceof \stack\filesystem\module\BaseModule) {
             $doc->module = $document->getModule()->getData();
         }
         else {

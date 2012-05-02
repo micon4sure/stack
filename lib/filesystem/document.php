@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -38,7 +38,7 @@ class Document {
     private $documentMeta;
 
     /**
-     * @var \stackos\module\BaseModule
+     * @var \stack\filesystem\module\BaseModule
      */
     private $module;
 
@@ -63,7 +63,7 @@ class Document {
     /**
      * @param module\BaseModule $module
      */
-    public function setModule(\stackos\module\BaseModule $module) {
+    public function setModule(\stack\filesystem\module\BaseModule $module) {
         $this->module = $module;
     }
 
@@ -109,7 +109,7 @@ class Document {
      * meta
      * @param security\Permission $permission
      */
-    public function addPermission(\stackos\security\Permission $permission) {
+    public function addPermission(\stack\filesystem\security\Permission $permission) {
         $this->documentMeta->addPermission($permission);
     }
 
@@ -203,7 +203,7 @@ class Document_Meta {
     public function getPermissions() {
         return $this->permissions;
     }
-    public function addPermission(\stackos\security\Permission $permission) {
+    public function addPermission(\stack\filesystem\security\Permission $permission) {
         $this->permissions[] = $permission;
     }
 }

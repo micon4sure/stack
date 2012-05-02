@@ -1,1 +1,1 @@
-# stackos
+# stack

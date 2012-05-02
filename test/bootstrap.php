@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -23,7 +23,7 @@ define('STOS_TEST_ROOT', __DIR__);
 require '../external/lean/lean/init.php';
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
-$autoload->register('stackos', STOS_TEST_ROOT . '/../lib');
+$autoload->register('stack', STOS_TEST_ROOT . '/../lib');
 $autoload->register('sotest', STOS_TEST_ROOT);
 
 
@@ -35,19 +35,19 @@ class StackOSTest extends \PHPUnit_Framework_TestCase {
     private $manager;
 
     public function setUp() {
-        $this->manager = new \stackos\DocumentManager('http://root:root@127.0.0.1:5984', 'stackos');
+        $this->manager = new \stack\filesystem\DocumentManager('http://root:root@127.0.0.1:5984', 'stack');
         $this->getManager()->destroy();
         // user, group, plain factory
-        $this->getManager()->registerModule('\stackos\module\UserModule');
-        $this->getManager()->registerModule('\stackos\module\GroupModule');
-        $this->manager->registerModuleFactory(\stackos\module\PlainModule::NAME, function($data) {
-            return new \stackos\module\PlainModule($data);
+        $this->getManager()->registerModule('\stack\filesystem\module\UserModule');
+        $this->getManager()->registerModule('\stack\filesystem\module\GroupModule');
+        $this->manager->registerModuleFactory(\stack\filesystem\module\PlainModule::NAME, function($data) {
+            return new \stack\filesystem\module\PlainModule($data);
         });
         $this->getManager()->init();
     }
 
     /**
-     * @return \stackos\DocumentManager
+     * @return \stack\filesystem\DocumentManager
      */
     protected function getManager() {
         return $this->manager;

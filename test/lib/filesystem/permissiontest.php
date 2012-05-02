@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -21,13 +21,13 @@ class PermissionTests extends StackOSTest {
         // create arbitrary user, uber user and document
         $uname = 'user';
         $path = ROOT_PATH_HOME . '/' . $uname;
-        $user = new \stackos\module\UserModule($uname, $path);
-        $uber = new \stackos\module\UserModule('uber', $path);
+        $user = new \stack\filesystem\module\UserModule($uname, $path);
+        $uber = new \stack\filesystem\module\UserModule('uber', $path);
         $uber->setUber(true);
         $document = new Document($this->getManager(), $path, $uname);
 
         // check for permission to be true due to user being uber
-        $security = new \stackos\security\DefaultSecurity($uber);
+        $security = new \stack\filesystem\security\DefaultSecurity($uber);
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
@@ -40,12 +40,12 @@ class PermissionTests extends StackOSTest {
         // create arbitrary user and document
         $uname = 'user';
         $path = ROOT_PATH_HOME . '/' . $uname;
-        $user = new \stackos\module\UserModule($uname, $path);
+        $user = new \stack\filesystem\module\UserModule($uname, $path);
         $document = new Document($this->getManager(), $path, $uname);
         //$document->addPermission(new Permi)
 
         // check for permission to be true due to user being uber (except execute)
-        $security = new \stackos\security\DefaultSecurity($user);
+        $security = new \stack\filesystem\security\DefaultSecurity($user);
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
@@ -57,13 +57,13 @@ class PermissionTests extends StackOSTest {
         $uname = 'user';
         $gname = 'group';
         $path = ROOT_USER_PATH_GROUPS . '/' . $gname;
-        $group = new \stackos\module\GroupModule($gname);
+        $group = new \stack\filesystem\module\GroupModule($gname);
         // ROOT_UNAME is document owner: prevent owner permission conflicts
         $document = new Document($this->getManager(), $path, ROOT_UNAME);
-        $user = new \stackos\module\UserModule($uname, $path);
+        $user = new \stack\filesystem\module\UserModule($uname, $path);
         $user->addToGroup($group);
 
-        $security = new \stackos\security\DefaultSecurity($user);
+        $security = new \stack\filesystem\security\DefaultSecurity($user);
         // assert that user can do nothing on the document
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
@@ -71,28 +71,28 @@ class PermissionTests extends StackOSTest {
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read
-        $document->addPermission(new \stackos\security\Permission_Group($gname, Security_Priviledge::READ));
+        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read and write
-        $document->addPermission(new \stackos\security\Permission_Group($gname, Security_Priviledge::WRITE));
+        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read, write and execute
-        $document->addPermission(new \stackos\security\Permission_Group($gname, Security_Priviledge::EXECUTE));
+        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::EXECUTE));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user has all priviledges
-        $document->addPermission(new \stackos\security\Permission_Group($gname, Security_Priviledge::DELETE));
+        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::DELETE));
         $this->checkAllPriviledges($security, $document);
 
         // save document, retry for all priviledges
@@ -115,11 +115,11 @@ class PermissionTests extends StackOSTest {
         // create arbitrary user and document
         $uname = 'user';
         $path = ROOT_USER_PATH_USERS . '/' . $uname;
-        $user = new \stackos\module\UserModule($uname, $path);
+        $user = new \stack\filesystem\module\UserModule($uname, $path);
         // ROOT_UNAME is document owner: prevent owner permission conflicts
         $document = new Document($this->getManager(), $path, ROOT_UNAME);
 
-        $security = new \stackos\security\DefaultSecurity($user);
+        $security = new \stack\filesystem\security\DefaultSecurity($user);
         // assert that user can do nothing on the document
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
@@ -127,28 +127,28 @@ class PermissionTests extends StackOSTest {
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read
-        $document->addPermission(new \stackos\security\Permission_User($uname, Security_Priviledge::READ));
+        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read and write
-        $document->addPermission(new \stackos\security\Permission_User($uname, Security_Priviledge::WRITE));
+        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read, write and execute
-        $document->addPermission(new \stackos\security\Permission_User($uname, Security_Priviledge::EXECUTE));
+        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::EXECUTE));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkDocumentPermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkDocumentPermission($document, Security_Priviledge::DELETE));
 
         // assert that user has all permissions
-        $document->addPermission(new \stackos\security\Permission_User($uname, Security_Priviledge::DELETE));
+        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::DELETE));
         $this->checkAllPriviledges($security, $document);
 
         // save document, retry for all permissions
@@ -161,7 +161,7 @@ class PermissionTests extends StackOSTest {
         try {
             #$this->fail('Expecting Exception_MissingContext');
         }
-        catch (\stackos\Exception_MissingSecurityStrategy $e) {
+        catch (\stack\filesystem\Exception_MissingSecurityStrategy $e) {
             // pass
         }
     }

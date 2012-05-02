@@ -1,5 +1,5 @@
 <?php
-namespace stackos\security;
+namespace stack\filesystem\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,13 +15,13 @@ namespace stackos\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DefaultSecurity implements \stackos\Security {
+class DefaultSecurity implements \stack\filesystem\Security {
     /**
-     * @var \stackos\module\UserModule
+     * @var \stack\filesystem\module\UserModule
      */
     private $user;
 
-    public function __construct(\stackos\module\UserModule $user) {
+    public function __construct(\stack\filesystem\module\UserModule $user) {
         $this->user = $user;
     }
 
@@ -32,14 +32,14 @@ class DefaultSecurity implements \stackos\Security {
      *
      * @return bool
      */
-    public function checkDocumentPermission(\stackos\Document $document, $priviledge) {
+    public function checkDocumentPermission(\stack\filesystem\Document $document, $priviledge) {
         // grant uber all priviledges
         if ($this->user->isUber()) {
             return true;
         }
 
         // grant owner all priviledges except execute
-        if ($document->getOwner() == $this->user->getUname() && $priviledge != \stackos\Security_Priviledge::EXECUTE) {
+        if ($document->getOwner() == $this->user->getUname() && $priviledge != \stack\filesystem\Security_Priviledge::EXECUTE) {
             return true;
         }
 
@@ -50,12 +50,12 @@ class DefaultSecurity implements \stackos\Security {
                 continue;
             }
             // check if user has a group permission
-            if ($permission->getEntity() == \stackos\security\Permission_Group::ENTITY_ID) {
+            if ($permission->getEntity() == \stack\filesystem\security\Permission_Group::ENTITY_ID) {
                 if (in_array($permission->getHolder(), $this->user->getGroups()))
                     return true;
             }
             // check if user has an explicit permission
-            else if ($permission->getEntity() == \stackos\security\Permission_User::ENTITY_ID) {
+            else if ($permission->getEntity() == \stack\filesystem\security\Permission_User::ENTITY_ID) {
                 if ($permission->getHolder() == $this->user->getUname())
                     return true;
             }

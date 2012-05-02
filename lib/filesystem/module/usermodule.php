@@ -1,5 +1,5 @@
 <?php
-namespace stackos\module;
+namespace stack\filesystem\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,8 +15,8 @@ namespace stackos\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class UserModule extends \stackos\module\BaseModule {
-    const NAME = 'stackos.user';
+class UserModule extends \stack\filesystem\module\BaseModule {
+    const NAME = 'stack.user';
 
     private $uber = false;
     private $uname;

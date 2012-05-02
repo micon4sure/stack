@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -14,28 +14,3 @@ namespace stackos;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-
-class SecurityTest extends StackOSTest {
-    public function testPriviledged() {
-        $security = new \stackos\security\PriviledgedSecurity();
-        $check = $security->checkDocumentPermission(new SecurityTest_Mock_Document(), \stackos\Security_Priviledge::READ);
-        $this->assertTrue($check);
-    }
-
-    public function testUnpriviledged() {
-        $security = new \stackos\security\UnpriviledgedSecurity();
-        $check = $security->checkDocumentPermission(new SecurityTest_Mock_Document(), \stackos\Security_Priviledge::READ);
-        $this->assertFalse($check);
-    }
-}
-
-class SecurityTest_Mock_UserModule extends \stackos\module\UserModule {
-    public function __construct() {
-        // pass
-    }
-}
-class SecurityTest_Mock_Document extends \stackos\Document {
-    public function __construct() {
-        // pass
-    }
-}

@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,7 +15,10 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Gate implements DocumentAccess {
+/**
+ * Facade for the filesystem
+ */
+class Filesystem implements DocumentAccess {
     /**
      * @var DocumentAccess
      */
@@ -24,7 +27,6 @@ class Gate implements DocumentAccess {
      * @var array
      */
     private $securityStack = array();
-
     /**
      * @param DocumentAccess $access
      */

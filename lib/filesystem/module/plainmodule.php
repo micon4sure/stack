@@ -1,5 +1,5 @@
 <?php
-namespace stackos\module;
+namespace stack\filesystem\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -17,7 +17,7 @@ namespace stackos\module;
 
 class PlainModule extends BaseModule {
 
-    const NAME = 'stackos.plain';
+    const NAME = 'stack.plain';
 
     protected function export($data) {
         return $data;

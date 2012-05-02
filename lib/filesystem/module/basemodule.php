@@ -1,5 +1,5 @@
 <?php
-namespace stackos\security;
+namespace stack\filesystem\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,16 +15,39 @@ namespace stackos\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class PriviledgedSecurity implements \stackos\Security {
-    /** Check if a user has permission to access a document in ways of $permission (r/w/x)
+abstract class BaseModule {
+    protected $data;
+
+    public function __construct($data = null) {
+        if($data = null)
+            $data = new \stdClass();
+        $this->data = $data;
+    }
+
+    /**
+     * final to ensure that name always is in data
      *
-     * @param \stackos\module\UserModule $user
-     * @param \stackos\Document          $document
-     * @param string                     $priviledge
-     *
-     * @return bool
+     * @return mixed
      */
-    public function checkDocumentPermission(\stackos\Document $document, $priviledge) {
-        return true;
+    public final function getData() {
+        $data = $this->export($this->data);
+        $data->name = $this->getName();
+        return $data;
+    }
+
+    /**
+     * Create JSONizable data
+     *
+     * @abstract
+     * @return \stdClass
+     */
+    protected abstract function export($data);
+
+    public function setData($data) {
+        $this->data = $data;
+    }
+
+    public function getName() {
+        return static::NAME;
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,8 +15,32 @@ namespace stackos;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class BaseModuleTest extends StackOSTest {
-    public function testBaseModule() {
+class GroupModule extends \stack\filesystem\module\BaseModule {
+    const NAME = 'stack.group';
 
+    private $gname;
+
+    public function __construct($gname) {
+        $this->gname = $gname;
+    }
+
+    public function getGname() {
+        return $this->gname;
+    }
+    public function setGname($gname) {
+        $this->gname = $gname;
+    }
+    protected function export($data) {
+        return (object)array('gname' => $this->gname);
+    }
+
+    public static function create($data) {
+        if(!isset($data->gname))
+            throw new \InvalidArgumentException('Group name missing.');
+        return new static($data->gname);
+    }
+
+    public function __toString() {
+        return $this->getGname();
     }
 }

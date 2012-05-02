@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -18,13 +18,13 @@ namespace stackos;
 interface Security {
     /** Check if a user has permission to access a document in ways of $permission (r/w/x)
      *
-     * @param \stackos\module\UserModule $user
-     * @param \stackos\Document          $document
+     * @param \stack\filesystem\module\UserModule $user
+     * @param \stack\filesystem\Document          $document
      * @param string                     $priviledge
      *
      * @return bool
      */
-    public function checkDocumentPermission(\stackos\Document $document, $priviledge);
+    public function checkDocumentPermission(\stack\filesystem\Document $document, $priviledge);
 }
 
 abstract class Security_Priviledge {

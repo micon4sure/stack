@@ -1,5 +1,5 @@
 <?php
-namespace stackos;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -24,13 +24,13 @@ class DocumentManagerTest extends StackOSTest {
         $manager = $this->getManager();
 
         // assert that initial files exist
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_PATH) instanceof \stackos\Document);
-        $this->assertEquals(\stackos\ROOT_UNAME, $manager->readDocument(\stackos\ROOT_PATH)->getOwner());
+        $this->assertTrue($manager->readDocument(\stack\filesystem\ROOT_PATH) instanceof \stack\filesystem\Document);
+        $this->assertEquals(\stack\filesystem\ROOT_UNAME, $manager->readDocument(\stack\filesystem\ROOT_PATH)->getOwner());
 
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_USERS) instanceof \stackos\Document);
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_USERS_ROOT) instanceof \stackos\Document);
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_GROUPS) instanceof \stackos\Document);
-        $this->assertTrue($manager->readDocument(\stackos\ROOT_USER_PATH_HOME) instanceof \stackos\Document);
+        $this->assertTrue($manager->readDocument(\stack\filesystem\ROOT_USER_PATH_USERS) instanceof \stack\filesystem\Document);
+        $this->assertTrue($manager->readDocument(\stack\filesystem\ROOT_USER_PATH_USERS_ROOT) instanceof \stack\filesystem\Document);
+        $this->assertTrue($manager->readDocument(\stack\filesystem\ROOT_USER_PATH_GROUPS) instanceof \stack\filesystem\Document);
+        $this->assertTrue($manager->readDocument(\stack\filesystem\ROOT_USER_PATH_HOME) instanceof \stack\filesystem\Document);
     }
 
     /**
@@ -40,7 +40,7 @@ class DocumentManagerTest extends StackOSTest {
         $manager = $this->getManager();
 
         // write the document
-        $document = new \stackos\Document($manager, '/foo', \stackos\ROOT_UNAME);
+        $document = new \stack\filesystem\Document($manager, '/foo', \stack\filesystem\ROOT_UNAME);
         $manager->writeDocument($document);
 
         // assert that the written document matches the read
@@ -52,7 +52,7 @@ class DocumentManagerTest extends StackOSTest {
         try {
             $manager->readDocument('/foo');
             $this->fail();
-        } catch(\stackos\Exception_DocumentNotFound $e) {
+        } catch(\stack\filesystem\Exception_DocumentNotFound $e) {
             // pass
         }
     }
@@ -62,7 +62,7 @@ class DocumentManagerTest extends StackOSTest {
      */
     public function testSave() {
         $manager = $this->getManager();
-        $document = new \stackos\Document($manager, '/foo', \stackos\ROOT_UNAME);
+        $document = new \stack\filesystem\Document($manager, '/foo', \stack\filesystem\ROOT_UNAME);
         $document->save();
 
         // assert that the written document matches the read
@@ -75,11 +75,11 @@ class DocumentManagerTest extends StackOSTest {
 
         // test manager's ability to create valid modules
         // - user
-        $user = new \stackos\module\UserModule('foo', '/foo');
-        $module = $manager->createModule(\stackos\module\UserModule::NAME, (object)array('uname' => 'foo', 'home' => '/foo/bar'));
-        $this->assertTrue($module instanceof \stackos\module\UserModule);
+        $user = new \stack\filesystem\module\UserModule('foo', '/foo');
+        $module = $manager->createModule(\stack\filesystem\module\UserModule::NAME, (object)array('uname' => 'foo', 'home' => '/foo/bar'));
+        $this->assertTrue($module instanceof \stack\filesystem\module\UserModule);
         // - group
-        $module = $manager->createModule(\stackos\module\GroupModule::NAME, (object)array('gname' => 'qux'));
-        $this->assertTrue($module instanceof \stackos\module\GroupModule);
+        $module = $manager->createModule(\stack\filesystem\module\GroupModule::NAME, (object)array('gname' => 'qux'));
+        $this->assertTrue($module instanceof \stack\filesystem\module\GroupModule);
     }
 }
