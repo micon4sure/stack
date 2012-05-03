@@ -25,7 +25,7 @@ const ROOT_USER_PATH_USERS = '/root/users';
 const ROOT_USER_PATH_USERS_ROOT = '/root/users/root';
 
 /**
- * Interface to the document system
+ * Interface to the Document system, including Modules
  */
 class DocumentManager implements DocumentAccess {
     /**
@@ -123,8 +123,12 @@ class DocumentManager implements DocumentAccess {
      * @param Document $document
      */
     public function writeDocument($document) {
+        // write the document to the file system
+        // set revision to document instance
         $doc = $this->getAdapter()->toDatabase($document);
-        $this->couchClient->storeDoc($doc);
+        $response = $this->couchClient->storeDoc($doc);
+        $document->setRevision($response->rev);
+        return $doc;
     }
 
     /**

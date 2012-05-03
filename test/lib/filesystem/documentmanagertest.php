@@ -82,4 +82,12 @@ class DocumentManagerTest extends StackOSTest {
         $module = $manager->createModule(\stack\filesystem\module\GroupModule::NAME, (object)array('gname' => 'qux'));
         $this->assertTrue($module instanceof \stack\filesystem\module\GroupModule);
     }
+
+    public function testSaveThrice() {
+        $manager = $this->getManager();
+        $document = new \stack\filesystem\Document($manager, '/foo', \stack\filesystem\ROOT_UNAME);
+        $document->save();
+        $document->save();
+        $document->save();
+    }
 }

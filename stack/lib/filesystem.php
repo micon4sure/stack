@@ -1,5 +1,5 @@
 <?php
-namespace filesystem;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -14,6 +14,11 @@ namespace filesystem;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+
+use stack\filesystem\Document;
+use stack\filesystem\DocumentAccess;
+use stack\filesystem\Security;
+use stack\filesystem\Security_Priviledge;
 
 /**
  * Facade for the filesystem
@@ -32,6 +37,9 @@ class Filesystem implements DocumentAccess {
      */
     public function __construct(DocumentAccess $access) {
         $this->access = $access;
+        // all rights by default
+        // subject to change, don't rely
+        $this->pushSecurity(new \stack\filesystem\security\PriviledgedSecurity());
     }
 
     /**
@@ -86,10 +94,16 @@ class Filesystem implements DocumentAccess {
      */
     public function deleteDocument($document) {
         // check permission
-        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::WRITE)) {
+        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::DELETE)) {
             $path = $document->getPath();
-            throw new Exception_PermissionDenied("WRITE (w) permission to document at path '$path' was denied.");
+            throw new Exception_PermissionDenied("DELETE (d) permission to document at path '$path' was denied.");
         }
         return $this->access->deleteDocument($document);
     }
+
+    public function createDocument($path, $owner) {
+        $document = new \stack\filesystem\Document($this->access, $path, $owner);
+        $this->writeDocument($document);
+        return $document;
+   }
 }

@@ -17,19 +17,19 @@ namespace stack\filesystem;
 
 date_default_timezone_set('Europe/Berlin');
 
-define('STOS_TEST_ROOT', __DIR__);
+define('STACK_TEST_ROOT', __DIR__);
 
 // initialize lean
 require '../external/lean/lean/init.php';
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
-$autoload->register('stack', STOS_TEST_ROOT . '/../lib');
-$autoload->register('sotest', STOS_TEST_ROOT);
+$autoload->register('stack', STACK_TEST_ROOT . '/../stack/lib');
+$autoload->register('sotest', STACK_TEST_ROOT);
 
 
-require_once STOS_TEST_ROOT . '/../external/PHP-on-Couch/lib/couch.php';
-require_once STOS_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchClient.php';
-require_once STOS_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
+require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couch.php';
+require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchClient.php';
+require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
 
 class StackOSTest extends \PHPUnit_Framework_TestCase {
     private $manager;

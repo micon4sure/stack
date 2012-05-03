@@ -35,7 +35,7 @@ class Document {
     /**
      * @var Document_Meta
      */
-    private $documentMeta;
+    private $meta;
 
     /**
      * @var \stack\filesystem\module\BaseModule
@@ -50,7 +50,7 @@ class Document {
      */
     public function __construct(DocumentManager $manager, $path, $owner, $revision = null) {
         $this->manager = $manager;
-        $this->documentMeta = new Document_Meta($this, $path, $owner, $revision);
+        $this->meta = new Document_Meta($this, $path, $owner, $revision);
     }
 
     /**
@@ -82,11 +82,18 @@ class Document {
     }
 
     /**
+     * Delete the document. No seriously. I mean it. Do it. Delete the document!
+     */
+    public function delete() {
+        $this->manager->deleteDocument($this);
+    }
+
+    /**
      * meta
      * @return string
      */
     public function getPath() {
-        return $this->documentMeta->getPath();
+        return $this->meta->getPath();
     }
 
     /**
@@ -94,7 +101,7 @@ class Document {
      * @return null|string
      */
     public function getRevision() {
-        return $this->documentMeta->getRevision();
+        return $this->meta->getRevision();
     }
 
     /**
@@ -102,7 +109,14 @@ class Document {
      * @return string
      */
     public function getOwner() {
-        return $this->documentMeta->getOwner();
+        return $this->meta->getOwner();
+    }
+
+    /**
+     * @param string $owner
+     */
+    public function setOwner($owner) {
+        $this->owner = $owner;
     }
 
     /**
@@ -110,7 +124,11 @@ class Document {
      * @param security\Permission $permission
      */
     public function addPermission(\stack\filesystem\security\Permission $permission) {
-        $this->documentMeta->addPermission($permission);
+        $this->meta->addPermission($permission);
+    }
+
+    public function setRevision($revision) {
+        $this->meta->setRevision($revision);
     }
 
     /**
@@ -118,7 +136,7 @@ class Document {
      * @return array
      */
     public function getPermissions() {
-        return $this->documentMeta->getPermissions();
+        return $this->meta->getPermissions();
     }
 }
 
@@ -176,6 +194,13 @@ class Document_Meta {
      */
     public function getPath() {
         return $this->path;
+    }
+
+    /**
+     * @param $revision
+     */
+    public function setRevision($revision) {
+        $this->revision = $revision;
     }
 
     /**
