@@ -3,7 +3,7 @@ namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -25,9 +25,9 @@ const ROOT_USER_PATH_USERS = '/root/users';
 const ROOT_USER_PATH_USERS_ROOT = '/root/users/root';
 
 /**
- * Interface to the Document system, including Modules
+ * Interface to the File system, including Modules
  */
-class DocumentManager implements DocumentAccess {
+class FileManager implements FileAccess {
     /**
      * @var \couchClient
      */
@@ -99,43 +99,43 @@ class DocumentManager implements DocumentAccess {
      * Lazy adapter loader.
      * Deriving classes are encouraged to overwrite this and use the protected $adapter variable if doing so
      *
-     * @return Adapter_Document
+     * @return Adapter_File
      */
     protected function getAdapter() {
-        return $this->adapter ?: $this->adapter = new Adapter_Document($this);
+        return $this->adapter ?: $this->adapter = new Adapter_File($this);
     }
 
     /**
      * @param string $path
-     * @return Document
-     * @throws Exception_DocumentNotFound
+     * @return File
+     * @throws Exception_FileNotFound
      */
-    public function readDocument($path) {
+    public function readFile($path) {
         try {
             $doc = $this->couchClient->getDoc("stack:/$path");
         } catch(\couchNotFoundException $e) {
-            throw new Exception_DocumentNotFound("Document at path '$path' could not be found", null, $e);
+            throw new Exception_FileNotFound("File at path '$path' could not be found", null, $e);
         }
         return $this->getAdapter()->fromDatabase($doc);
     }
 
     /**
-     * @param Document $document
+     * @param File $file
      */
-    public function writeDocument($document) {
-        // write the document to the file system
-        // set revision to document instance
-        $doc = $this->getAdapter()->toDatabase($document);
+    public function writeFile($file) {
+        // write the file to the file system
+        // set revision to file instance
+        $doc = $this->getAdapter()->toDatabase($file);
         $response = $this->couchClient->storeDoc($doc);
-        $document->setRevision($response->rev);
+        $file->setRevision($response->rev);
         return $doc;
     }
 
     /**
-     * @param Document $document
+     * @param File $file
      */
-    public function deleteDocument($document) {
-        $this->couchClient->deleteDoc($this->adapter->toDatabase($document));
+    public function deleteFile($file) {
+        $this->couchClient->deleteDoc($this->adapter->toDatabase($file));
     }
 
     /**
@@ -151,12 +151,12 @@ class DocumentManager implements DocumentAccess {
             ROOT_USER_PATH_GROUPS
         );
         foreach ($files as $path) {
-            $document = new Document($this, $path, ROOT_UNAME);
-            $this->writeDocument($document);
+            $file = new File($this, $path, ROOT_UNAME);
+            $this->writeFile($file);
         }
-        $document = new Document($this, ROOT_USER_PATH_USERS_ROOT, ROOT_UNAME);
-        $document->setModule(new \stack\filesystem\module\UserModule(ROOT_UNAME, ROOT_USER_PATH_HOME));
-        $this->writeDocument($document);
+        $file = new File($this, ROOT_USER_PATH_USERS_ROOT, ROOT_UNAME);
+        $file->setModule(new \stack\filesystem\module\User(ROOT_UNAME, ROOT_USER_PATH_HOME));
+        $this->writeFile($file);
     }
 
     /**

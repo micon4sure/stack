@@ -18,23 +18,23 @@ namespace stack\filesystem;
 class SecurityTest extends StackOSTest {
     public function testPriviledged() {
         $security = new \stack\filesystem\security\PriviledgedSecurity();
-        $check = $security->checkDocumentPermission(new SecurityTest_Mock_Document(), \stack\filesystem\Security_Priviledge::READ);
+        $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\filesystem\Security_Priviledge::READ);
         $this->assertTrue($check);
     }
 
     public function testUnpriviledged() {
         $security = new \stack\filesystem\security\UnpriviledgedSecurity();
-        $check = $security->checkDocumentPermission(new SecurityTest_Mock_Document(), \stack\filesystem\Security_Priviledge::READ);
+        $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\filesystem\Security_Priviledge::READ);
         $this->assertFalse($check);
     }
 }
 
-class SecurityTest_Mock_UserModule extends \stack\filesystem\module\UserModule {
+class SecurityTest_Mock_User extends \stack\filesystem\module\User {
     public function __construct() {
         // pass
     }
 }
-class SecurityTest_Mock_Document extends \stack\filesystem\Document {
+class SecurityTest_Mock_File extends \stack\filesystem\File {
     public function __construct() {
         // pass
     }

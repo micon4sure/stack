@@ -35,19 +35,19 @@ class StackOSTest extends \PHPUnit_Framework_TestCase {
     private $manager;
 
     public function setUp() {
-        $this->manager = new \stack\filesystem\DocumentManager('http://root:root@127.0.0.1:5984', 'stack');
+        $this->manager = new \stack\filesystem\FileManager('http://root:root@127.0.0.1:5984', 'stack');
         $this->getManager()->destroy();
         // user, group, plain factory
-        $this->getManager()->registerModule('\stack\filesystem\module\UserModule');
-        $this->getManager()->registerModule('\stack\filesystem\module\GroupModule');
-        $this->manager->registerModuleFactory(\stack\filesystem\module\PlainModule::NAME, function($data) {
-            return new \stack\filesystem\module\PlainModule($data);
+        $this->getManager()->registerModule('\stack\filesystem\module\User');
+        $this->getManager()->registerModule('\stack\filesystem\module\Group');
+        $this->manager->registerModuleFactory(\stack\filesystem\module\Plain::NAME, function($data) {
+            return new \stack\filesystem\module\Plain($data);
         });
         $this->getManager()->init();
     }
 
     /**
-     * @return \stack\filesystem\DocumentManager
+     * @return \stack\filesystem\FileManager
      */
     protected function getManager() {
         return $this->manager;

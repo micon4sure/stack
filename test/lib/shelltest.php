@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem\module;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,11 +15,19 @@ namespace stack\filesystem\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class PlainModule extends BaseModule {
-
-    const NAME = 'stack.plain';
-
-    protected function export($data) {
-        return $data;
+class ShellTest extends \stack\filesystem\StackOSTest {
+    /**
+     * @expectedException \stack\filesystem\Exception_NeedAccess
+     */
+    public function testNeedAccess() {
+        Shell::instance();
+    }
+    public function testTravelling() {
+        $traveler = Shell::instance(new Filesystem($this->getManager()));
+        $traveler->goto(ROOT_USER_PATH_USERS_ROOT);
+        $this->assertEquals(
+            ROOT_USER_PATH_USERS_ROOT,
+            $traveler->getPath()
+        );
     }
 }

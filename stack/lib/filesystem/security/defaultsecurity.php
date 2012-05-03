@@ -3,7 +3,7 @@ namespace stack\filesystem\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -17,34 +17,34 @@ namespace stack\filesystem\security;
 
 class DefaultSecurity implements \stack\filesystem\Security {
     /**
-     * @var \stack\filesystem\module\UserModule
+     * @var \stack\filesystem\module\User
      */
     private $user;
 
-    public function __construct(\stack\filesystem\module\UserModule $user) {
+    public function __construct(\stack\filesystem\module\User $user) {
         $this->user = $user;
     }
 
-    /** Check if a user has permission to access a document in ways of $permission (r/w/x)
+    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
-     * @param Document $document
+     * @param File $file
      * @param string   $priviledge
      *
      * @return bool
      */
-    public function checkDocumentPermission(\stack\filesystem\Document $document, $priviledge) {
+    public function checkFilePermission(\stack\filesystem\File $file, $priviledge) {
         // grant uber all priviledges
         if ($this->user->isUber()) {
             return true;
         }
 
         // grant owner all priviledges except execute
-        if ($document->getOwner() == $this->user->getUname() && $priviledge != \stack\filesystem\Security_Priviledge::EXECUTE) {
+        if ($file->getOwner() == $this->user->getUname() && $priviledge != \stack\filesystem\Security_Priviledge::EXECUTE) {
             return true;
         }
 
         // check individual user and group permissions
-        foreach ($document->getPermissions() as $permission) {
+        foreach ($file->getPermissions() as $permission) {
             // check priviledge name
             if ($permission->getPriviledge() != $priviledge) {
                 continue;

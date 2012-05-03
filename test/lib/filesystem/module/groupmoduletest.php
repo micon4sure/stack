@@ -15,15 +15,15 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class GroupModuleTest extends StackOSTest {
+class GroupTest extends StackOSTest {
     public function testNamechange() {
         $gname = 'foo';
         $path = '/bar';
         // check for plain set and get
-        $group = new module\GroupModule($gname);
+        $group = new module\Group($gname);
         // save in a document, read again, check for correct gname
         $this->assertEquals($gname, $group->getGname());
-        $document = new Document($this->getManager(), $path, $group->getGname());
+        $document = new File($this->getManager(), $path, $group->getGname());
         $document->setModule($group);
         $this->assertEquals(
             $gname,
@@ -32,7 +32,7 @@ class GroupModuleTest extends StackOSTest {
         $document->save();
 
         // reread document, check gname
-        $document = $this->getManager()->readDocument($path);
+        $document = $this->getManager()->readFile($path);
         $this->assertEquals(
             $gname,
             $document->getModule()->getGname()
@@ -40,11 +40,11 @@ class GroupModuleTest extends StackOSTest {
 
         // again, with new uname
         $new = 'qux';
-        $document = $this->getManager()->readDocument($path);
+        $document = $this->getManager()->readFile($path);
         $document->getModule()->setGname($new);
         $document->save();
         // reread document, check new
-        $document = $this->getManager()->readDocument($path);
+        $document = $this->getManager()->readFile($path);
         $this->assertEquals(
             $new,
             $document->getModule()->getGname()

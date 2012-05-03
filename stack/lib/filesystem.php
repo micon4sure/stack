@@ -3,7 +3,7 @@ namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -15,17 +15,17 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-use stack\filesystem\Document;
-use stack\filesystem\DocumentAccess;
+use stack\filesystem\File;
+use stack\filesystem\FileAccess;
 use stack\filesystem\Security;
 use stack\filesystem\Security_Priviledge;
 
 /**
  * Facade for the filesystem
  */
-class Filesystem implements DocumentAccess {
+class Filesystem implements FileAccess {
     /**
-     * @var DocumentAccess
+     * @var FileAccess
      */
     private $access;
     /**
@@ -33,13 +33,10 @@ class Filesystem implements DocumentAccess {
      */
     private $securityStack = array();
     /**
-     * @param DocumentAccess $access
+     * @param FileAccess $access
      */
-    public function __construct(DocumentAccess $access) {
+    public function __construct(FileAccess $access) {
         $this->access = $access;
-        // all rights by default
-        // subject to change, don't rely
-        $this->pushSecurity(new \stack\filesystem\security\PriviledgedSecurity());
     }
 
     /**
@@ -64,46 +61,46 @@ class Filesystem implements DocumentAccess {
     /**
      * @param string $path
      * @return \stdClass
-     * @throws Exception_DocumentNotFound
+     * @throws Exception_FileNotFound
      * @throws Exception_PermissionDenied
      */
-    public function readDocument($path) {
-        $document = $this->access->readDocument($path);
-        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::READ)) {
-            throw new Exception_PermissionDenied("READ (r) permission to document at path '$path' was denied.");
+    public function readFile($path) {
+        $file = $this->access->readFile($path);
+        if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::READ)) {
+            throw new Exception_PermissionDenied("READ (r) permission to file at path '$path' was denied.");
         }
-        return $document;
+        return $file;
     }
 
     /**
-     * @param Document $document
+     * @param File $file
      */
-    public function writeDocument($document) {
+    public function writeFile($file) {
         // check permission
-        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::WRITE)) {
-            $path = $document->getPath();
-            throw new Exception_PermissionDenied("WRITE (w) permission to document at path '$path' was denied.");
+        if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::WRITE)) {
+            $path = $file->getPath();
+            throw new Exception_PermissionDenied("WRITE (w) permission to file at path '$path' was denied.");
         }
-        $this->access->writeDocument($document);
-        return $document;
+        $this->access->writeFile($file);
+        return $file;
     }
 
     /**
-     * @param Document $document
+     * @param File $file
      * @return void
      */
-    public function deleteDocument($document) {
+    public function deleteFile($file) {
         // check permission
-        if(!$this->currentSecurity()->checkDocumentPermission($document, Security_Priviledge::DELETE)) {
-            $path = $document->getPath();
-            throw new Exception_PermissionDenied("DELETE (d) permission to document at path '$path' was denied.");
+        if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::DELETE)) {
+            $path = $file->getPath();
+            throw new Exception_PermissionDenied("DELETE (d) permission to file at path '$path' was denied.");
         }
-        return $this->access->deleteDocument($document);
+        return $this->access->deleteFile($file);
     }
 
-    public function createDocument($path, $owner) {
-        $document = new \stack\filesystem\Document($this->access, $path, $owner);
-        $this->writeDocument($document);
-        return $document;
+    public function createFile($path, $owner) {
+        $file = new \stack\filesystem\File($this->access, $path, $owner);
+        $this->writeFile($file);
+        return $file;
    }
 }

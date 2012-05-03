@@ -3,7 +3,7 @@ namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -26,9 +26,9 @@ class Exception_Couch extends Exception {
 }
 
 /**
- * A document could not be found
+ * A file could not be found
  */
-class Exception_DocumentNotFound extends Exception_Couch {
+class Exception_FileNotFound extends Exception_Couch {
 }
 
 /**
@@ -38,19 +38,19 @@ class Exception_ModuleNotFound extends Exception_Couch {
 }
 
 /**
- * A database document had a module name in meta but no data under module
+ * A database file had a module name in meta but no data under module
  */
 class Exception_ModuleDataNotFound extends Exception_Couch {
 }
 
 /**
- * A module in a document was not of the expected type
+ * A module in a file was not of the expected type
  */
 class Exception_UnexpectedModuleType extends Exception_Couch {
 }
 
 /**
- * A document could not be found
+ * A file could not be found
  */
 class Exception_ModuleConflict extends Exception_Couch {
     public function __construct($message, $code = self::MODULE_WITH_NAME_ALREADY_REGISTERED, $previous = null) {
@@ -87,4 +87,8 @@ class Exception_InvalidModule extends \Exception {
 }
 
 class Exception_PermissionDenied extends Exception {
+}
+
+class Exception_NeedAccess extends Exception {
+
 }

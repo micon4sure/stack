@@ -3,7 +3,7 @@ namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -18,22 +18,22 @@ namespace stack\filesystem;
 /**
  * Indicates that a class knows how to convert objects of its type from and to json
  */
-interface Document_JSONizable {
+interface File_JSONizable {
     public function fromJSON();
     public function toJSON();
 }
 
 /**
- * Abstraction of a document in the file system
+ * Abstraction of a file in the file system
  */
-class Document {
+class File {
     /**
-     * @var DocumentAccess
+     * @var FileAccess
      */
     private $manager;
 
     /**
-     * @var Document_Meta
+     * @var File_Meta
      */
     private $meta;
 
@@ -43,18 +43,18 @@ class Document {
     private $module;
 
     /**
-     * @param DocumentAccess $manager
+     * @param FileAccess $manager
      * @param string $path
      * @param string $owner
      * @param string $revision
      */
-    public function __construct(DocumentManager $manager, $path, $owner, $revision = null) {
+    public function __construct(FileManager $manager, $path, $owner, $revision = null) {
         $this->manager = $manager;
-        $this->meta = new Document_Meta($this, $path, $owner, $revision);
+        $this->meta = new File_Meta($this, $path, $owner, $revision);
     }
 
     /**
-     * @return DocumentManager
+     * @return FileManager
      */
     protected function getManager() {
         return $this->manager;
@@ -75,17 +75,17 @@ class Document {
     }
 
     /**
-     * Save the document in the database
+     * Save the file in the database
      */
     public function save() {
-        $this->manager->writeDocument($this);
+        $this->manager->writeFile($this);
     }
 
     /**
-     * Delete the document. No seriously. I mean it. Do it. Delete the document!
+     * Delete the file. No seriously. I mean it. Do it. Delete the file!
      */
     public function delete() {
-        $this->manager->deleteDocument($this);
+        $this->manager->deleteFile($this);
     }
 
     /**
@@ -141,7 +141,7 @@ class Document {
 }
 
 /**
- * Meta information about the document
+ * Meta information about the file
  * - owner
  * - path
  * - revision
@@ -149,11 +149,11 @@ class Document {
  * - creationTime
  * - manipulationTime
  */
-class Document_Meta {
+class File_Meta {
     /**
-     * @var Document
+     * @var File
      */
-    private $document;
+    private $file;
     /**
      * @var string
      */
@@ -172,14 +172,14 @@ class Document_Meta {
     private $permissions = array();
 
     /**
-     * @param Document $document
+     * @param File $file
      * @param string $path
      * @param string $owner
      * @param null $revision
      */
-    public function __construct(Document $document, $path, $owner, $revision = null) {
+    public function __construct(File $file, $path, $owner, $revision = null) {
         $this->revision = $revision;
-        $this->document = $document;
+        $this->file = $file;
         $this->setPath($path);
         $this->setOwner($owner);
     }
@@ -204,7 +204,7 @@ class Document_Meta {
     }
 
     /**
-     * Return the revision of the document or null if it has not been saved yet
+     * Return the revision of the file or null if it has not been saved yet
      * @return null|string
      */
     public function getRevision() {

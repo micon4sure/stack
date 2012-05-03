@@ -15,10 +15,10 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class UserModuleTest extends StackOSTest {
-    public function testUserModule() {
+class UserTest extends StackOSTest {
+    public function testUser() {
         $home = \stack\filesystem\ROOT_PATH_HOME . '/foo';
-        $user = new module\UserModule('foo', $home);
+        $user = new module\User('foo', $home);
         $this->assertEquals('foo', $user->getUname());
         $this->assertEquals($home, $user->getHome());
     }
@@ -26,16 +26,16 @@ class UserModuleTest extends StackOSTest {
     public function testUber() {
         // check for plain set and get
         $home = \stack\filesystem\ROOT_PATH_HOME . '/foo';
-        $user = new module\UserModule('foo', $home);
+        $user = new module\User('foo', $home);
         $user->setUber(true);
 
         // save in a document, read again, check for uber
         $this->assertEquals(true, $user->isUber());
-        $document = new \stack\filesystem\Document($this->getManager(), '/bar', $user->getUname());
+        $document = new \stack\filesystem\File($this->getManager(), '/bar', $user->getUname());
         $document->setModule($user);
         $document->save();
 
-        $document = $this->getManager()->readDocument('/bar');
+        $document = $this->getManager()->readFile('/bar');
         \lean\util\Dump::deep($document->getModule());
         $this->assertTrue($document->getModule()->isUber());
     }

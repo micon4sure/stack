@@ -15,17 +15,17 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DocumentTest extends StackOSTest {
+class FileTest extends StackOSTest {
     /**
-     * Test Document's save method
+     * Test File's save method
      */
     public function testSave() {
         $manager = $this->getManager();
-        $document = new \stack\filesystem\Document($manager, '/foo', \stack\filesystem\ROOT_UNAME);
+        $document = new \stack\filesystem\File($manager, '/foo', \stack\filesystem\ROOT_UNAME);
         $document->save();
 
         // assert that the written document matches the read
-        $this->assertEquals($document->getOwner(), $manager->readDocument('/foo')->getOwner());
-        $this->assertEquals($document->getPath(), $manager->readDocument('/foo')->getPath());
+        $this->assertEquals($document->getOwner(), $manager->readFile('/foo')->getOwner());
+        $this->assertEquals($document->getPath(), $manager->readFile('/foo')->getPath());
     }
 }

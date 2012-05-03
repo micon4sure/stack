@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack\filesystem\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,30 +15,32 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface Security {
-    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
-     *
-     * @param \stack\filesystem\module\User $user
-     * @param \stack\filesystem\File          $file
-     * @param string                     $priviledge
-     *
-     * @return bool
-     */
-    public function checkFilePermission(\stack\filesystem\File $file, $priviledge);
-}
+class Group extends \stack\filesystem\module\BaseModule {
+    const NAME = 'stack.group';
 
-abstract class Security_Priviledge {
-    /** Read permission
-     */
-    const READ = 'r';
-    /** Write permission
-     */
-    const WRITE = 'w';
-    /** Execute permission: allows to execute applications enclosed in a file
-     * Allows transversion into directory (TODO unimplemented)
-     */
-    const EXECUTE = 'x';
-    /** Delete permission
-     */
-    const DELETE = 'd';
+    private $gname;
+
+    public function __construct($gname) {
+        $this->gname = $gname;
+    }
+
+    public function getGname() {
+        return $this->gname;
+    }
+    public function setGname($gname) {
+        $this->gname = $gname;
+    }
+    protected function export($data) {
+        return (object)array('gname' => $this->gname);
+    }
+
+    public static function create($data) {
+        if(!isset($data->gname))
+            throw new \InvalidArgumentException('Group name missing.');
+        return new static($data->gname);
+    }
+
+    public function __toString() {
+        return $this->getGname();
+    }
 }

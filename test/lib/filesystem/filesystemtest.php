@@ -19,32 +19,32 @@ use \stack\filesystem\ROOT_UNAME;
 
 class FileSystemTest extends StackOSTest {
     /**
-     * Test read* write* and deleteDocument
+     * Test read* write* and deleteFile
      */
     public function testReadWriteDelete() {
         $system = new \stack\Filesystem($this->getManager());
 
         // write the document
-        $document = $system->createDocument('/foo', ROOT_UNAME);
+        $document = $system->createFile('/foo', ROOT_UNAME);
         $document->setOwner('test');
         $document->save();
 
         // assert that the written document matches the read
         $this->assertEquals(
             $document->getOwner(),
-            $system->readDocument('/foo')->getOwner()
+            $system->readFile('/foo')->getOwner()
         );
         $this->assertEquals(
             $document->getPath(),
-            $system->readDocument('/foo')->getPath()
+            $system->readFile('/foo')->getPath()
         );
 
         // delete file and assert that it's gone
         $document->delete();
         try {
-            $system->readDocument('/foo');
+            $system->readFile('/foo');
             $this->fail();
-        } catch(\stack\filesystem\Exception_DocumentNotFound $e) {
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
             // pass
         }
     }
