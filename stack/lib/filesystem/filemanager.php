@@ -15,15 +15,6 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-const ROOT_UNAME = 'root';
-const ROOT_PATH = '/';
-const ROOT_PATH_HOME = '/home';
-const ROOT_USER_PATH_HOME = '/root';
-const ROOT_USER_PATH_SYSTEM = '/root/system';
-const ROOT_USER_PATH_GROUPS = '/root/groups';
-const ROOT_USER_PATH_USERS = '/root/users';
-const ROOT_USER_PATH_USERS_ROOT = '/root/users/root';
-
 /**
  * Interface to the File system, including Modules
  */
@@ -34,7 +25,7 @@ class FileManager implements FileAccess {
     private $couchClient;
 
     /**
-     * @var \stack\filesystem\module\Adapter
+     * @var \stack\module\Adapter
      */
     protected $adapter;
 
@@ -89,7 +80,7 @@ class FileManager implements FileAccess {
             throw new Exception_ModuleNotFound();
         $module = call_user_func($this->moduleFactories[$name], $data);
         // check for validity
-        if(!$module instanceof \stack\filesystem\module\BaseModule) {
+        if(!$module instanceof \stack\module\BaseModule) {
             throw new \stack\filesystem\Exception_InvalidModule($name, $module, $data);
         }
         return $module;
@@ -144,18 +135,18 @@ class FileManager implements FileAccess {
     public function init() {
         $this->couchClient->createDatabase();
         $files = array(
-            ROOT_PATH,
-            ROOT_USER_PATH_SYSTEM,
-            ROOT_USER_PATH_HOME,
-            ROOT_USER_PATH_USERS,
-            ROOT_USER_PATH_GROUPS
+            \stack\Root::ROOT_PATH,
+            \stack\Root::ROOT_USER_PATH_SYSTEM,
+            \stack\Root::ROOT_USER_PATH_HOME,
+            \stack\Root::ROOT_USER_PATH_USERS,
+            \stack\Root::ROOT_USER_PATH_GROUPS
         );
         foreach ($files as $path) {
-            $file = new File($this, $path, ROOT_UNAME);
+            $file = new File($this, $path, \stack\Root::ROOT_UNAME);
             $this->writeFile($file);
         }
-        $file = new File($this, ROOT_USER_PATH_USERS_ROOT, ROOT_UNAME);
-        $file->setModule(new \stack\filesystem\module\User(ROOT_UNAME, ROOT_USER_PATH_HOME));
+        $file = new File($this, \stack\Root::ROOT_USER_PATH_USERS_ROOT, \stack\Root::ROOT_UNAME);
+        $file->setModule(new \stack\module\User(\stack\Root::ROOT_UNAME, \stack\Root::ROOT_USER_PATH_HOME));
         $this->writeFile($file);
     }
 

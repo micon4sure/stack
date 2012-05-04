@@ -20,28 +20,28 @@ class ModuleTest extends StackOSTest {
         $manager = $this->getManager();
 
         // write the document
-        $document = new \stack\filesystem\File($manager, \stack\filesystem\ROOT_USER_PATH_USERS . '/foo', \stack\filesystem\ROOT_UNAME);
-        $module = new \stack\filesystem\module\User('foo', \stack\filesystem\ROOT_UNAME, \stack\filesystem\ROOT_PATH_HOME . '/foo');
+        $document = new \stack\filesystem\File($manager, \stack\Root::ROOT_USER_PATH_USERS . '/foo', \stack\Root::ROOT_UNAME);
+        $module = new \stack\module\User('foo', \stack\Root::ROOT_UNAME, \stack\Root::ROOT_PATH_HOME . '/foo');
         $document->setModule($manager->createModule('stack.user', $module));
         $manager->writeFile($document);
 
-        $module = $manager->readFile(\stack\filesystem\ROOT_USER_PATH_USERS . '/foo')->getModule();
-        $this->assertTrue($module instanceof \stack\filesystem\module\User);
+        $module = $manager->readFile(\stack\Root::ROOT_USER_PATH_USERS . '/foo')->getModule();
+        $this->assertTrue($module instanceof \stack\module\User);
     }
 
     public function testData() {
         $manager = $this->getManager();
         // create the document
-        $document = new \stack\filesystem\File($manager, \stack\filesystem\ROOT_USER_PATH_HOME . '/plain', \stack\filesystem\ROOT_UNAME);
+        $document = new \stack\filesystem\File($manager, \stack\Root::ROOT_USER_PATH_HOME . '/plain', \stack\Root::ROOT_UNAME);
         // create module, set data to it  and place it in document
-        $module = $manager->createModule('stack.plain', new \stack\filesystem\module\Plain(null));
+        $module = $manager->createModule('stack.plain', new \stack\module\Plain(null));
         $module->setData((object)array('foo'=>'bar'));
         $document->setModule($module);
         // write document
         $manager->writeFile($document);
         //read document
-        $doc = $manager->readFile(\stack\filesystem\ROOT_USER_PATH_HOME . '/plain');
-        $this->assertTrue($doc->getModule() instanceof \stack\filesystem\module\Plain);
+        $doc = $manager->readFile(\stack\Root::ROOT_USER_PATH_HOME . '/plain');
+        $this->assertTrue($doc->getModule() instanceof \stack\module\Plain);
         $this->assertEquals('bar', $document->getModule()->getData()->foo);
     }
 

@@ -23,9 +23,10 @@ class FileSystemTest extends StackOSTest {
      */
     public function testReadWriteDelete() {
         $system = new \stack\Filesystem($this->getManager());
+        $system->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         // write the document
-        $document = $system->createFile('/foo', ROOT_UNAME);
+        $document = $system->createFile('/foo', \stack\Root::ROOT_UNAME);
         $document->setOwner('test');
         $document->save();
 

@@ -38,7 +38,7 @@ class File {
     private $meta;
 
     /**
-     * @var \stack\filesystem\module\BaseModule
+     * @var \stack\module\BaseModule
      */
     private $module;
 
@@ -63,7 +63,7 @@ class File {
     /**
      * @param module\BaseModule $module
      */
-    public function setModule(\stack\filesystem\module\BaseModule $module) {
+    public function setModule(\stack\module\BaseModule $module) {
         $this->module = $module;
     }
 
@@ -123,7 +123,7 @@ class File {
      * meta
      * @param security\Permission $permission
      */
-    public function addPermission(\stack\filesystem\security\Permission $permission) {
+    public function addPermission(\stack\security\Permission $permission) {
         $this->meta->addPermission($permission);
     }
 
@@ -228,7 +228,7 @@ class File_Meta {
     public function getPermissions() {
         return $this->permissions;
     }
-    public function addPermission(\stack\filesystem\security\Permission $permission) {
+    public function addPermission(\stack\security\Permission $permission) {
         $this->permissions[] = $permission;
     }
 }

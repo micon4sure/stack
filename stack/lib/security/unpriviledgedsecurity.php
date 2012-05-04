@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem\module;
+namespace stack\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,11 +15,16 @@ namespace stack\filesystem\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Plain extends BaseModule {
-
-    const NAME = 'stack.plain';
-
-    protected function export($data) {
-        return $data;
+class UnpriviledgedSecurity implements \stack\Security {
+    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
+     *
+     * @param \stack\module\User $user
+     * @param \stack\filesystem\File          $file
+     * @param string                     $priviledge
+     *
+     * @return bool
+     */
+    public function checkFilePermission(\stack\filesystem\File $file, $priviledge) {
+        return false;
     }
 }

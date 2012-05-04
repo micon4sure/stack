@@ -38,10 +38,19 @@ class Shell {
         $this->filesystem = $filesystem;
     }
 
+    public function login($uname, $password) {
+        try {
+            $ufile = $this->filesystem->readFile(Root::ROOT_USER_PATH_USERS . '/' . $uname);
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
+        }
+
+    }
+
     /**
      * Create an instance of Traveler with the passed $access or self::$defaultAccess.
      * Throw exception if neither are set.
-     * Take precedent to $access, overwrite self::$defaultAccess with it if set.
+     * Take precedent to $access, overwrite defaultAccess with it if set.
      *
      * @static
      * @param null|\stack\Filesystem $filesystem
@@ -61,10 +70,19 @@ class Shell {
     /**
      * Classic change dir
      * @param string $path
-     * @return
+     * @return \stack\filesystem\File
      */
     public function cd($path) {
-        $chunks = explode('/', $path);
+        $chunks = array_filter(explode('/', $path));
+        // attention: recycling path var
+        $path = '';
+        foreach($chunks as $chunk) {
+            $path .= '/' . $chunk;
+            \lean\util\Dump::flat($chunks);
+            $document = $this->filesystem->readFile($path);
+            \lean\util\Dump::flat($document);
+        }
+
         return $path;
     }
 

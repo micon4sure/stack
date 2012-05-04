@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem\security;
+namespace stack\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,13 +15,13 @@ namespace stack\filesystem\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DefaultSecurity implements \stack\filesystem\Security {
+class DefaultSecurity implements \stack\Security {
     /**
-     * @var \stack\filesystem\module\User
+     * @var \stack\module\User
      */
     private $user;
 
-    public function __construct(\stack\filesystem\module\User $user) {
+    public function __construct(\stack\module\User $user) {
         $this->user = $user;
     }
 
@@ -39,7 +39,7 @@ class DefaultSecurity implements \stack\filesystem\Security {
         }
 
         // grant owner all priviledges except execute
-        if ($file->getOwner() == $this->user->getUname() && $priviledge != \stack\filesystem\Security_Priviledge::EXECUTE) {
+        if ($file->getOwner() == $this->user->getUname() && $priviledge != \stack\Security_Priviledge::EXECUTE) {
             return true;
         }
 
@@ -50,12 +50,12 @@ class DefaultSecurity implements \stack\filesystem\Security {
                 continue;
             }
             // check if user has a group permission
-            if ($permission->getEntity() == \stack\filesystem\security\Permission_Group::ENTITY_ID) {
+            if ($permission->getEntity() == \stack\security\Permission_Group::ENTITY_ID) {
                 if (in_array($permission->getHolder(), $this->user->getGroups()))
                     return true;
             }
             // check if user has an explicit permission
-            else if ($permission->getEntity() == \stack\filesystem\security\Permission_User::ENTITY_ID) {
+            else if ($permission->getEntity() == \stack\security\Permission_User::ENTITY_ID) {
                 if ($permission->getHolder() == $this->user->getUname())
                     return true;
             }

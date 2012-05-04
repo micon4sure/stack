@@ -54,13 +54,13 @@ class Adapter_File implements Adapter {
 
         // add permissions
         foreach ($doc->meta->permissions as $permission) {
-            if ($permission->entity == \stack\filesystem\security\Permission_User::ENTITY_ID) {
+            if ($permission->entity == \stack\security\Permission_User::ENTITY_ID) {
                 // user
-                $file->addPermission(new \stack\filesystem\security\Permission_User($permission->holder, $permission->priviledge));
+                $file->addPermission(new \stack\security\Permission_User($permission->holder, $permission->priviledge));
             }
-        else if ($permission->entity == \stack\filesystem\security\Permission_Group::ENTITY_ID) {
+        else if ($permission->entity == \stack\security\Permission_Group::ENTITY_ID) {
             // group
-                $file->addPermission(new \stack\filesystem\security\Permission_Group($permission->holder, $permission->priviledge));
+                $file->addPermission(new \stack\security\Permission_Group($permission->holder, $permission->priviledge));
             }
             else
                 throw new Exception('Unknown entity in permission');
@@ -102,7 +102,7 @@ class Adapter_File implements Adapter {
         }
         $doc->meta->owner = $file->getOwner();
         // -- module
-        if ($file->getModule() instanceof \stack\filesystem\module\BaseModule) {
+        if ($file->getModule() instanceof \stack\module\BaseModule) {
             $doc->module = $file->getModule()->getData();
         }
         else {

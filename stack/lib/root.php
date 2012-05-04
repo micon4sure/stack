@@ -1,9 +1,9 @@
 <?php
-namespace stack\filesystem\security;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -15,16 +15,13 @@ namespace stack\filesystem\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class UnpriviledgedSecurity implements \stack\filesystem\Security {
-    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
-     *
-     * @param \stack\filesystem\module\User $user
-     * @param \stack\filesystem\File          $file
-     * @param string                     $priviledge
-     *
-     * @return bool
-     */
-    public function checkFilePermission(\stack\filesystem\File $file, $priviledge) {
-        return false;
-    }
+class Root {
+    const ROOT_UNAME = 'root';
+    const ROOT_PATH = '/';
+    const ROOT_PATH_HOME = '/home';
+    const ROOT_USER_PATH_HOME = '/root';
+    const ROOT_USER_PATH_SYSTEM = '/root/system';
+    const ROOT_USER_PATH_GROUPS = '/root/groups';
+    const ROOT_USER_PATH_USERS = '/root/users';
+    const ROOT_USER_PATH_USERS_ROOT = '/root/users/root';
 }

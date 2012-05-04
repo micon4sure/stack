@@ -92,3 +92,10 @@ class Exception_PermissionDenied extends Exception {
 class Exception_NeedAccess extends Exception {
 
 }
+
+/**
+ * Indicates that access to security was requested while there is none
+ */
+class Exception_NoSecurity extends Exception {
+
+}

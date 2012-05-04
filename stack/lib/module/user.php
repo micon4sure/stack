@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem\module;
+namespace stack\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,7 +15,7 @@ namespace stack\filesystem\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class User extends \stack\filesystem\module\BaseModule {
+class User extends BaseModule {
     const NAME = 'stack.user';
 
     private $uber = false;

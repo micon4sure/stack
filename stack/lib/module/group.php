@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem\module;
+namespace stack\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,39 +15,32 @@ namespace stack\filesystem\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-abstract class BaseModule {
-    protected $data;
+class Group extends BaseModule {
+    const NAME = 'stack.group';
 
-    public function __construct($data = null) {
-        if($data = null)
-            $data = new \stdClass();
-        $this->data = $data;
+    private $gname;
+
+    public function __construct($gname) {
+        $this->gname = $gname;
     }
 
-    /**
-     * final to ensure that name always is in data
-     *
-     * @return mixed
-     */
-    public final function getData() {
-        $data = $this->export($this->data);
-        $data->name = $this->getName();
-        return $data;
+    public function getGname() {
+        return $this->gname;
+    }
+    public function setGname($gname) {
+        $this->gname = $gname;
+    }
+    protected function export($data) {
+        return (object)array('gname' => $this->gname);
     }
 
-    /**
-     * Create JSONizable data
-     *
-     * @abstract
-     * @return \stdClass
-     */
-    protected abstract function export($data);
-
-    public function setData($data) {
-        $this->data = $data;
+    public static function create($data) {
+        if(!isset($data->gname))
+            throw new \InvalidArgumentException('Group name missing.');
+        return new static($data->gname);
     }
 
-    public function getName() {
-        return static::NAME;
+    public function __toString() {
+        return $this->getGname();
     }
 }

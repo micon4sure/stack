@@ -17,19 +17,19 @@ namespace stack\filesystem;
 
 class SecurityTest extends StackOSTest {
     public function testPriviledged() {
-        $security = new \stack\filesystem\security\PriviledgedSecurity();
-        $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\filesystem\Security_Priviledge::READ);
+        $security = new \stack\security\PriviledgedSecurity();
+        $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\security_Priviledge::READ);
         $this->assertTrue($check);
     }
 
     public function testUnpriviledged() {
-        $security = new \stack\filesystem\security\UnpriviledgedSecurity();
-        $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\filesystem\Security_Priviledge::READ);
+        $security = new \stack\security\UnpriviledgedSecurity();
+        $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\security_Priviledge::READ);
         $this->assertFalse($check);
     }
 }
 
-class SecurityTest_Mock_User extends \stack\filesystem\module\User {
+class SecurityTest_Mock_User extends \stack\module\User {
     public function __construct() {
         // pass
     }

@@ -17,16 +17,16 @@ namespace stack\filesystem;
 
 class UserTest extends StackOSTest {
     public function testUser() {
-        $home = \stack\filesystem\ROOT_PATH_HOME . '/foo';
-        $user = new module\User('foo', $home);
+        $home = \stack\Root::ROOT_PATH_HOME . '/foo';
+        $user = new \stack\module\User('foo', $home);
         $this->assertEquals('foo', $user->getUname());
         $this->assertEquals($home, $user->getHome());
     }
 
     public function testUber() {
         // check for plain set and get
-        $home = \stack\filesystem\ROOT_PATH_HOME . '/foo';
-        $user = new module\User('foo', $home);
+        $home = \stack\Root::ROOT_PATH_HOME . '/foo';
+        $user = new \stack\module\User('foo', $home);
         $user->setUber(true);
 
         // save in a document, read again, check for uber

@@ -15,10 +15,11 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// use
 use stack\filesystem\File;
 use stack\filesystem\FileAccess;
-use stack\filesystem\Security;
-use stack\filesystem\Security_Priviledge;
+use stack\security;
+use stack\security_Priviledge;
 
 /**
  * Facade for the filesystem
@@ -55,6 +56,8 @@ class Filesystem implements FileAccess {
      * @return  Security
      */
     protected function currentSecurity() {
+        if(!count($this->securityStack))
+            throw new \stack\filesystem\Exception_NoSecurity('Filesystem needs Security.');
         return end($this->securityStack);
     }
 

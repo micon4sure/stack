@@ -14,20 +14,23 @@ namespace stack\filesystem;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+
+use stack\Security_Priviledge;
+
 class PermissionTests extends StackOSTest {
     /** Test if $uber has access to $file owned by $user
      */
     public function testCheckUber() {
         // create arbitrary user, uber user and document
         $uname = 'user';
-        $path = ROOT_PATH_HOME . '/' . $uname;
-        $user = new \stack\filesystem\module\User($uname, $path);
-        $uber = new \stack\filesystem\module\User('uber', $path);
+        $path = \stack\Root::ROOT_PATH_HOME . '/' . $uname;
+        $user = new \stack\module\User($uname, $path);
+        $uber = new \stack\module\User('uber', $path);
         $uber->setUber(true);
         $document = new File($this->getManager(), $path, $uname);
 
         // check for permission to be true due to user being uber
-        $security = new \stack\filesystem\security\DefaultSecurity($uber);
+        $security = new \stack\security\DefaultSecurity($uber);
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
@@ -39,13 +42,13 @@ class PermissionTests extends StackOSTest {
     public function testCheckOwner() {
         // create arbitrary user and document
         $uname = 'user';
-        $path = ROOT_PATH_HOME . '/' . $uname;
-        $user = new \stack\filesystem\module\User($uname, $path);
+        $path = \stack\Root::ROOT_PATH_HOME . '/' . $uname;
+        $user = new \stack\module\User($uname, $path);
         $document = new File($this->getManager(), $path, $uname);
         //$document->addPermission(new Permi)
 
         // check for permission to be true due to user being uber (except execute)
-        $security = new \stack\filesystem\security\DefaultSecurity($user);
+        $security = new \stack\security\DefaultSecurity($user);
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
@@ -56,14 +59,14 @@ class PermissionTests extends StackOSTest {
         // create arbitrary user and document
         $uname = 'user';
         $gname = 'group';
-        $path = ROOT_USER_PATH_GROUPS . '/' . $gname;
-        $group = new \stack\filesystem\module\Group($gname);
+        $path = \stack\Root::ROOT_USER_PATH_GROUPS . '/' . $gname;
+        $group = new \stack\module\Group($gname);
         // ROOT_UNAME is document owner: prevent owner permission conflicts
-        $document = new File($this->getManager(), $path, ROOT_UNAME);
-        $user = new \stack\filesystem\module\User($uname, $path);
+        $document = new File($this->getManager(), $path, \stack\Root::ROOT_UNAME);
+        $user = new \stack\module\User($uname, $path);
         $user->addToGroup($group);
 
-        $security = new \stack\filesystem\security\DefaultSecurity($user);
+        $security = new \stack\security\DefaultSecurity($user);
         // assert that user can do nothing on the document
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::WRITE));
@@ -71,28 +74,28 @@ class PermissionTests extends StackOSTest {
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read
-        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::READ));
+        $document->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read and write
-        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::WRITE));
+        $document->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read, write and execute
-        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::EXECUTE));
+        $document->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::EXECUTE));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user has all priviledges
-        $document->addPermission(new \stack\filesystem\security\Permission_Group($gname, Security_Priviledge::DELETE));
+        $document->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::DELETE));
         $this->checkAllPriviledges($security, $document);
 
         // save document, retry for all priviledges
@@ -114,12 +117,12 @@ class PermissionTests extends StackOSTest {
     public function testUserPermission() {
         // create arbitrary user and document
         $uname = 'user';
-        $path = ROOT_USER_PATH_USERS . '/' . $uname;
-        $user = new \stack\filesystem\module\User($uname, $path);
+        $path = \stack\Root::ROOT_USER_PATH_USERS . '/' . $uname;
+        $user = new \stack\module\User($uname, $path);
         // ROOT_UNAME is document owner: prevent owner permission conflicts
-        $document = new File($this->getManager(), $path, ROOT_UNAME);
+        $document = new File($this->getManager(), $path, \stack\Root::ROOT_UNAME);
 
-        $security = new \stack\filesystem\security\DefaultSecurity($user);
+        $security = new \stack\security\DefaultSecurity($user);
         // assert that user can do nothing on the document
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::WRITE));
@@ -127,42 +130,33 @@ class PermissionTests extends StackOSTest {
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read
-        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::READ));
+        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read and write
-        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::WRITE));
+        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user can now read, write and execute
-        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::EXECUTE));
+        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::EXECUTE));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
         $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
 
         // assert that user has all permissions
-        $document->addPermission(new \stack\filesystem\security\Permission_User($uname, Security_Priviledge::DELETE));
+        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::DELETE));
         $this->checkAllPriviledges($security, $document);
 
         // save document, retry for all permissions
         $document->save();
         $document = $this->getManager()->readFile($path);
         $this->checkAllPriviledges($security, $document);
-    }
-
-    public function testPopEmptyContext() {
-        try {
-            #$this->fail('Expecting Exception_MissingContext');
-        }
-        catch (\stack\filesystem\Exception_MissingSecurityStrategy $e) {
-            // pass
-        }
     }
 }

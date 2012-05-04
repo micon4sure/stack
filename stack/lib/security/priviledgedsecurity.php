@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem\security;
+namespace stack\security;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,37 +15,16 @@ namespace stack\filesystem\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Permission {
-    private $entity;
-    private $holder;
-    private $priviledge;
-
-    public function __construct($holder, $priviledge, $entity) {
-        $this->holder = $holder;
-        $this->priviledge = $priviledge;
-        $this->entity = $entity;
-    }
-
-    public function getHolder() {
-        return $this->holder;
-    }
-    public function getPriviledge() {
-        return $this->priviledge;
-    }
-    public function getEntity() {
-        return $this->entity;
-    }
-}
-
-class Permission_Group extends Permission {
-    const ENTITY_ID = 'g';
-    public function __construct($holder, $priviledge) {
-        parent::__construct($holder, $priviledge, self::ENTITY_ID);
-    }
-}
-class Permission_User extends Permission {
-    const ENTITY_ID = 'u';
-    public function __construct($holder, $priviledge) {
-        parent::__construct($holder, $priviledge, self::ENTITY_ID);
+class PriviledgedSecurity implements \stack\Security {
+    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
+     *
+     * @param \stack\module\User $user
+     * @param \stack\filesystem\File          $file
+     * @param string                     $priviledge
+     *
+     * @return bool
+     */
+    public function checkFilePermission(\stack\filesystem\File $file, $priviledge) {
+        return true;
     }
 }

@@ -1,9 +1,9 @@
 <?php
-namespace stack\filesystem;
+namespace stack\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -15,17 +15,11 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class FileTest extends StackOSTest {
-    /**
-     * Test File's save method
-     */
-    public function testSave() {
-        $manager = $this->getManager();
-        $document = new \stack\filesystem\File($manager, '/foo', \stack\Root::ROOT_UNAME);
-        $document->save();
+class Plain extends BaseModule {
 
-        // assert that the written document matches the read
-        $this->assertEquals($document->getOwner(), $manager->readFile('/foo')->getOwner());
-        $this->assertEquals($document->getPath(), $manager->readFile('/foo')->getPath());
+    const NAME = 'stack.plain';
+
+    protected function export($data) {
+        return $data;
     }
 }

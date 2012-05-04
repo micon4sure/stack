@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -23,7 +23,7 @@ class GroupTest extends StackOSTest {
         $group = new module\Group($gname);
         // save in a document, read again, check for correct gname
         $this->assertEquals($gname, $group->getGname());
-        $document = new File($this->getManager(), $path, $group->getGname());
+        $document = new \stack\filesystem\File($this->getManager(), $path, $group->getGname());
         $document->setModule($group);
         $this->assertEquals(
             $gname,

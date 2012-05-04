@@ -15,19 +15,38 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class ShellTest extends \stack\filesystem\StackOSTest {
+use \stack\filesystem\ROOT_USER_PATH_USERS_ROOT;
+
+class ShellTestAccess  extends \stack\filesystem\StackOSTest {
     /**
      * @expectedException \stack\filesystem\Exception_NeedAccess
      */
     public function testNeedAccess() {
         Shell::instance();
     }
-    public function testTravelling() {
-        $traveler = Shell::instance(new Filesystem($this->getManager()));
-        $traveler->goto(ROOT_USER_PATH_USERS_ROOT);
+
+}
+
+class ShellTest extends \stack\filesystem\StackOSTest {
+
+    public function setUp() {
+        parent::setUp();
+        $fs = new Filesystem($this->getManager());
+        $fs->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $shell = Shell::instance($fs);
+    }
+
+    public function loginTest() {
+        $shell = Shell::instance();
+        $shell->login(Root::ROOT_UNAME, 'foo');
+    }
+
+    public function testChangeDir() {
+        return;
+        $shell->cd(\stack\Filesystem_Paths::ROOT_USER_PATH_USERS_ROOT);
         $this->assertEquals(
-            ROOT_USER_PATH_USERS_ROOT,
-            $traveler->getPath()
+            \stack\Filesystem_Paths::ROOT_USER_PATH_USERS_ROOT,
+            $shell->getPath()
         );
     }
 }
