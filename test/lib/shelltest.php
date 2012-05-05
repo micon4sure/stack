@@ -40,7 +40,7 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         // save a new user
         $user = new \stack\module\User('test');
         $user->setPassword('foo');
-        Shell::instance()->saveUser($user);
+        Shell::instance()->execute(Root::ROOT_PATH_SYSTEM . '/adduser', $user);
 
         $this->assertTrue(Shell::instance()->login('kos', 'foo'));
     }

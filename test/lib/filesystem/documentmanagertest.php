@@ -27,9 +27,9 @@ class FileManagerTest extends StackOSTest {
         $this->assertTrue($manager->readFile(\stack\Root::ROOT_PATH) instanceof \stack\filesystem\File);
         $this->assertEquals(\stack\Root::ROOT_UNAME, $manager->readFile(\stack\Root::ROOT_PATH)->getOwner());
 
-        $this->assertTrue($manager->readFile(\stack\Root::ROOT_USER_PATH_USERS) instanceof \stack\filesystem\File);
-        $this->assertTrue($manager->readFile(\stack\Root::ROOT_USER_PATH_USERS_ROOT) instanceof \stack\filesystem\File);
-        $this->assertTrue($manager->readFile(\stack\Root::ROOT_USER_PATH_GROUPS) instanceof \stack\filesystem\File);
+        $this->assertTrue($manager->readFile(\stack\Root::ROOT_PATH_USERS) instanceof \stack\filesystem\File);
+        $this->assertTrue($manager->readFile(\stack\Root::ROOT_PATH_USERS_ROOT) instanceof \stack\filesystem\File);
+        $this->assertTrue($manager->readFile(\stack\Root::ROOT_PATH_GROUPS) instanceof \stack\filesystem\File);
         $this->assertTrue($manager->readFile(\stack\Root::ROOT_USER_PATH_HOME) instanceof \stack\filesystem\File);
     }
 

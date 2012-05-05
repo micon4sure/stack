@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,25 +15,17 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface FileAccess {
-    /**
-     * @param string $path
-     * @return \stdClass
-     * @throws Exception_FileNotFound
-     */
-    public function readFile($path);
-    /**
-     * @param File $file
-     * @return void
-     */
-    public function writeFile($file);
-    /**
-     * @param File $file
-     */
-    public function deleteFile($file);
-    /**
-     * Factory reset method
-     * @return void
-     */
-    public function nuke();
+class Environment extends \lean\application\Environment {
+    public function __construct($environmentName) {
+        parent::__construct(STACK_ROOT . '/stack/config/environment.ini', $environmentName);
+    }
+    public function createShell() {
+        return new Shell($this->createFilesystem());
+    }
+    public function createManager() {
+        return new \stack\filesystem\FileManager($this->get('stack.database.url'), $this->get('stack.database.name'));
+    }
+    public function createFilesystem() {
+        return new Filesystem($this->createManager());
+    }
 }

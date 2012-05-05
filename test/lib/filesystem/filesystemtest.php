@@ -55,7 +55,7 @@ class FileSystemTest extends StackOSTest {
         $system = new \stack\Filesystem($this->getManager());
         $system->pushSecurity(new \stack\security\UnpriviledgedSecurity());
         $this->assertFalse(
-            $system->checkTraversionPermissions(\stack\Root::ROOT_USER_PATH_USERS_ROOT)
+            $system->checkTraversionPermissions(\stack\Root::ROOT_PATH_USERS_ROOT)
         );
     }
 
@@ -63,8 +63,8 @@ class FileSystemTest extends StackOSTest {
         $system = new \stack\Filesystem($this->getManager());
         $system->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->assertEquals(
-            3,
-            count($system->readFilesInPath(\stack\Root::ROOT_USER_PATH_USERS_ROOT))
+            2,
+            count($system->readFilesInPath(\stack\Root::ROOT_PATH_USERS_ROOT))
         );
 
     }

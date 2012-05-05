@@ -140,8 +140,8 @@ class Filesystem implements FileAccess {
             return false;
         }
         catch(\Exception $e) {
-            throw $e;
             $this->pullSecurity();
+            throw $e;
         }
         $this->pullSecurity();
         foreach($files as $file) {
@@ -149,6 +149,13 @@ class Filesystem implements FileAccess {
                 return false;
             }
         }
+    }
+
+    /**
+     *
+     */
+    public function nuke() {
+        $this->access->nuke();
     }
 
     public function createFile($path, $owner) {

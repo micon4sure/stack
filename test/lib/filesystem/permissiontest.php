@@ -59,7 +59,7 @@ class PermissionTests extends StackOSTest {
         // create arbitrary user and document
         $uname = 'user';
         $gname = 'group';
-        $path = \stack\Root::ROOT_USER_PATH_GROUPS . '/' . $gname;
+        $path = \stack\Root::ROOT_PATH_GROUPS . '/' . $gname;
         $group = new \stack\module\Group($gname);
         // ROOT_UNAME is document owner: prevent owner permission conflicts
         $document = new File($this->getManager(), $path, \stack\Root::ROOT_UNAME);
@@ -117,7 +117,7 @@ class PermissionTests extends StackOSTest {
     public function testUserPermission() {
         // create arbitrary user and document
         $uname = 'user';
-        $path = \stack\Root::ROOT_USER_PATH_USERS . '/' . $uname;
+        $path = \stack\Root::ROOT_PATH_USERS . '/' . $uname;
         $user = new \stack\module\User($uname, $path);
         // ROOT_UNAME is document owner: prevent owner permission conflicts
         $document = new File($this->getManager(), $path, \stack\Root::ROOT_UNAME);

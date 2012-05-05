@@ -20,12 +20,12 @@ class ModuleTest extends StackOSTest {
         $manager = $this->getManager();
 
         // write the document
-        $document = new \stack\filesystem\File($manager, \stack\Root::ROOT_USER_PATH_USERS . '/foo', \stack\Root::ROOT_UNAME);
+        $document = new \stack\filesystem\File($manager, \stack\Root::ROOT_PATH_USERS . '/foo', \stack\Root::ROOT_UNAME);
         $module = new \stack\module\User('foo', \stack\Root::ROOT_UNAME, \stack\Root::ROOT_PATH_HOME . '/foo');
         $document->setModule($manager->createModule('stack.user', $module));
         $manager->writeFile($document);
 
-        $module = $manager->readFile(\stack\Root::ROOT_USER_PATH_USERS . '/foo')->getModule();
+        $module = $manager->readFile(\stack\Root::ROOT_PATH_USERS . '/foo')->getModule();
         $this->assertTrue($module instanceof \stack\module\User);
     }
 

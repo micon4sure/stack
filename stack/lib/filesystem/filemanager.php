@@ -51,7 +51,7 @@ class FileManager implements FileAccess {
      */
     public function registerModuleFactory($name, $moduleFactory) {
         if(!is_callable($moduleFactory))
-            throw new Exception_ModuleFactoryNotCallable("The modulefactory '$name' is not callable");
+            throw new Exception_ModuleFactoryNotCallable("The module factory '$name' is not callable.");
         if(array_key_exists($name, $this->moduleFactories))
             throw new Exception_ModuleConflict("Module with name '$name' is already registered", Exception_ModuleConflict::MODULE_WITH_NAME_ALREADY_REGISTERED);
         $this->moduleFactories[$name] = $moduleFactory;
@@ -130,30 +130,16 @@ class FileManager implements FileAccess {
     }
 
     /**
-     * Create the database and write system files
+     * Create the database
      */
     public function init() {
         $this->couchClient->createDatabase();
-        $files = array(
-            \stack\Root::ROOT_PATH,
-            \stack\Root::ROOT_USER_PATH_SYSTEM,
-            \stack\Root::ROOT_USER_PATH_HOME,
-            \stack\Root::ROOT_USER_PATH_USERS,
-            \stack\Root::ROOT_USER_PATH_GROUPS
-        );
-        foreach ($files as $path) {
-            $file = new File($this, $path, \stack\Root::ROOT_UNAME);
-            $this->writeFile($file);
-        }
-        $file = new File($this, \stack\Root::ROOT_USER_PATH_USERS_ROOT, \stack\Root::ROOT_UNAME);
-        $file->setModule(new \stack\module\User(\stack\Root::ROOT_UNAME, \stack\Root::ROOT_USER_PATH_HOME));
-        $this->writeFile($file);
     }
 
     /**
      * Delete the database (if exists)
      */
-    public function destroy() {
+    public function nuke() {
         if ($this->couchClient->databaseExists()) {
             $this->couchClient->deleteDatabase();
         }

@@ -44,7 +44,7 @@ class Shell {
 
     public function login($uname, $password) {
         try {
-            $ufile = $this->filesystem->readFile(Root::ROOT_USER_PATH_USERS . '/' . $uname);
+            $ufile = $this->filesystem->readFile(Root::ROOT_PATH_USERS . '/' . $uname);
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
@@ -92,6 +92,14 @@ class Shell {
     }
 
     /**
+     * Warning: destroys database
+     * @return void
+     */
+    public function nuke() {
+        $this->filesystem->nuke();
+    }
+
+    /**
      * See if the
      * @param $path
      * @return bool
@@ -106,7 +114,7 @@ class Shell {
 
     public function getUser($uname) {
         $uname =
-        $file = $this->filesystem->readFile(Root::ROOT_USER_PATH_USERS . "/$uname");
+        $file = $this->filesystem->readFile(Root::ROOT_PATH_USERS . "/$uname");
     }
 
     public function saveUser(\stack\module\User $user) {

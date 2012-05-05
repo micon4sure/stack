@@ -17,6 +17,7 @@ namespace stack {
 
     date_default_timezone_set('Europe/Berlin');
 
+    define('STACK_ROOT', realpath(__DIR__ . '/..'));
     define('STACK_TEST_ROOT', __DIR__);
 
     // initialize lean
@@ -25,24 +26,45 @@ namespace stack {
     $autoload->loadLean();
     $autoload->register('stack', STACK_TEST_ROOT . '/../stack/lib');
 
-
     require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couch.php';
     require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchClient.php';
     require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
 
+    // create register environment
+    $env = new Environment('test_dev');
+    $env->createManager();
+    // nuke database
+    $env->createShell()->nuke();
+    $registry = \lean\Registry_Stateless::instance();
+    $registry->set('stack.environment', $env);
+
     class StackOSTest extends \PHPUnit_Framework_TestCase {
         protected $manager;
+        protected static $migration;
+
+        private static function getMigration() {
+            // need to make sure there's only one instance for migration manager reads the files outright
+            return self::$migration ?: self::$migration = new \lean\Migration_Manager(STACK_ROOT . '/stack/migration');
+        }
+
 
         public function setUp() {
-            $this->manager = new \stack\filesystem\FileManager('http://root:root@127.0.0.1:5984', 'stack');
-            $this->getManager()->destroy();
-            // user, group, plain factory
+            $env = new Environment('test_dev');
+            $this->manager = $env->createManager();
+            $env->createShell()->nuke();
+            self::getMigration()->reset();
+            self::getMigration()->upgrade();
+
+            // module factories
             $this->getManager()->registerModule('\stack\module\User');
             $this->getManager()->registerModule('\stack\module\Group');
+            $this->getManager()->registerModule('\stack\module\AddUser');
+            $this->getManager()->registerModule('\stack\module\AddGroup');
+            $this->getManager()->registerModule('\stack\module\DelUser');
+            $this->getManager()->registerModule('\stack\module\DelGroup');
             $this->manager->registerModuleFactory(\stack\module\Plain::NAME, function($data) {
                 return new \stack\module\Plain($data);
             });
-            $this->getManager()->init();
         }
 
         /**
@@ -53,6 +75,7 @@ namespace stack {
         }
     }
 }
+
 namespace stack\filesystem {
     class StackOSTest extends \stack\StackosTest {
     }

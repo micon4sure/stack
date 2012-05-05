@@ -14,8 +14,17 @@ namespace stack\module;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+class BaseModule extends BaseModule_Abstract {
+    protected function export($data) {
+        return $data;
+    }
 
-abstract class BaseModule {
+    public static function create($data) {
+        return new static($data);
+    }
+}
+abstract class BaseModule_Abstract {
+
     protected $data;
 
     public function __construct($data = null) {
