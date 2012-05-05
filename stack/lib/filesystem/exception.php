@@ -3,7 +3,7 @@ namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -15,7 +15,7 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Exception extends \Exception {
+class Exception extends \stack\Exception {
 
 }
 
@@ -97,5 +97,9 @@ class Exception_NeedAccess extends Exception {
  * Indicates that access to security was requested while there is none
  */
 class Exception_NoSecurity extends Exception {
+
+}
+
+class Exception_UserNotFound extends Exception {
 
 }

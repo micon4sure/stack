@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,20 +15,10 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface FileAccess {
-    /**
-     * @param string $path
-     * @return \stdClass
-     * @throws Exception_FileNotFound
-     */
-    public function readFile($path);
-    /**
-     * @param File $file
-     * @return void
-     */
-    public function writeFile($file);
-    /**
-     * @param File $file
-     */
-    public function deleteFile($file);
+class Exception extends \Exception {
+
+}
+
+class Exception_UserNotFound extends \Exception {
+
 }

@@ -3,7 +3,7 @@ namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -70,9 +70,33 @@ class Filesystem implements FileAccess {
     public function readFile($path) {
         $file = $this->access->readFile($path);
         if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::READ)) {
-            throw new Exception_PermissionDenied("READ (r) permission to file at path '$path' was denied.");
+            throw new \stack\filesystem\Exception_PermissionDenied("READ (r) permission to file at path '$path' was denied.");
         }
         return $file;
+    }
+
+    public function readFilesInPath($path) {
+        $fileNames = array_filter(explode('/', $path));
+        $paths = array();
+        // attention: recycling path var
+        $path = '';
+        foreach($fileNames as $fileName) {
+            $paths[] = $path .= "/$fileName";
+        }
+        return $this->readFiles($paths);
+    }
+
+    /**
+     * Read an array of paths
+     * @param array $paths
+     * @return array
+     */
+    public function readFiles(array $paths) {
+        $result = array();
+        foreach($paths as $path) {
+            $result[] = $this->readFile($path);
+        }
+        return $result;
     }
 
     /**
@@ -99,6 +123,32 @@ class Filesystem implements FileAccess {
             throw new Exception_PermissionDenied("DELETE (d) permission to file at path '$path' was denied.");
         }
         return $this->access->deleteFile($file);
+    }
+
+    /**
+     * Check if current security will allow READ(3) of all files in the path
+     * @param $path
+     * @return bool
+     */
+    public function checkTraversionPermissions($path) {
+        $this->pushSecurity(new \stack\security\PriviledgedSecurity());
+        try {
+            $files = $this->readFilesInPath($path);
+        }
+        catch(\stack\filesystem\Exception_PermissionDenied $e) {
+            $this->pullSecurity();
+            return false;
+        }
+        catch(\Exception $e) {
+            throw $e;
+            $this->pullSecurity();
+        }
+        $this->pullSecurity();
+        foreach($files as $file) {
+            if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::EXECUTE)) {
+                return false;
+            }
+        }
     }
 
     public function createFile($path, $owner) {

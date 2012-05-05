@@ -3,7 +3,7 @@ namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -14,6 +14,8 @@ namespace stack;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+
+
 
 class Shell {
     /**
@@ -29,7 +31,9 @@ class Shell {
     /**
      * @var string
      */
-    private $cwd;
+    private $currentWorkingFile;
+
+    private $loggedIn = false;
 
     /**
      * @param \stack\Filesystem $filesystem
@@ -44,13 +48,23 @@ class Shell {
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
+        return $this->loggedIn = $ufile->getModule()->auth($password);
+    }
 
+    public function checkLoggedIn($message = null) {
+        if(!$this->loggedIn) {
+            throw new Exception_NeedToBeLoggedIn($message ?: 'Need to be logged in to perform this action.');
+        }
     }
 
     /**
-     * Create an instance of Traveler with the passed $access or self::$defaultAccess.
+     * Create an instance of Shell with the passed $access or self::$defaultAccess.
      * Throw exception if neither are set.
      * Take precedent to $access, overwrite defaultAccess with it if set.
+     * :::
+     * Be aware that the default filesystem can be overwritten at any time.
+     * Method is possible subject to change, don't rely.
+     * :::
      *
      * @static
      * @param null|\stack\Filesystem $filesystem
@@ -73,23 +87,28 @@ class Shell {
      * @return \stack\filesystem\File
      */
     public function cd($path) {
-        $chunks = array_filter(explode('/', $path));
-        // attention: recycling path var
-        $path = '';
-        foreach($chunks as $chunk) {
-            $path .= '/' . $chunk;
-            \lean\util\Dump::flat($chunks);
-            $document = $this->filesystem->readFile($path);
-            \lean\util\Dump::flat($document);
-        }
-
-        return $path;
+        $this->filesystem->checkTraversionPermissions($path);
+        return $this->filesystem->readFile($path);
     }
 
     /**
-     * Return current working dir
+     * See if the
+     * @param $path
+     * @return bool
      */
-    public function getCWD() {
+    public function isInCWF($path) {
+        return \lean\Text::left($this->getCurrentWorkingFile(), $path) == $path;
+    }
 
+    public function getCurrentWorkingFile() {
+        return $this->currentWorkingFile;
+    }
+
+    public function getUser($uname) {
+        $uname =
+        $file = $this->filesystem->readFile(Root::ROOT_USER_PATH_USERS . "/$uname");
+    }
+
+    public function saveUser(\stack\module\User $user) {
     }
 }

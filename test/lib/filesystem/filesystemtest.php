@@ -15,8 +15,6 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-use \stack\filesystem\ROOT_UNAME;
-
 class FileSystemTest extends StackOSTest {
     /**
      * Test read* write* and deleteFile
@@ -25,28 +23,49 @@ class FileSystemTest extends StackOSTest {
         $system = new \stack\Filesystem($this->getManager());
         $system->pushSecurity(new \stack\security\PriviledgedSecurity());
 
-        // write the document
-        $document = $system->createFile('/foo', \stack\Root::ROOT_UNAME);
-        $document->setOwner('test');
-        $document->save();
+        // write the file
+        $file = $system->createFile('/foo', \stack\Root::ROOT_UNAME);
+        $file->setOwner('test');
+        $file->save();
 
         // assert that the written document matches the read
         $this->assertEquals(
-            $document->getOwner(),
+            $file->getOwner(),
             $system->readFile('/foo')->getOwner()
         );
         $this->assertEquals(
-            $document->getPath(),
+            $file->getPath(),
             $system->readFile('/foo')->getPath()
         );
 
         // delete file and assert that it's gone
-        $document->delete();
+        $system->deleteFile($file);
         try {
             $system->readFile('/foo');
             $this->fail();
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             // pass
         }
+    }
+
+    /**
+     *
+     */
+    public function testCheckTraversionPermission() {
+        $system = new \stack\Filesystem($this->getManager());
+        $system->pushSecurity(new \stack\security\UnpriviledgedSecurity());
+        $this->assertFalse(
+            $system->checkTraversionPermissions(\stack\Root::ROOT_USER_PATH_USERS_ROOT)
+        );
+    }
+
+    public function testReadFilesInPath() {
+        $system = new \stack\Filesystem($this->getManager());
+        $system->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->assertEquals(
+            3,
+            count($system->readFilesInPath(\stack\Root::ROOT_USER_PATH_USERS_ROOT))
+        );
+
     }
 }

@@ -15,8 +15,6 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-use \stack\filesystem\ROOT_USER_PATH_USERS_ROOT;
-
 class ShellTestAccess  extends \stack\filesystem\StackOSTest {
     /**
      * @expectedException \stack\filesystem\Exception_NeedAccess
@@ -31,22 +29,41 @@ class ShellTest extends \stack\filesystem\StackOSTest {
 
     public function setUp() {
         parent::setUp();
+        // init default shell with priviledged security
+        $fs = new Filesystem($this->getManager());
+        $fs->pushSecurity(new \stack\security\PriviledgedSecurity());
+        Shell::instance($fs);
+    }
+
+    public function testLogin() {
+        return;
+        // save a new user
+        $user = new \stack\module\User('test');
+        $user->setPassword('foo');
+        Shell::instance()->saveUser($user);
+
+        $this->assertTrue(Shell::instance()->login('kos', 'foo'));
+    }
+
+    /*public function testChangeDir() {
+        // go unpriviledged
         $fs = new Filesystem($this->getManager());
         $fs->pushSecurity(new \stack\security\PriviledgedSecurity());
         $shell = Shell::instance($fs);
-    }
 
-    public function loginTest() {
-        $shell = Shell::instance();
-        $shell->login(Root::ROOT_UNAME, 'foo');
-    }
-
-    public function testChangeDir() {
+        $shell->cd(Root::ROOT_USER_PATH_USERS_ROOT);
         return;
-        $shell->cd(\stack\Filesystem_Paths::ROOT_USER_PATH_USERS_ROOT);
         $this->assertEquals(
-            \stack\Filesystem_Paths::ROOT_USER_PATH_USERS_ROOT,
+            Root::ROOT_USER_PATH_USERS_ROOT,
             $shell->getPath()
         );
+    }*/
+
+    /**
+     * @expectedException \stack\Exception_UserNotFound
+     *
+     */
+    public function testUserNotFound() {
+        Shell::instance()->login('asd', 'asd');
     }
 }

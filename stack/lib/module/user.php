@@ -3,7 +3,7 @@ namespace stack\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * fileation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions
@@ -22,8 +22,12 @@ class User extends BaseModule {
     private $uname;
     private $home;
     private $groups = array();
+    private $password;
 
-    public function __construct($uname, $home) {
+    public function __construct($uname, $home = null) {
+        if($home === null) {
+            $home = \stack\Root::ROOT_PATH_HOME . "/$uname";
+        }
         $this->setUname($uname);
         $this->setHome($home);
     }
@@ -60,6 +64,11 @@ class User extends BaseModule {
         return $this->groups;
     }
 
+
+    public function setPassword($password) {
+        $this->password = sha1($password);
+    }
+
     protected function export($data) {
         return (object)array(
             'uname' => $this->getUname(),
@@ -74,6 +83,13 @@ class User extends BaseModule {
         $instance = new static($data->uname, $data->home);
         $uber = isset($data->uber) ? $data->uber : false;
         $instance->setUber($uber);
+        $password = isset($data->password) ? $data->password : false;
+        $instance->setPassword($password);
         return $instance;
     }
+
+    public function runAuth($shell, $password) {
+        return sha1($password) == $this->password;
+    }
+
 }
