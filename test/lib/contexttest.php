@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,17 +15,14 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class FileTest extends StackOSTest {
-    /**
-     * Test File's save method
-     */
-    public function testSave() {
-        $manager = $this->getManager();
-        $document = new \stack\filesystem\File($manager, '/foo', \stack\Root::ROOT_UNAME);
-        $document->save();
-
-        // assert that the written document matches the read
-        $this->assertEquals($document->getOwner(), $manager->readFile('/foo')->getOwner());
-        $this->assertEquals($document->getPath(), $manager->readFile('/foo')->getPath());
+class ContextTest extends StackOSTest {
+    public function testContext() {
+        // get the preconfigured context from StackOSTest
+        $context = $this->context;
+        // assert that context das not make up new instanced as it goes.
+        $this->assertTrue($context->getFilesystem() === $context->getFilesystem());
+        $this->assertTrue($context->getEnvironment() === $context->getEnvironment());
+        $this->assertTrue($context->getShell() === $context->getShell());
+        $this->assertTrue($context->getFileManager() === $context->getFileManager());
     }
 }

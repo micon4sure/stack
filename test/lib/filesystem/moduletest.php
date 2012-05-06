@@ -17,32 +17,33 @@ namespace stack\filesystem;
 
 class ModuleTest extends StackOSTest {
     public function testContainsModule() {
-        $manager = $this->getManager();
+        $manager = $this->getFileManager();
 
         // write the document
-        $document = new \stack\filesystem\File($manager, \stack\Root::ROOT_PATH_USERS . '/foo', \stack\Root::ROOT_UNAME);
-        $module = new \stack\module\User('foo', \stack\Root::ROOT_UNAME, \stack\Root::ROOT_PATH_HOME . '/foo');
-        $document->setModule($manager->createModule('stack.user', $module));
-        $manager->writeFile($document);
+        $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS . '/foo', \stack\Root::ROOT_UNAME);
+        $user = new \stack\module\User('foo', \stack\Root::ROOT_UNAME, \stack\Root::ROOT_PATH_HOME . '/foo');
+        $user->setPassword('asd');
+        $file->setModule($manager->createModule('stack.user', $user));
+        $manager->writeFile($file);
 
-        $module = $manager->readFile(\stack\Root::ROOT_PATH_USERS . '/foo')->getModule();
-        $this->assertTrue($module instanceof \stack\module\User);
+        $user = $manager->readFile(\stack\Root::ROOT_PATH_USERS . '/foo')->getModule();
+        $this->assertTrue($user instanceof \stack\module\User);
     }
 
     public function testData() {
-        $manager = $this->getManager();
+        $fileManager = $this->getFileManager();
         // create the document
-        $document = new \stack\filesystem\File($manager, \stack\Root::ROOT_USER_PATH_HOME . '/plain', \stack\Root::ROOT_UNAME);
+        $file = new \stack\filesystem\File(\stack\Root::ROOT_USER_PATH_HOME . '/plain', \stack\Root::ROOT_UNAME);
         // create module, set data to it  and place it in document
-        $module = $manager->createModule('stack.plain', new \stack\module\Plain(null));
-        $module->setData((object)array('foo'=>'bar'));
-        $document->setModule($module);
+        $plain = $fileManager->createModule('stack.plain', new \stack\module\Plain(null));
+        $plain->setData((object)array('foo'=>'bar'));
+        $file->setModule($plain);
         // write document
-        $manager->writeFile($document);
+        $fileManager->writeFile($file);
         //read document
-        $doc = $manager->readFile(\stack\Root::ROOT_USER_PATH_HOME . '/plain');
+        $doc = $fileManager->readFile(\stack\Root::ROOT_USER_PATH_HOME . '/plain');
         $this->assertTrue($doc->getModule() instanceof \stack\module\Plain);
-        $this->assertEquals('bar', $document->getModule()->getData()->foo);
+        $this->assertEquals('bar', $file->getModule()->getData()->foo);
     }
 
     /**
@@ -50,8 +51,8 @@ class ModuleTest extends StackOSTest {
      * @expectedException stack\filesystem\Exception_ModuleConflict
      */
     public function testModuleConflict() {
-        $manager = $this->getManager();
-        $manager->registerModuleFactory('stack.user', function($data) {
+        $manager = $this->getFileManager();
+        $manager->registerModule('stack.user', function($data) {
 
         });
     }

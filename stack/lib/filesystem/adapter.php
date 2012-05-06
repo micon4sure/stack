@@ -32,26 +32,27 @@ class Adapter_File implements Adapter {
     /**
      * @var \stack\filesystem\FileManager
      */
-    private $manager;
+    private $fileManager;
 
     /**
-     * @param \stack\filesystem\FileManager $manager
+     * @param \stack\filesystem\FileManager_Module $manager
      */
-    public function __construct(\stack\filesystem\FileManager $manager) {
-        $this->manager = $manager;
+    public function __construct(\stack\filesystem\FileManager_Module $manager) {
+        $this->fileManager = $manager;
     }
 
     /**
      * Adapt a stdClass object to a File instance.
      *
      * @param $doc
+     * @throws Exception
      * @return \stack\filesystem\File
      */
     public function fromDatabase($doc) {
         // cut prefix from path
         $id = \lean\Text::offsetLeft($doc->_id, 'stack:/');
         $revision = isset($doc->_rev) ? $doc->_rev : null;
-        $file = new \stack\filesystem\File($this->manager, $id, $doc->meta->owner, $revision);
+        $file = new \stack\filesystem\File($id, $doc->meta->owner, $revision);
 
         // add permissions
         foreach ($doc->meta->permissions as $permission) {
@@ -59,8 +60,8 @@ class Adapter_File implements Adapter {
                 // user
                 $file->addPermission(new \stack\security\Permission_User($permission->holder, $permission->priviledge));
             }
-        else if ($permission->entity == \stack\security\Permission_Group::ENTITY_ID) {
-            // group
+            else if ($permission->entity == \stack\security\Permission_Group::ENTITY_ID) {
+                // group
                 $file->addPermission(new \stack\security\Permission_Group($permission->holder, $permission->priviledge));
             }
             else
@@ -69,7 +70,7 @@ class Adapter_File implements Adapter {
 
         // load module if module name exists
         if (isset($doc->module->name)) {
-            $module = $this->manager->createModule($doc->module->name, $doc->module);
+            $module = $this->fileManager->createModule($doc->module->name, $doc->module);
             $file->setModule($module);
         }
         return $file;

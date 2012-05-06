@@ -64,14 +64,20 @@ class User extends BaseModule {
         return $this->groups;
     }
 
-
-    public function setPassword($password) {
+    public function changePassword($password) {
         $this->password = sha1($password);
+    }
+    public function setPassword($password) {
+        if(!\lean\Text::len($password)) {
+            throw new \InvalidArgumentException('No password provided. Password must not be empty.');
+        }
+        $this->password = $password;
     }
 
     protected function export($data) {
         return (object)array(
             'uname' => $this->getUname(),
+            'password' => $this->password,
             'home' => $this->getHome(),
             'uber' => $this->isUber(),
             'groups' => $this->groups);
@@ -79,7 +85,7 @@ class User extends BaseModule {
 
     public static function create($data) {
         if(!isset($data->uname, $data->home))
-        throw new \InvalidArgumentException('User parameters are missing data. Need uname and home.');
+            throw new \InvalidArgumentException('User parameters are missing data. Need uname and home.');
         $instance = new static($data->uname, $data->home);
         $uber = isset($data->uber) ? $data->uber : false;
         $instance->setUber($uber);
@@ -88,7 +94,8 @@ class User extends BaseModule {
         return $instance;
     }
 
-    public function runAuth($shell, $password) {
+    public function auth($password) {
+        #\lean\util\Dump::flat($password . ' ::: ' . sha1($password) . '  ::: ' . $this->password);
         return sha1($password) == $this->password;
     }
 

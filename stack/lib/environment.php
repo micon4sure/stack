@@ -15,17 +15,31 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Environment extends \lean\application\Environment {
+class Environment extends \lean\Environment {
     public function __construct($environmentName) {
         parent::__construct(STACK_ROOT . '/stack/config/environment.ini', $environmentName);
     }
-    public function createShell() {
-        return new Shell($this->createFilesystem());
+    /**
+     * Create a Shell with the passed filesystem or a created one
+     *
+     * @param null $filesystem
+     * @return Shell
+     */
+    public function createShell($filesystem = null) {
+        return new Shell($filesystem ?: $this->createFilesystem());
     }
-    public function createManager() {
-        return new \stack\filesystem\FileManager($this->get('stack.database.url'), $this->get('stack.database.name'));
+    /**
+     * Create a new FileManager from the data provided by the environment configuration
+     * @return filesystem\FileManager
+     */
+    public function createFileManager() {
+        return new \stack\filesystem\FileManager_Module($this->get('stack.database.url'), $this->get('stack.database.name'));
     }
-    public function createFilesystem() {
-        return new Filesystem($this->createManager());
+    /**
+     * Create a new filesystem with the provided manager or a created one
+     * @return Filesystem
+     */
+    public function createFilesystem($manager = null) {
+        return new Filesystem($manager ?: $this->createFileManager());
     }
 }

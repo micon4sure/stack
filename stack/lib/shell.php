@@ -15,14 +15,20 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-
-class Shell {
+interface Shell_ModuleRegistry {
     /**
-     * @var \stack\Filesystem
+     * Register a module factory callable
+     *
+     * @param string $name
+     * @param callable $factory
+     * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable
+     * @throws Exception_ModuleConflict
      */
-    private static $defaultFilesystem;
+    public function registerModule($name, $factory);
+}
 
+
+class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, SecurityAccess {
     /**
      * @var Filesystem
      */
@@ -48,7 +54,8 @@ class Shell {
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
-        return $this->loggedIn = $ufile->getModule()->auth($password);
+        $this->loggedIn = $ufile->getModule()->auth($password);
+        return $this->loggedIn;
     }
 
     public function checkLoggedIn($message = null) {
@@ -57,28 +64,14 @@ class Shell {
         }
     }
 
-    /**
-     * Create an instance of Shell with the passed $access or self::$defaultAccess.
-     * Throw exception if neither are set.
-     * Take precedent to $access, overwrite defaultAccess with it if set.
-     * :::
-     * Be aware that the default filesystem can be overwritten at any time.
-     * Method is possible subject to change, don't rely.
-     * :::
-     *
-     * @static
-     * @param null|\stack\Filesystem $filesystem
-     * @throws filesystem\Exception_NeedAccess
-     * @return Shell
-     */
-    public static function instance(\stack\Filesystem $filesystem = null) {
-        if(isset($filesystem)) {
-            self::$defaultFilesystem = $filesystem;
-        }
-        if(!isset(self::$defaultFilesystem)) {
-            throw new \stack\filesystem\Exception_NeedAccess('Need to be passed a filesystem at least once.');
-        }
-        return new static(self::$defaultFilesystem);
+    public function execute(Context $context, $fileName) {
+        $file = $this->filesystem->readFile($fileName);
+        $args = func_get_args();
+        array_shift($args); // shift context argument
+        array_shift($args); // shift fileName argument
+        array_unshift($args, $context); // reunshift the context as first argument
+        $module = $file->getModule();
+        return call_user_func_array(array($module, 'run'), $args);
     }
 
     /**
@@ -89,6 +82,13 @@ class Shell {
     public function cd($path) {
         $this->filesystem->checkTraversionPermissions($path);
         return $this->filesystem->readFile($path);
+    }
+
+    /**
+     * Initialize a new database
+     */
+    public function init() {
+        $this->filesystem->init();
     }
 
     /**
@@ -112,11 +112,50 @@ class Shell {
         return $this->currentWorkingFile;
     }
 
-    public function getUser($uname) {
-        $uname =
-        $file = $this->filesystem->readFile(Root::ROOT_PATH_USERS . "/$uname");
+    /**
+     * @param string $path
+     * @return \stdClass
+     * @throws Exception_FileNotFound
+     */
+    public function readFile($path)
+    {
+        return $this->filesystem->readFile($path);
     }
 
-    public function saveUser(\stack\module\User $user) {
+    /**
+     * @param File $file
+     * @return void
+     */
+    public function writeFile($file)
+    {
+        return $this->filesystem->writeFile($file);
+    }
+
+    /**
+     * @param File $file
+     */
+    public function deleteFile($file)
+    {
+        return $this->filesystem->deleteFile($file);
+    }
+
+    public function registerModule($name, $callable) {
+        $this->filesystem->registerModule($name, $callable);
+    }
+
+    /**
+     * @param Security $security
+     */
+    public function pushSecurity(Security $security)
+    {
+        $this->filesystem->pushSecurity($security);
+    }
+
+    /**
+     * @return Security
+     */
+    public function pullSecurity()
+    {
+        return $this->filesystem->pullSecurity();
     }
 }

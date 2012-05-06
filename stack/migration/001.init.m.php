@@ -18,12 +18,13 @@ namespace stack;
 class MigrationInit001 implements \lean\Migration {
     /**
      * Create the database and write system files
+     * @internal $context Context
      */
     public function up() {
-        $env = \lean\Registry_Stateless::instance()->get('stack.environment');
-        $manager = $env->createManager();
+        $context = \lean\Registry::instance()->get('stack.context');
+        $shell = $context->getShell();
+        $shell->init();
 
-        $manager->init();
 
         // create initial files
         $files = array(
@@ -34,29 +35,41 @@ class MigrationInit001 implements \lean\Migration {
             \stack\Root::ROOT_PATH_GROUPS,
             \stack\Root::ROOT_USER_PATH_HOME,
         );
-        foreach ($files as $path) {
-            $file = new \stack\filesystem\File($manager, $path, \stack\Root::ROOT_UNAME);
-            $manager->writeFile($file);
-        }
+        $shell->pushSecurity(new \stack\security\PriviledgedSecurity());
+        try {
+            foreach ($files as $path) {
+                $file = new \stack\filesystem\File($path, \stack\Root::ROOT_UNAME);
+                $shell->writeFile($file);
+            }
 
-        // create root user file + module
-        $file = new \stack\filesystem\File($manager, \stack\Root::ROOT_PATH_USERS_ROOT, \stack\Root::ROOT_UNAME);
-        $file->setModule(new \stack\module\User(\stack\Root::ROOT_UNAME, \stack\Root::ROOT_USER_PATH_HOME));
-        $manager->writeFile($file);
+            // create root user file + module
+            $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS_ROOT, \stack\Root::ROOT_UNAME);
+            $user = new \stack\module\User(\stack\Root::ROOT_UNAME, \stack\Root::ROOT_USER_PATH_HOME);
+            $password = uniqid();
+            $user->setPassword($password);
+            $file->setModule($user);
+            $shell->writeFile($file);
 
-        // create system run files
-        $modules = array(
-            'adduser' => new \stack\module\AddUser(),
-            'deluser' => new \stack\module\DelUser(),
-            'addgroup' => new \stack\module\AddGroup(),
-            'delgroup' => new \stack\module\DelGroup(),
-        );
-        foreach($modules as $name => $module) {
-            $path = Root::ROOT_PATH_SYSTEM_RUN . "/$name";
-            $file = new \stack\filesystem\File($manager, $path, \stack\Root::ROOT_UNAME);
-            $file->setModule($module);
-            $manager->writeFile($file);
+            file_put_contents(STACK_ROOT . '/rootpw', $password);
+
+            // create system run files
+            $modules = array(
+                'adduser' => new \stack\module\AddUser($shell),
+                'deluser' => new \stack\module\DelUser($shell),
+                'addgroup' => new \stack\module\AddGroup($shell),
+                'delgroup' => new \stack\module\DelGroup($shell),
+            );
+            foreach($modules as $name => $module) {
+                $path = Root::ROOT_PATH_SYSTEM_RUN . "/$name";
+                $file = new \stack\filesystem\File($path, \stack\Root::ROOT_UNAME);
+                $file->setModule($module);
+                $shell->writeFile($file);
+            }
+        } catch(\Exception $e) {
+            $shell->pullSecurity();
+            throw $e;
         }
+        $shell->pullSecurity();
     }
 
     public function down() {

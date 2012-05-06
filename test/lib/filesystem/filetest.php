@@ -1,5 +1,5 @@
 <?php
-namespace stack\module;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,19 +15,8 @@ namespace stack\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class AddUser extends BaseModule {
-
-    const NAME = 'stack.system.adduser';
-
-    protected function export($data) {
-        return $data;
-    }
-
-    public function run(\stack\Context $context, $uname, $password) {
-        $user = new User($uname);
-        $user->changePassword($password);
-        $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS . '/' . $user->getUname(), \stack\Root::ROOT_UNAME);
-        $file->setModule($user);
-        $context->getShell()->writeFile($file);
+class FileTest extends StackOSTest {
+    public function testFoo() {
+        $this->assertTrue(true);
     }
 }

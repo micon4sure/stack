@@ -24,20 +24,29 @@ use stack\security_Priviledge;
 /**
  * Facade for the filesystem
  */
-class Filesystem implements FileAccess {
+class Filesystem implements FileAccess, SecurityAccess {
     /**
-     * @var FileAccess
+     * @var FileManager
      */
-    private $access;
+    private $fileManager;
     /**
      * @var array
      */
     private $securityStack = array();
     /**
-     * @param FileAccess $access
+     * @param \stack\filesystem\FileManager_Module $module
      */
-    public function __construct(FileAccess $access) {
-        $this->access = $access;
+    public function __construct(\stack\filesystem\FileManager_Module $module) {
+        $this->fileManager = $module;
+    }
+
+    /**
+     * This method should ne called from outside \stack\filesystem
+     *
+     * @return FileManager|filesystem\FileManager_Module
+     */
+    public function getFileManger() {
+        return $this->fileManager;
     }
 
     /**
@@ -68,7 +77,7 @@ class Filesystem implements FileAccess {
      * @throws Exception_PermissionDenied
      */
     public function readFile($path) {
-        $file = $this->access->readFile($path);
+        $file = $this->fileManager->readFile($path);
         if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::READ)) {
             throw new \stack\filesystem\Exception_PermissionDenied("READ (r) permission to file at path '$path' was denied.");
         }
@@ -108,7 +117,7 @@ class Filesystem implements FileAccess {
             $path = $file->getPath();
             throw new Exception_PermissionDenied("WRITE (w) permission to file at path '$path' was denied.");
         }
-        $this->access->writeFile($file);
+        $this->fileManager->writeFile($file);
         return $file;
     }
 
@@ -122,11 +131,11 @@ class Filesystem implements FileAccess {
             $path = $file->getPath();
             throw new Exception_PermissionDenied("DELETE (d) permission to file at path '$path' was denied.");
         }
-        return $this->access->deleteFile($file);
+        return $this->fileManager->deleteFile($file);
     }
 
     /**
-     * Check if current security will allow READ(3) of all files in the path
+     * Check if current security will allow READ(r) of all files in the path
      * @param $path
      * @return bool
      */
@@ -149,18 +158,37 @@ class Filesystem implements FileAccess {
                 return false;
             }
         }
+        return true;
+    }
+
+    public function init() {
+        $this->fileManager->init();
     }
 
     /**
-     *
+     * Warning: destroys database
+     * @return void
      */
     public function nuke() {
-        $this->access->nuke();
+        $this->fileManager->nuke();
     }
 
     public function createFile($path, $owner) {
-        $file = new \stack\filesystem\File($this->access, $path, $owner);
+        $file = new \stack\filesystem\File($path, $owner);
         $this->writeFile($file);
         return $file;
-   }
+    }
+
+    /**
+     * Register a module factory callable
+     *
+     * @implements Shell_ModuleRegistry
+     * @param string $name
+     * @param \Closure $factory
+     * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable
+     * @throws Exception_ModuleConflict
+     */
+    public function registerModule($name, $factory) {
+        $this->fileManager->registerModule($name, $factory);
+    }
 }

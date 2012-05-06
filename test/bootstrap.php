@@ -32,46 +32,76 @@ namespace stack {
 
     // create register environment
     $env = new Environment('test_dev');
-    $env->createManager();
+    $env->createFileManager();
     // nuke database
     $env->createShell()->nuke();
-    $registry = \lean\Registry_Stateless::instance();
+    $registry = \lean\Registry::instance();
     $registry->set('stack.environment', $env);
 
+    class TestContext extends Context {
+        // Expose manager in test context
+        /**
+         * @return filesystem\FileManager
+         */
+        public function getFileManager() {
+            return parent::getFileManager();
+        }
+    }
+
     class StackOSTest extends \PHPUnit_Framework_TestCase {
-        protected $manager;
+        /**
+         * @var TestContext
+         */
+        protected $context;
+        /**
+         * @var \lean\Migration_Manager
+         */
         protected static $migration;
 
-        private static function getMigration() {
+        private static function getMigrationManager() {
             // need to make sure there's only one instance for migration manager reads the files outright
             return self::$migration ?: self::$migration = new \lean\Migration_Manager(STACK_ROOT . '/stack/migration');
         }
 
-
-        public function setUp() {
-            $env = new Environment('test_dev');
-            $this->manager = $env->createManager();
-            $env->createShell()->nuke();
-            self::getMigration()->reset();
-            self::getMigration()->upgrade();
-
-            // module factories
-            $this->getManager()->registerModule('\stack\module\User');
-            $this->getManager()->registerModule('\stack\module\Group');
-            $this->getManager()->registerModule('\stack\module\AddUser');
-            $this->getManager()->registerModule('\stack\module\AddGroup');
-            $this->getManager()->registerModule('\stack\module\DelUser');
-            $this->getManager()->registerModule('\stack\module\DelGroup');
-            $this->manager->registerModuleFactory(\stack\module\Plain::NAME, function($data) {
-                return new \stack\module\Plain($data);
-            });
+        protected function getFileManager() {
+            return $this->context->getFileManager();
         }
 
-        /**
-         * @return \stack\filesystem\FileManager
-         */
-        protected function getManager() {
-            return $this->manager;
+        public function setUp() {
+            // create test environment
+            $env = new Environment('test_dev');
+            // create context around environment
+            $this->context = new TestContext($env);
+            // put created context into static registry
+            \lean\Registry::instance()->set('stack.context', $this->context);
+
+            // registering module factories from the outside
+            $this->context->getShell()->registerModule('stack.plain', function($data) {
+                return new \stack\module\Plain($data);
+            });
+            $this->context->getShell()->registerModule('stack.user', function($data) {
+                return \stack\module\User::create($data);
+            });
+            $this->context->getShell()->registerModule('stack.group', function($data) {
+                return \stack\module\Group::create($data);
+            });
+            $this->context->getShell()->registerModule('stack.system.adduser', function($data) {
+                return \stack\module\AddUser::create($data);
+            });
+            $this->context->getShell()->registerModule('stack.system.addgroup', function($data) {
+                return \stack\module\AddGroup::create($data);
+            });
+            $this->context->getShell()->registerModule('stack.system.deluser', function($data) {
+                return \stack\module\DelUser::create($data);
+            });
+            $this->context->getShell()->registerModule('stack.system.delgroup', function($data) {
+                return \stack\module\DelGroup::create($data);
+            });
+
+            // nuke and reset shell back into clean state
+            $this->context->getShell()->nuke();
+            self::getMigrationManager()->reset();
+            self::getMigrationManager()->upgrade();
         }
     }
 }

@@ -20,13 +20,13 @@ class FileSystemTest extends StackOSTest {
      * Test read* write* and deleteFile
      */
     public function testReadWriteDelete() {
-        $system = new \stack\Filesystem($this->getManager());
+        $system = new \stack\Filesystem($this->getFileManager());
         $system->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         // write the file
         $file = $system->createFile('/foo', \stack\Root::ROOT_UNAME);
         $file->setOwner('test');
-        $file->save();
+        $system->writeFile($file);
 
         // assert that the written document matches the read
         $this->assertEquals(
@@ -52,7 +52,7 @@ class FileSystemTest extends StackOSTest {
      *
      */
     public function testCheckTraversionPermission() {
-        $system = new \stack\Filesystem($this->getManager());
+        $system = new \stack\Filesystem($this->getFileManager());
         $system->pushSecurity(new \stack\security\UnpriviledgedSecurity());
         $this->assertFalse(
             $system->checkTraversionPermissions(\stack\Root::ROOT_PATH_USERS_ROOT)
@@ -60,7 +60,7 @@ class FileSystemTest extends StackOSTest {
     }
 
     public function testReadFilesInPath() {
-        $system = new \stack\Filesystem($this->getManager());
+        $system = new \stack\Filesystem($this->getFileManager());
         $system->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->assertEquals(
             2,

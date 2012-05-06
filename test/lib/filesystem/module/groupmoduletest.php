@@ -17,37 +17,40 @@ namespace stack;
 
 class GroupTest extends StackOSTest {
     public function testNamechange() {
+        $system = new \stack\Filesystem($this->getFileManager());
+        $system->pushSecurity(new \stack\security\PriviledgedSecurity());
+
         $gname = 'foo';
         $path = '/bar';
         // check for plain set and get
         $group = new module\Group($gname);
         // save in a document, read again, check for correct gname
         $this->assertEquals($gname, $group->getGname());
-        $document = new \stack\filesystem\File($this->getManager(), $path, $group->getGname());
-        $document->setModule($group);
+        $file = new \stack\filesystem\File($path, $group->getGname());
+        $file->setModule($group);
         $this->assertEquals(
             $gname,
-            $document->getModule()->getGname()
+            $file->getModule()->getGname()
         );
-        $document->save();
+        $system->writeFile($file);
 
         // reread document, check gname
-        $document = $this->getManager()->readFile($path);
+        $file = $this->getFileManager()->readFile($path);
         $this->assertEquals(
             $gname,
-            $document->getModule()->getGname()
+            $file->getModule()->getGname()
         );
 
         // again, with new uname
         $new = 'qux';
-        $document = $this->getManager()->readFile($path);
-        $document->getModule()->setGname($new);
-        $document->save();
+        $file = $this->getFileManager()->readFile($path);
+        $file->getModule()->setGname($new);
+        $system->writeFile($file);
         // reread document, check new
-        $document = $this->getManager()->readFile($path);
+        $file = $this->getFileManager()->readFile($path);
         $this->assertEquals(
             $new,
-            $document->getModule()->getGname()
+            $file->getModule()->getGname()
         );
     }
 }

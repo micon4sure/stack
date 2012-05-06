@@ -24,19 +24,29 @@ class UserTest extends StackOSTest {
     }
 
     public function testUber() {
+        $system = new \stack\Filesystem($this->getFileManager());
+        $system->pushSecurity(new \stack\security\PriviledgedSecurity());
+
         // check for plain set and get
         $home = \stack\Root::ROOT_PATH_HOME . '/foo';
         $user = new \stack\module\User('foo', $home);
+        $user->setPassword('test');
         $user->setUber(true);
 
         // save in a document, read again, check for uber
         $this->assertEquals(true, $user->isUber());
-        $document = new \stack\filesystem\File($this->getManager(), '/bar', $user->getUname());
-        $document->setModule($user);
-        $document->save();
+        $file = new \stack\filesystem\File('/bar', $user->getUname());
+        $file->setModule($user);
+        $system->writeFile($file);
 
-        $document = $this->getManager()->readFile('/bar');
-        \lean\util\Dump::deep($document->getModule());
-        $this->assertTrue($document->getModule()->isUber());
+        $file = $this->getFileManager()->readFile('/bar');
+        \lean\util\Dump::deep($file->getModule());
+        $this->assertTrue($file->getModule()->isUber());
+    }
+
+    public function testAuth() {
+        $user = new \stack\module\User('foo');
+        $user->changePassword('bar');
+        $this->assertTrue($user->auth('bar'));
     }
 }

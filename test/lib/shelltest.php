@@ -15,34 +15,30 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class ShellTestAccess  extends \stack\filesystem\StackOSTest {
-    /**
-     * @expectedException \stack\filesystem\Exception_NeedAccess
-     */
-    public function testNeedAccess() {
-        Shell::instance();
-    }
-
-}
-
 class ShellTest extends \stack\filesystem\StackOSTest {
 
     public function setUp() {
         parent::setUp();
         // init default shell with priviledged security
-        $fs = new Filesystem($this->getManager());
-        $fs->pushSecurity(new \stack\security\PriviledgedSecurity());
-        Shell::instance($fs);
+        $this->context->getFilesystem()->pushSecurity(new \stack\security\PriviledgedSecurity());
     }
 
     public function testLogin() {
-        return;
         // save a new user
-        $user = new \stack\module\User('test');
-        $user->setPassword('foo');
-        Shell::instance()->execute(Root::ROOT_PATH_SYSTEM . '/adduser', $user);
+        $uname = 'foo';
+        $pass = 'bar';
+        $path = Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
 
-        $this->assertTrue(Shell::instance()->login('kos', 'foo'));
+        $this->context->getShell()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->getShell()->execute($this->context, $path, $uname, $pass);
+
+        // saved user's uname must match original uname
+        $this->assertEquals(
+            $uname,
+            $this->context->getShell()->readFile(Root::ROOT_PATH_USERS . "/$uname")->getModule()->getUname());
+
+        // assert that user can login
+        $this->assertTrue($this->context->getShell()->login($uname, $pass));
     }
 
     /*public function testChangeDir() {
@@ -64,6 +60,11 @@ class ShellTest extends \stack\filesystem\StackOSTest {
      *
      */
     public function testUserNotFound() {
-        Shell::instance()->login('asd', 'asd');
+        $this->context->getShell()->login('asd', 'asd');
+    }
+
+    public function testNukeAndInit() {
+        $this->context->getShell()->nuke();
+        $this->context->getShell()->init();
     }
 }

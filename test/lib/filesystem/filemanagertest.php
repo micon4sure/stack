@@ -21,11 +21,14 @@ class FileManagerTest extends StackOSTest {
      * Test if the initial files are being written
      */
     public function testInitialFiles() {
-        $manager = $this->getManager();
+        $manager = $this->getFileManager();
 
         // assert that initial files exist
         $this->assertTrue($manager->readFile(\stack\Root::ROOT_PATH) instanceof \stack\filesystem\File);
-        $this->assertEquals(\stack\Root::ROOT_UNAME, $manager->readFile(\stack\Root::ROOT_PATH)->getOwner());
+        $this->assertEquals(
+            \stack\Root::ROOT_UNAME,
+            $manager->readFile(\stack\Root::ROOT_PATH)->getOwner()
+        );
 
         $this->assertTrue($manager->readFile(\stack\Root::ROOT_PATH_USERS) instanceof \stack\filesystem\File);
         $this->assertTrue($manager->readFile(\stack\Root::ROOT_PATH_USERS_ROOT) instanceof \stack\filesystem\File);
@@ -37,10 +40,10 @@ class FileManagerTest extends StackOSTest {
      * Test read* write* and deleteFile
      */
     public function testReadWriteDelete() {
-        $manager = $this->getManager();
+        $manager = $this->getFileManager();
 
         // write the document
-        $document = new \stack\filesystem\File($manager, '/foo', \stack\Root::ROOT_UNAME);
+        $document = new \stack\filesystem\File('/foo', \stack\Root::ROOT_UNAME);
         $manager->writeFile($document);
 
         // assert that the written document matches the read
@@ -57,26 +60,13 @@ class FileManagerTest extends StackOSTest {
         }
     }
 
-    /**
-     * Test File's save method
-     */
-    public function testSave() {
-        $manager = $this->getManager();
-        $document = new \stack\filesystem\File($manager, '/foo', \stack\Root::ROOT_UNAME);
-        $document->save();
-
-        // assert that the written document matches the read
-        $this->assertEquals($document->getOwner(), $manager->readFile('/foo')->getOwner());
-        $this->assertEquals($document->getPath(), $manager->readFile('/foo')->getPath());
-    }
-
-    public function testCreateModule() {
-        $manager = $this->getManager();
+     public function testCreateModule() {
+        $manager = $this->getFileManager();
 
         // test manager's ability to create valid modules
         // - user
         $user = new \stack\module\User('foo', '/foo');
-        $module = $manager->createModule(\stack\module\User::NAME, (object)array('uname' => 'foo', 'home' => '/foo/bar'));
+        $module = $manager->createModule(\stack\module\User::NAME, (object)array('uname' => 'foo', 'home' => '/foo/bar', 'password' => 'foo'));
         $this->assertTrue($module instanceof \stack\module\User);
         // - group
         $module = $manager->createModule(\stack\module\Group::NAME, (object)array('gname' => 'qux'));
@@ -84,10 +74,10 @@ class FileManagerTest extends StackOSTest {
     }
 
     public function testSaveThrice() {
-        $manager = $this->getManager();
-        $document = new \stack\filesystem\File($manager, '/foo', \stack\Root::ROOT_UNAME);
-        $document->save();
-        $document->save();
-        $document->save();
+        $manager = $this->getFileManager();
+        $file = new \stack\filesystem\File('/foo', \stack\Root::ROOT_UNAME);
+        $manager->writeFile($file);
+        $manager->writeFile($file);
+        $manager->writeFile($file);
     }
 }

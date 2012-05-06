@@ -20,7 +20,7 @@
         >
 
     <testsuites>
-        <testsuite name="kernel">
+        <testsuite name="stack">
             <directory suffix="test.php">lib</directory>
         </testsuite>
     </testsuites>

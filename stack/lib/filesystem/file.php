@@ -28,11 +28,6 @@ interface File_JSONizable {
  */
 class File {
     /**
-     * @var FileAccess
-     */
-    private $manager;
-
-    /**
      * @var File_Meta
      */
     private $meta;
@@ -43,25 +38,17 @@ class File {
     private $module;
 
     /**
-     * @param FileAccess $manager
      * @param string $path
      * @param string $owner
      * @param string $revision
      */
-    public function __construct(FileManager $manager, $path, $owner, $revision = null) {
-        $this->manager = $manager;
+    public function __construct($path, $owner, $revision = null) {
         $this->meta = new File_Meta($this, $path, $owner, $revision);
     }
 
     /**
-     * @return FileManager
-     */
-    protected function getManager() {
-        return $this->manager;
-    }
-
-    /**
-     * @param module\BaseModule $module
+     *
+     * @param \stack\module\BaseModule $module
      */
     public function setModule(\stack\module\BaseModule $module) {
         $this->module = $module;
@@ -72,20 +59,6 @@ class File {
      */
     public function getModule() {
         return $this->module;
-    }
-
-    /**
-     * Save the file in the database
-     */
-    public function save() {
-        $this->manager->writeFile($this);
-    }
-
-    /**
-     * Delete the file. No seriously. I mean it. Do it. Delete the file!
-     */
-    public function delete() {
-        $this->manager->deleteFile($this);
     }
 
     /**
