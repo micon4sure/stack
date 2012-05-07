@@ -39,7 +39,10 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
      */
     private $currentWorkingFile;
 
-    private $loggedIn = false;
+    /**
+     * @var \stack\module\User
+     */
+    private $currentUser;
 
     /**
      * @param \stack\Filesystem $filesystem
@@ -54,16 +57,29 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
-        $this->loggedIn = $ufile->getModule()->auth($password);
-        return $this->loggedIn;
+        $this->currentUser = $ufile->getModule()->auth($password);
+
     }
 
+    /**
+     * Check if a user is logged in to the shell
+     *
+     * @param null $message
+     * @throws Exception_NeedToBeLoggedIn
+     */
     public function checkLoggedIn($message = null) {
         if(!$this->loggedIn) {
             throw new Exception_NeedToBeLoggedIn($message ?: 'Need to be logged in to perform this action.');
         }
     }
 
+    /**
+     * Read a file, take out its module, call run on it with the args passed to the method (slightly changed)
+     *
+     * @param Context $context
+     * @param $fileName
+     * @throws Exception_ExecutionError
+     */
     public function execute(Context $context, $fileName) {
         $file = $this->filesystem->readFile($fileName);
         $args = func_get_args();
@@ -74,7 +90,9 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
         try {
             call_user_func_array(array($module, 'run'), $args);
         } catch(\Exception $e) {
-            throw new Exception_ExecutionError("The file at path '$fileName' could not be executed\n\n : " . $e->getMessage() . "\n\n", 0, $e);
+            throw new Exception_ExecutionError(
+                "The file at path '$fileName' could not be executed\n\n : " . $e->getMessage() . "\n\n", 0, $e
+            );
         }
     }
 
@@ -84,6 +102,7 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
      * @return \stack\filesystem\File
      */
     public function cd($path) {
+        $this->checkLoggedIn();
         $this->filesystem->checkTraversionPermissions($path);
         return $this->filesystem->readFile($path);
     }
@@ -109,57 +128,68 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
      * @return bool
      */
     public function isInCWF($path) {
+        $this->checkLoggedIn();
         return \lean\Text::left($this->getCurrentWorkingFile(), $path) == $path;
     }
 
+    /**
+     * @return string
+     */
     public function getCurrentWorkingFile() {
+        $this->checkLoggedIn();
         return $this->currentWorkingFile;
     }
 
     /**
+     * @implements FileAccess
      * @param string $path
      * @return \stdClass
      * @throws Exception_FileNotFound
      */
-    public function readFile($path)
-    {
+    public function readFile($path) {
         return $this->filesystem->readFile($path);
     }
 
     /**
+     * @implements FileAccess
      * @param File $file
      * @return void
      */
-    public function writeFile($file)
-    {
+    public function writeFile(\stack\filesystem\File $file) {
         return $this->filesystem->writeFile($file);
     }
 
     /**
+     * @implements FileAccess
      * @param File $file
+     * @return void
      */
-    public function deleteFile($file)
-    {
+    public function deleteFile($file) {
         return $this->filesystem->deleteFile($file);
     }
 
+    /**
+     * @implements Shell_ModuleRegistry
+     * @param $name
+     * @param $callable
+     */
     public function registerModule($name, $callable) {
         $this->filesystem->registerModule($name, $callable);
     }
 
     /**
+     * @implements SecurityAccess
      * @param Security $security
      */
-    public function pushSecurity(Security $security)
-    {
+    public function pushSecurity(Security $security) {
         $this->filesystem->pushSecurity($security);
     }
 
     /**
+     * @implements SecurityAccess
      * @return Security
      */
-    public function pullSecurity()
-    {
+    public function pullSecurity() {
         return $this->filesystem->pullSecurity();
     }
 }

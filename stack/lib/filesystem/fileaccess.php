@@ -26,7 +26,7 @@ interface FileAccess {
      * @param File $file
      * @return void
      */
-    public function writeFile($file);
+    public function writeFile(File $file);
     /**
      * @param File $file
      */

@@ -111,7 +111,7 @@ class Filesystem implements FileAccess, SecurityAccess {
     /**
      * @param File $file
      */
-    public function writeFile($file) {
+    public function writeFile(File $file) {
         // check permission
         if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::WRITE)) {
             $path = $file->getPath();

@@ -68,4 +68,12 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         $this->context->getShell()->nuke();
         $this->context->getShell()->init();
     }
+
+    public function testIsInCWF() {
+        $user = new \stack\module\User('test');
+        $shell = $this->context->getShell();
+        $shell->cd('/foo');
+        $this->assertTrue($shell->isInCWF('/foo', '/foo/bar'));
+        $this->assertFalse($shell->isInCWF('/foo/bar', '/foo'));
+    }
 }

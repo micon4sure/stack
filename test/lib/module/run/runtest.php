@@ -40,13 +40,13 @@ class RunTest extends \stack\StackOSTest {
 
         $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname");
     }
+
     /**
      * @expectedException \stack\filesystem\Exception_FileNotFound
      */
     public function testGroup() {
         // save a new user
         $gname = 'foo';
-        $pass = 'bar';
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/addgroup';
 
         $this->context->getShell()->pushSecurity(new \stack\security\PriviledgedSecurity());
@@ -54,13 +54,13 @@ class RunTest extends \stack\StackOSTest {
 
         // saved user's uname must match original uname
         $this->assertEquals(
-            $uname,
-            $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname")->getModule()->getUname()
+            $gname,
+            $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$gname")->getModule()->getGname()
         );
 
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
-        $this->context->getShell()->execute($this->context, $path, $uname);
+        $this->context->getShell()->execute($this->context, $path, $gname);
 
-        $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname");
+        $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$gname");
     }
 }

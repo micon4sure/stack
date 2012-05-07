@@ -26,3 +26,7 @@ class Exception_UserNotFound extends \Exception {
 class Exception_ExecutionError extends \Exception {
 
 }
+
+class Exception_NeedToBeLoggedIn extends \Exception {
+
+}

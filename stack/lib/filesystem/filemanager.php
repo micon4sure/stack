@@ -70,7 +70,7 @@ class FileManager implements FileAccess {
      * @param File $file
      * @return \stdClass
      */
-    public function writeFile($file) {
+    public function writeFile(File $file) {
         // write the file to the file system
         // set revision to file instance
         $doc = $this->getAdapter()->toDatabase($file);
