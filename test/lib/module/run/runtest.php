@@ -15,19 +15,16 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class ShellTest extends \stack\filesystem\StackOSTest {
 
-    public function setUp() {
-        parent::setUp();
-        // init default shell with priviledged security
-        $this->context->getFilesystem()->pushSecurity(new \stack\security\PriviledgedSecurity());
-    }
-
-    public function testLogin() {
+class RunTest extends \stack\StackOSTest {
+    /**
+     * @expectedException \stack\filesystem\Exception_FileNotFound
+     */
+    public function testUser() {
         // save a new user
         $uname = 'foo';
         $pass = 'bar';
-        $path = Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
+        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
 
         $this->context->getShell()->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->context->getShell()->execute($this->context, $path, $uname, $pass);
@@ -35,37 +32,35 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         // saved user's uname must match original uname
         $this->assertEquals(
             $uname,
-            $this->context->getShell()->readFile(Root::ROOT_PATH_USERS . "/$uname")->getModule()->getUname()
+            $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname")->getModule()->getUname()
         );
 
-        // assert that user can login
-        $this->assertTrue($this->context->getShell()->login($uname, $pass));
+        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
+        $this->context->getShell()->execute($this->context, $path, $uname);
+
+        $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname");
     }
-
-    /*public function testChangeDir() {
-        // go unpriviledged
-        $fs = new Filesystem($this->getManager());
-        $fs->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $shell = Shell::instance($fs);
-
-        $shell->cd(Root::ROOT_USER_PATH_USERS_ROOT);
-        return;
-        $this->assertEquals(
-            Root::ROOT_USER_PATH_USERS_ROOT,
-            $shell->getPath()
-        );
-    }*/
-
     /**
-     * @expectedException \stack\Exception_UserNotFound
-     *
+     * @expectedException \stack\filesystem\Exception_FileNotFound
      */
-    public function testUserNotFound() {
-        $this->context->getShell()->login('asd', 'asd');
-    }
+    public function testGroup() {
+        // save a new user
+        $gname = 'foo';
+        $pass = 'bar';
+        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/addgroup';
 
-    public function testNukeAndInit() {
-        $this->context->getShell()->nuke();
-        $this->context->getShell()->init();
+        $this->context->getShell()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->getShell()->execute($this->context, $path, $gname);
+
+        // saved user's uname must match original uname
+        $this->assertEquals(
+            $uname,
+            $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname")->getModule()->getUname()
+        );
+
+        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
+        $this->context->getShell()->execute($this->context, $path, $uname);
+
+        $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname");
     }
 }

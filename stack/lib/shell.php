@@ -71,7 +71,11 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
         array_shift($args); // shift fileName argument
         array_unshift($args, $context); // reunshift the context as first argument
         $module = $file->getModule();
-        return call_user_func_array(array($module, 'run'), $args);
+        try {
+            call_user_func_array(array($module, 'run'), $args);
+        } catch(\Exception $e) {
+            throw new Exception_ExecutionError("The file at path '$fileName' could not be executed\n\n : " . $e->getMessage() . "\n\n", 0, $e);
+        }
     }
 
     /**

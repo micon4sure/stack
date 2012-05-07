@@ -15,9 +15,8 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-    class FileDumpTest extends StackOSTest {
-        public function testDump() {
-            $file = new \stack\filesystem\File('/foo', Root::ROOT_UNAME);
-            \lean\util\Dump::all($file);
-        }
+class BaseModuleTest extends StackOSTest {
+    public function testBaseModule() {
+
     }
+}

@@ -54,10 +54,10 @@ class MigrationInit001 implements \lean\Migration {
 
             // create system run files
             $modules = array(
-                'adduser' => new \stack\module\AddUser($shell),
-                'deluser' => new \stack\module\DelUser($shell),
-                'addgroup' => new \stack\module\AddGroup($shell),
-                'delgroup' => new \stack\module\DelGroup($shell),
+                'adduser' => new \stack\module\run\AddUser($shell),
+                'deluser' => new \stack\module\run\DelUser($shell),
+                'addgroup' => new \stack\module\run\AddGroup($shell),
+                'delgroup' => new \stack\module\run\DelGroup($shell),
             );
             foreach($modules as $name => $module) {
                 $path = Root::ROOT_PATH_SYSTEM_RUN . "/$name";

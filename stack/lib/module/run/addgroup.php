@@ -1,5 +1,5 @@
 <?php
-namespace stack\module;
+namespace stack\module\run;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,11 +15,18 @@ namespace stack\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class AddGroup extends BaseModule {
+class AddGroup extends \stack\module\BaseModule {
 
-    const NAME = 'stack.addgroup';
+    const NAME = 'stack.system.addgroup';
 
     protected function export($data) {
         return $data;
+    }
+
+    public function run(\stack\Context $context, $gname) {
+        $group = new \stack\module\Group($gname);
+        $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS . '/' . $group->getGname(), \stack\Root::ROOT_UNAME);
+        $file->setModule($group);
+        $context->getShell()->writeFile($file);
     }
 }

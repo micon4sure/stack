@@ -86,16 +86,16 @@ namespace stack {
                 return \stack\module\Group::create($data);
             });
             $this->context->getShell()->registerModule('stack.system.adduser', function($data) {
-                return \stack\module\AddUser::create($data);
-            });
-            $this->context->getShell()->registerModule('stack.system.addgroup', function($data) {
-                return \stack\module\AddGroup::create($data);
+                return \stack\module\run\AddUser::create($data);
             });
             $this->context->getShell()->registerModule('stack.system.deluser', function($data) {
-                return \stack\module\DelUser::create($data);
+                return \stack\module\run\DelUser::create($data);
+            });
+            $this->context->getShell()->registerModule('stack.system.addgroup', function($data) {
+                return \stack\module\run\AddGroup::create($data);
             });
             $this->context->getShell()->registerModule('stack.system.delgroup', function($data) {
-                return \stack\module\DelGroup::create($data);
+                return \stack\module\run\DelGroup::create($data);
             });
 
             // nuke and reset shell back into clean state

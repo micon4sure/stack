@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack\module\run;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,8 +15,13 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class BaseModuleTest extends StackOSTest {
-    public function testBaseModule() {
+class DelGroup extends \stack\module\BaseModule {
 
+    const NAME = 'stack.system.delgroup';
+
+    public function run(\stack\Context $context, $gname) {
+        $path = \stack\Root::ROOT_PATH_USERS . "/$gname";
+        $file = $context->getShell()->readFile($path);
+        $context->getShell()->deleteFile($file);
     }
 }

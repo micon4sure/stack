@@ -22,3 +22,7 @@ class Exception extends \Exception {
 class Exception_UserNotFound extends \Exception {
 
 }
+
+class Exception_ExecutionError extends \Exception {
+
+}
