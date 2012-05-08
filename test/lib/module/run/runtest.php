@@ -17,9 +17,6 @@ namespace stack;
 
 
 class RunTest extends \stack\StackOSTest {
-    /**
-     * @expectedException \stack\filesystem\Exception_FileNotFound
-     */
     public function testUser() {
         // save a new user
         $uname = 'foo';
@@ -38,12 +35,14 @@ class RunTest extends \stack\StackOSTest {
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
         $this->context->getShell()->execute($this->context, $path, $uname);
 
-        $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname");
+        try {
+            $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname");
+            $this->fail();
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            // pass
+        }
     }
 
-    /**
-     * @expectedException \stack\filesystem\Exception_FileNotFound
-     */
     public function testGroup() {
         // save a new user
         $gname = 'foo';
@@ -61,6 +60,11 @@ class RunTest extends \stack\StackOSTest {
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
         $this->context->getShell()->execute($this->context, $path, $gname);
 
-        $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$gname");
+        try {
+            $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$gname");
+            $this->fail();
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            // pass
+        }
     }
 }

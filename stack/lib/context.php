@@ -15,7 +15,7 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Context extends \lean\Registry_State implements Shell_ModuleRegistry {
+class Context extends \lean\Registry_State implements Interface_ModuleRegistry {
     /**
      * @var Environment
      */

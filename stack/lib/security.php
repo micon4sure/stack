@@ -15,18 +15,6 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface Security {
-    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
-     *
-     * @param \stack\module\User $user
-     * @param \stack\filesystem\File          $file
-     * @param string                     $priviledge
-     *
-     * @return bool
-     */
-    public function checkFilePermission(\stack\filesystem\File $file, $priviledge);
-}
-
 abstract class Security_Priviledge {
     /** Read permission
      */
@@ -35,7 +23,6 @@ abstract class Security_Priviledge {
      */
     const WRITE = 'w';
     /** Execute permission: allows to execute applications enclosed in a file
-     * Allows transversion into directory (TODO unimplemented)
      */
     const EXECUTE = 'x';
     /** Delete permission

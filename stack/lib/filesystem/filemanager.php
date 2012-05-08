@@ -18,7 +18,7 @@ namespace stack\filesystem;
 /**
  * Interface to the File system, including Modules
  */
-class FileManager implements FileAccess {
+class FileManager implements \stack\Interface_FileAccess {
     /**
      * @var \couchClient
      */
@@ -82,7 +82,7 @@ class FileManager implements FileAccess {
     /**
      * @param File $file
      */
-    public function deleteFile($file) {
+    public function deleteFile(File $file) {
         $this->couchClient->deleteDoc($this->adapter->toDatabase($file));
     }
 
@@ -103,7 +103,7 @@ class FileManager implements FileAccess {
     }
 }
 
-class FileManager_Module extends FileManager implements \stack\Shell_ModuleRegistry {
+class FileManager_Module extends FileManager implements \stack\Interface_ModuleRegistry {
     /**
      * @var array
      */
@@ -133,7 +133,7 @@ class FileManager_Module extends FileManager implements \stack\Shell_ModuleRegis
     /**
      * Register a module factory callable
      *
-     * @implements Shell_ModuleRegistry
+     * @implements Interface_ModuleRegistry
      * @param string $name
      * @param \Closure $factory
      * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable

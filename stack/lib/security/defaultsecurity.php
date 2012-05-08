@@ -15,7 +15,7 @@ namespace stack\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DefaultSecurity implements \stack\Security {
+class DefaultSecurity implements \stack\Interface_Security {
     /**
      * @var \stack\module\User
      */

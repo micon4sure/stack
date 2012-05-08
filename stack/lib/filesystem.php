@@ -17,14 +17,14 @@ namespace stack;
 
 // use
 use stack\filesystem\File;
-use stack\filesystem\FileAccess;
+use stack\Interface_FileAccess;
 use stack\security;
 use stack\security_Priviledge;
 
 /**
  * Facade for the filesystem
  */
-class Filesystem implements FileAccess, SecurityAccess {
+class Filesystem implements \stack\Interface_FileAccess, Interface_SecurityAccess {
     /**
      * @var FileManager
      */
@@ -50,19 +50,21 @@ class Filesystem implements FileAccess, SecurityAccess {
     }
 
     /**
-     * @param Security $security
+     * @param Interface_Security $security
      */
-    public function pushSecurity(Security $security) {
+    public function pushSecurity(Interface_Security $security) {
         array_push($this->securityStack, $security);
     }
     /**
-     * @return  Security
+     * @return  Interface_Security
      */
     public function pullSecurity() {
         return array_pop($this->securityStack);
     }
+
     /**
-     * @return  Security
+     * @throws filesystem\Exception_NoSecurity
+     * @return  Interface_Security
      */
     protected function currentSecurity() {
         if(!count($this->securityStack))
@@ -72,9 +74,8 @@ class Filesystem implements FileAccess, SecurityAccess {
 
     /**
      * @param string $path
+     * @throws filesystem\Exception_PermissionDenied
      * @return \stdClass
-     * @throws Exception_FileNotFound
-     * @throws Exception_PermissionDenied
      */
     public function readFile($path) {
         $file = $this->fileManager->readFile($path);
@@ -84,6 +85,14 @@ class Filesystem implements FileAccess, SecurityAccess {
         return $file;
     }
 
+    /**
+     * Read all files in a path:
+     * /foo/bar/qux
+     * return [/foo, /foo/bar, /foo/bar/qux]
+     *
+     * @param $path
+     * @return array
+     */
     public function readFilesInPath($path) {
         $fileNames = array_filter(explode('/', $path));
         $paths = array();
@@ -97,6 +106,7 @@ class Filesystem implements FileAccess, SecurityAccess {
 
     /**
      * Read an array of paths
+     *
      * @param array $paths
      * @return array
      */
@@ -123,9 +133,10 @@ class Filesystem implements FileAccess, SecurityAccess {
 
     /**
      * @param File $file
+     * @throws Exception_PermissionDenied
      * @return void
      */
-    public function deleteFile($file) {
+    public function deleteFile(File $file) {
         // check permission
         if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::DELETE)) {
             $path = $file->getPath();
@@ -137,6 +148,7 @@ class Filesystem implements FileAccess, SecurityAccess {
     /**
      * Check if current security will allow READ(r) of all files in the path
      * @param $path
+     * @throws \Exception|filesystem\Exception_PermissionDenied
      * @return bool
      */
     public function checkTraversionPermissions($path) {
@@ -182,7 +194,7 @@ class Filesystem implements FileAccess, SecurityAccess {
     /**
      * Register a module factory callable
      *
-     * @implements Shell_ModuleRegistry
+     * @implements Interface_ModuleRegistry
      * @param string $name
      * @param \Closure $factory
      * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable

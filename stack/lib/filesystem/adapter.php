@@ -16,19 +16,10 @@ namespace stack\filesystem;
     */
 
 /**
- * Describes the interface of an adapter that will adapt a file to a database compatible format and back
- */
-interface Adapter {
-    public function fromDatabase($doc);
-
-    public function toDatabase(\stack\filesystem\File $doc);
-}
-
-/**
  * Adapts files from and to database for FileManager
  * Including modules
  */
-class Adapter_File implements Adapter {
+class Adapter_File implements \stack\Interface_Adapter {
     /**
      * @var \stack\filesystem\FileManager
      */

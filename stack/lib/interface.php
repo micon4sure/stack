@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,7 +15,59 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface FileAccess {
+interface Interface_Security {
+    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
+     *
+     * @param \stack\filesystem\File  $file
+     * @param string                  $priviledge
+     * @return bool
+     */
+    public function checkFilePermission(\stack\filesystem\File $file, $priviledge);
+}
+
+/**
+ * I know how to hold module factories.
+ */
+interface Interface_ModuleRegistry {
+    /**
+     * Register a module factory callable
+     *
+     * @param string $name
+     * @param callable $factory
+     * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable
+     * @throws Exception_ModuleConflict
+     */
+    public function registerModule($name, $factory);
+}
+
+/**
+ * I know how to adapt couchDB documents to File objects and back.
+ * I am also a ModuleRegistry
+ */
+interface Interface_Adapter {
+    public function fromDatabase($doc);
+
+    public function toDatabase(\stack\filesystem\File $doc);
+}
+
+/**
+ * I know how to handle a security stack.
+ */
+interface Interface_SecurityAccess {
+    /**
+     * @param Security $security
+     */
+    public function pushSecurity(Interface_Security $security);
+    /**
+     * @return  Security
+     */
+    public function pullSecurity();
+}
+
+/**
+ * I know how to handle files.
+ */
+interface Interface_FileAccess {
     /**
      * @param string $path
      * @return \stdClass
@@ -26,11 +78,11 @@ interface FileAccess {
      * @param File $file
      * @return void
      */
-    public function writeFile(File $file);
+    public function writeFile(\stack\filesystem\File $file);
     /**
      * @param File $file
      */
-    public function deleteFile($file);
+    public function deleteFile(File $file);
     /**
      * Factory reset method
      * @return void

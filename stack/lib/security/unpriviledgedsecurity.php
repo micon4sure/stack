@@ -15,7 +15,7 @@ namespace stack\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class UnpriviledgedSecurity implements \stack\Security {
+class UnpriviledgedSecurity implements \stack\Interface_Security {
     /** Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
      * @param \stack\module\User $user

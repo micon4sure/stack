@@ -15,20 +15,11 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-interface Shell_ModuleRegistry {
-    /**
-     * Register a module factory callable
-     *
-     * @param string $name
-     * @param callable $factory
-     * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable
-     * @throws Exception_ModuleConflict
-     */
-    public function registerModule($name, $factory);
-}
-
-
-class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, SecurityAccess {
+/**
+ * Facade to the underlying implementation levels: Security, File and Module.
+ * Also handles the current User's session (for the lifetime of the Shell object) and their current working file.
+ */
+class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface_ModuleRegistry {
     /**
      * @var Filesystem
      */
@@ -51,14 +42,38 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
         $this->filesystem = $filesystem;
     }
 
+    /**
+     * Check the given credentials, throw Exception_UserNotFound if user is not in the system.
+     *
+     *
+     * @param $uname
+     * @param $password
+     * @return bool
+     * @throws Exception_UserNotFound
+     */
     public function login($uname, $password) {
         try {
             $ufile = $this->filesystem->readFile(Root::ROOT_PATH_USERS . '/' . $uname);
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
-        $this->currentUser = $ufile->getModule()->auth($password);
+        $user = $ufile->getModule();
+        $loggedIn = $user->auth($password);
+        if(!$loggedIn) {
+            return false;
+        }
+        $this->currentUser = $user;
+        return true;
+    }
 
+    /**
+     * Unset the currently active user
+     *
+     * @return Shell
+     */
+    public function logout() {
+        unset($this->currentUser);
+        return $this;
     }
 
     /**
@@ -68,7 +83,7 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
      * @throws Exception_NeedToBeLoggedIn
      */
     public function checkLoggedIn($message = null) {
-        if(!$this->loggedIn) {
+        if(!$this->currentUser !== null) {
             throw new Exception_NeedToBeLoggedIn($message ?: 'Need to be logged in to perform this action.');
         }
     }
@@ -90,9 +105,7 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
         try {
             call_user_func_array(array($module, 'run'), $args);
         } catch(\Exception $e) {
-            throw new Exception_ExecutionError(
-                "The file at path '$fileName' could not be executed\n\n : " . $e->getMessage() . "\n\n", 0, $e
-            );
+            throw new Exception_ExecutionError("The file at path '$fileName' could not be executed\n\n : " . $e->getMessage() . "\n\n", 0, $e);
         }
     }
 
@@ -169,7 +182,7 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
     }
 
     /**
-     * @implements Shell_ModuleRegistry
+     * @implements Interface_ModuleRegistry
      * @param $name
      * @param $callable
      */
@@ -178,15 +191,15 @@ class Shell implements \stack\filesystem\FileAccess, Shell_ModuleRegistry, Secur
     }
 
     /**
-     * @implements SecurityAccess
+     * @implements Interface_SecurityAccess
      * @param Security $security
      */
-    public function pushSecurity(Security $security) {
+    public function pushSecurity(Interface_Security $security) {
         $this->filesystem->pushSecurity($security);
     }
 
     /**
-     * @implements SecurityAccess
+     * @implements Interface_SecurityAccess
      * @return Security
      */
     public function pullSecurity() {
