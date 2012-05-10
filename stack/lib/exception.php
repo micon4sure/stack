@@ -23,10 +23,18 @@ class Exception_UserNotFound extends \Exception {
 
 }
 
+class Exception_GroupNotFound extends \Exception {
+
+}
+
 class Exception_ExecutionError extends \Exception {
 
 }
 
 class Exception_NeedToBeLoggedIn extends \Exception {
+
+}
+
+class Exception_CorruptModuleInUserFile extends \Exception {
 
 }

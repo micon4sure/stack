@@ -52,18 +52,47 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
      * @throws Exception_UserNotFound
      */
     public function login($uname, $password) {
-        try {
-            $ufile = $this->filesystem->readFile(Root::ROOT_PATH_USERS . '/' . $uname);
-        } catch(\stack\filesystem\Exception_FileNotFound $e) {
-            throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
+        $file = $this->readUser($uname);
+        if(!$file->getModule() instanceof \stack\module\BaseModule) {
+            throw new Exception_CorruptModuleInUserFile();
         }
-        $user = $ufile->getModule();
+        $user = $file->getModule();
         $loggedIn = $user->auth($password);
         if(!$loggedIn) {
             return false;
         }
         $this->currentUser = $user;
         return true;
+    }
+
+    /**
+     * Read a user file and return its module
+     *
+     * @param string $uname
+     * @return \stack\module\User
+     * @throws Exception_UserNotFound
+     */
+    public function readUser($uname) {
+        try {
+            return $this->filesystem->readFile(Root::ROOT_PATH_USERS . '/' . $uname);
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
+        }
+    }
+
+    /**
+     * Read a group file and return its module
+     *
+     * @param string $gname
+     * @return \stack\module\Group
+     * @throws Exception_GroupNotFound
+     */
+    public function readGroup($gname) {
+        try {
+            return $this->filesystem->readFile(Root::ROOT_PATH_USERS . '/' . $gname);
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            throw new Exception_GroupNotFound("The group with the gname '$gname' was not found.");
+        }
     }
 
     /**
@@ -100,7 +129,7 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
         $args = func_get_args();
         array_shift($args); // shift context argument
         array_shift($args); // shift fileName argument
-        array_unshift($args, $context); // reunshift the context as first argument
+        array_unshift($args, $context); // unshift the context as new first argument
         $module = $file->getModule();
         try {
             call_user_func_array(array($module, 'run'), $args);
@@ -177,7 +206,7 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
      * @param File $file
      * @return void
      */
-    public function deleteFile($file) {
+    public function deleteFile(\stack\filesystem\File $file) {
         return $this->filesystem->deleteFile($file);
     }
 

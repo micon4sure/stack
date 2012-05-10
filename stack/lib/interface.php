@@ -82,7 +82,7 @@ interface Interface_FileAccess {
     /**
      * @param File $file
      */
-    public function deleteFile(File $file);
+    public function deleteFile(\stack\filesystem\File $file);
     /**
      * Factory reset method
      * @return void
