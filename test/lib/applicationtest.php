@@ -16,6 +16,9 @@ namespace stack;
  */
 
 class ApplicationTest extends StackOSTest {
+    /**
+     * Test that a user can be created and deleted via applications conenience methods
+     */
     public function testUser() {
         // push a priviledged security to be used in the application
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
@@ -40,6 +43,9 @@ class ApplicationTest extends StackOSTest {
         }
     }
 
+    /**
+     * Test that a group can be created and deleted via applications conenience methods
+     */
     public function testGroup() {
         // push a priviledged security to be used in the application
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());

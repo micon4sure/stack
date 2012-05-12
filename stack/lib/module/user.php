@@ -124,10 +124,17 @@ class User extends BaseModule {
      * @throws \InvalidArgumentException
      */
     public function changePassword($password) {
-        $this->password = sha1($password);
         if(!\lean\Text::len($password)) {
             throw new \InvalidArgumentException('No password provided. Password must not be empty.');
         }
+        $this->password = sha1($password);
+    }
+
+    /**
+     * @param $password
+     */
+    public function setPasswordHash($hash) {
+        $this->password = $hash;
     }
 
     /**
@@ -156,7 +163,7 @@ class User extends BaseModule {
         $uber = isset($data->uber) ? $data->uber : false;
         $instance->setUber($uber);
         $password = isset($data->password) ? $data->password : false;
-        $instance->changePassword($password);
+        $instance->setPasswordHash($password);
         return $instance;
     }
 

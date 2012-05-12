@@ -18,12 +18,18 @@ namespace stack\fileSystem;
 use stack\Security_Priviledge;
 
 class SecurityTest extends StackOSTest {
+    /**
+     * Test that priviledged security always returns true
+     */
     public function testPriviledged() {
         $security = new \stack\security\PriviledgedSecurity();
         $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\security_Priviledge::READ);
         $this->assertTrue($check);
     }
 
+    /**
+     * Test that unpriviledged security always returns false
+     */
     public function testUnpriviledged() {
         $security = new \stack\security\UnpriviledgedSecurity();
         $check = $security->checkFilePermission(new SecurityTest_Mock_File(), \stack\security_Priviledge::READ);
@@ -69,6 +75,9 @@ class SecurityTest extends StackOSTest {
         $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::DELETE));
     }
 
+    /**
+     * Test group permissions granted on a user in a group
+     */
     public function testGroupPermission() {
         // create arbitrary user and document
         $uname = 'user';
@@ -113,6 +122,9 @@ class SecurityTest extends StackOSTest {
         $this->checkAllPriviledges($security, $file);
     }
 
+    /**
+     * test permissions granted to a user
+     */
     public function testUserPermission() {
         // create arbitrary user and document
         $uname = 'user';

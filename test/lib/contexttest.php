@@ -16,11 +16,13 @@ namespace stack;
  */
 
 class ContextTest extends StackOSTest {
+    /**
+     * Test that a context will always deliver the same instance for env, shell and fs
+     */
     public function testContext() {
         // get the preconfigured context from StackOSTest
         $context = $this->context;
         // assert that context das not make up new instanced as it goes.
-        $this->assertTrue($context->getFilesystem() === $context->getFilesystem());
         $this->assertTrue($context->getEnvironment() === $context->getEnvironment());
         $this->assertTrue($context->getShell() === $context->getShell());
         $this->assertTrue($context->getFileSystem() === $context->getFileSystem());

@@ -16,6 +16,9 @@ namespace stack;
  */
 
 class UserTest extends StackOSTest {
+    /**
+     * Test basic functionality
+     */
     public function testUser() {
         $home = \stack\Root::ROOT_PATH_HOME . '/foo';
         $user = new \stack\module\User('foo', $home);
@@ -23,6 +26,9 @@ class UserTest extends StackOSTest {
         $this->assertEquals($home, $user->getHome());
     }
 
+    /**
+     * Test if a user is still uber after saving
+     */
     public function testUber() {
         $fs = $this->getFileSystem();
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
@@ -40,10 +46,12 @@ class UserTest extends StackOSTest {
         $fs->writeFile($file);
 
         $file = $this->getFileSystem()->readFile('/bar');
-        \lean\util\Dump::deep($file->getModule());
         $this->assertTrue($file->getModule()->isUber());
     }
 
+    /**
+     * Test authentication of users
+     */
     public function testAuth() {
         $user = new \stack\module\User('foo');
         $user->changePassword('bar');

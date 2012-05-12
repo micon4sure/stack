@@ -60,6 +60,9 @@ class FileSystemTest extends StackOSTest {
         }
     }
 
+    /**
+     * Test that module creation works as expected
+     */
      public function testCreateModule() {
         $fs = $this->getFileSystem();
 
@@ -73,6 +76,9 @@ class FileSystemTest extends StackOSTest {
         $this->assertTrue($module instanceof \stack\module\Group);
     }
 
+    /**
+     * Test saving a file thrice
+     */
     public function testSaveThrice() {
         $fs = $this->getFileSystem();
         $file = new \stack\filesystem\File('/foo', \stack\Root::ROOT_UNAME);

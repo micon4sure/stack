@@ -16,6 +16,10 @@ namespace stack\fileSystem;
  */
 
 class ModuleTest extends StackOSTest {
+
+    /**
+     * Save a file with a module and see if its still there after reading
+     */
     public function testContainsModule() {
         $system = $this->getFileSystem();
 
@@ -30,6 +34,9 @@ class ModuleTest extends StackOSTest {
         $this->assertTrue($user instanceof \stack\module\User);
     }
 
+    /**
+     * Save a plain module and see if it still has its data after saving
+     */
     public function testData() {
         $fileSystem = $this->getFileSystem();
         // create the document

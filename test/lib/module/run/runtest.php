@@ -17,6 +17,9 @@ namespace stack;
 
 
 class RunTest extends \stack\StackOSTest {
+    /**
+     * Test adduser and deluser modules
+     */
     public function testUser() {
         // save a new user
         $uname = 'foo';
@@ -24,7 +27,7 @@ class RunTest extends \stack\StackOSTest {
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
 
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $this->context->getShell()->execute($this->context, $path, $uname, $pass);
+        $this->context->getShell()->execute($path, $uname, $pass);
 
         // saved user's uname must match original uname
         $this->assertEquals(
@@ -33,7 +36,7 @@ class RunTest extends \stack\StackOSTest {
         );
 
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
-        $this->context->getShell()->execute($this->context, $path, $uname);
+        $this->context->getShell()->execute($path, $uname);
 
         try {
             $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname");
@@ -43,13 +46,16 @@ class RunTest extends \stack\StackOSTest {
         }
     }
 
+    /**
+     * test addgroup and delgroup modules
+     */
     public function testGroup() {
         // save a new user
         $gname = 'foo';
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/addgroup';
 
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $this->context->getShell()->execute($this->context, $path, $gname);
+        $this->context->getShell()->execute($path, $gname);
 
         // saved user's uname must match original uname
         $this->assertEquals(
@@ -58,7 +64,7 @@ class RunTest extends \stack\StackOSTest {
         );
 
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
-        $this->context->getShell()->execute($this->context, $path, $gname);
+        $this->context->getShell()->execute($path, $gname);
 
         try {
             $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$gname");

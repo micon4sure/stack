@@ -131,12 +131,11 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
      * @param $fileName
      * @throws Exception_ExecutionError
      */
-    public function execute(Context $context, $fileName) {
+    public function execute($fileName) {
         $file = $this->fileSystem->readFile($fileName);
         $args = func_get_args();
-        array_shift($args); // shift context argument
         array_shift($args); // shift fileName argument
-        array_unshift($args, $context); // unshift the context as new first argument
+        array_unshift($args, $this->context); // unshift the context as new first argument
         $module = $file->getModule();
         try {
             call_user_func_array(array($module, 'run'), $args);

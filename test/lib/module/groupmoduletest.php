@@ -16,6 +16,9 @@ namespace stack;
  */
 
 class GroupTest extends StackOSTest {
+    /**
+     * Test that the name of a group can be changed
+     */
     public function testNamechange() {
         $fs = $this->getFileSystem();
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());

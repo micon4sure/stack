@@ -19,10 +19,12 @@ class ShellTest extends \stack\filesystem\StackOSTest {
 
     public function setUp() {
         parent::setUp();
-        // init default shell with priviledged security
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
     }
 
+    /**
+     * Test if a user can log in
+     */
     public function testLogin() {
         // save a new user
         $uname = 'foo';
@@ -30,7 +32,7 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         $path = Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
 
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $this->context->getShell()->execute($this->context, $path, $uname, $pass);
+        $this->context->getShell()->execute($path, $uname, $pass);
 
         // saved user's uname must match original uname
         $this->assertEquals(
@@ -38,7 +40,7 @@ class ShellTest extends \stack\filesystem\StackOSTest {
             $this->context->getShell()->readFile(Root::ROOT_PATH_USERS . "/$uname")->getModule()->getUname()
         );
 
-        // assert that user can login
+        // assert that user can log in
         $this->assertTrue($this->context->getShell()->login($uname, $pass));
     }
 
@@ -64,11 +66,17 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         $this->context->getShell()->login('asd', 'asd');
     }
 
+    /**
+     * Test that a database can be nuked and initialized
+     */
     public function testNukeAndInit() {
         $this->context->getShell()->nuke();
         $this->context->getShell()->init();
     }
 
+    /**
+     * Test that a user
+     */
     public function testIsInCWF() {
         $user = new \stack\module\User('test');
         $shell = $this->context->getShell();
