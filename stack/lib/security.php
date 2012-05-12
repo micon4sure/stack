@@ -15,6 +15,9 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Kind of a cheap enum for the default priviledges
+ */
 abstract class Security_Priviledge {
     /** Read permission
      */

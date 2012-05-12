@@ -14,6 +14,10 @@ namespace stack\module;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+
+/**
+ * Default implements BaseModule_Abstract
+ */
 class BaseModule extends BaseModule_Abstract {
     protected function export($data) {
         return $data;
@@ -23,10 +27,20 @@ class BaseModule extends BaseModule_Abstract {
         return new static($data);
     }
 }
+
+/**
+ * Module to be saved in a file
+ */
 abstract class BaseModule_Abstract {
 
+    /**
+     * @var null|\stdClass
+     */
     protected $data;
 
+    /**
+     * @param null $data
+     */
     public function __construct($data = null) {
         if($data = null)
             $data = new \stdClass();
@@ -48,14 +62,23 @@ abstract class BaseModule_Abstract {
      * Create JSONizable data
      *
      * @abstract
+     * @param $data
      * @return \stdClass
      */
     protected abstract function export($data);
 
+    /**
+     * @param $data
+     * @return \stack\module\BaseModule_Abstract
+     */
     public function setData($data) {
         $this->data = $data;
+        return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getName() {
         return static::NAME;
     }

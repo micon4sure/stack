@@ -15,7 +15,13 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Context extends \lean\Registry_State implements Interface_ModuleRegistry {
+/**
+ * Context is the way to provide access among units inside the Shell.
+ * It may also be passed around outside the Shell to alter the context.
+ * (Like registering a module or pushing a Security)
+ * Also handles security concerns over the implemented Interface_SecurityAccess
+ */
+class Context extends \lean\Registry_State implements Interface_ModuleRegistry, Interface_Security, Interface_SecurityAccess {
     /**
      * @var Environment
      */
@@ -24,24 +30,16 @@ class Context extends \lean\Registry_State implements Interface_ModuleRegistry {
      * @var Shell
      */
     private $shell;
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
 
     /**
-     * @var filesystem\FileManager
+     * @var FileSystem
      */
-    private $fileManager;
+    private $fileSystem;
 
     /**
-     * @var Context
+     * @var \lean\Stack
      */
-    private static $instance;
-
-    public static function instance() {
-
-    }
+    private $security;
 
     /**
      * Initiate a context for the passed environment
@@ -50,35 +48,16 @@ class Context extends \lean\Registry_State implements Interface_ModuleRegistry {
      */
     public function __construct(Environment $environment) {
         $this->environment = $environment;
+        $this->security = new \lean\Stack();
     }
 
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :  accessors for internals */
     /**
-     * @return Environment
-     */
+      * @return Environment
+      */
     public function getEnvironment() {
         return $this->environment;
     }
-
-    /**
-     * @return Filesystem
-     */
-    public function getFilesystem() {
-        if($this->filesystem)
-            return $this->filesystem;
-        $this->filesystem = $this->environment->createFileSystem();
-        return $this->filesystem;
-    }
-
-    /**
-     * Register a module class bei their class name.
-     * Register module with the NAME constant of the class and the static method create as factory
-     * @param string $name
-     * @param $callable
-     */
-    public function registerModule($name, $callable) {
-        $this->getFileManager()->registerModule($name, $callable);
-    }
-
     /**
      * @return Shell
      */
@@ -87,10 +66,61 @@ class Context extends \lean\Registry_State implements Interface_ModuleRegistry {
             return $this->shell;
         }
         $fs = $this->getFilesystem();
-        return $this->shell = $this->environment->createShell($fs);
+        return $this->shell = $this->environment->createShell($this, $fs);
     }
 
-    protected function getFileManager() {
-        return $this->filesystem->getFileManger();
+    /**
+     * Use this method only to access the file system.
+     *
+     * @return Filesystem
+     */
+    protected function getFileSystem() {
+        return $this->fileSystem ?: $this->fileSystem = $this->environment->createFilesystem($this);
+    }
+
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :  : : : : ModuleRegistry*/
+    /**
+     * Register a module class bei their class name.
+     * Register module with the NAME constant of the class and the static method create as factory
+     * @param string $name
+     * @param $callable
+     */
+    public function registerModule($name, $callable) {
+        $this->getFileSystem()->registerModule($name, $callable);
+    }
+
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : SecurityAccess */
+    /**
+     * @param Interface_Security $security
+     */
+    public function pushSecurity(Interface_Security $security) {
+        $this->security->push($security);
+    }
+
+    /**
+     * @return  Interface_Security
+     */
+    public function pullSecurity() {
+        return $this->security->pull();
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function currentSecurity() {
+        return $this->security->current();
+    }
+
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : Security */
+    /**
+     * Check if a user has permission to access a file in ways of $permission (r/w/x)
+     *
+     * @param \stack\filesystem\File  $file
+     * @param string                  $priviledge
+     * @return bool
+     */
+    public function checkFilePermission(\stack\filesystem\File $file, $priviledge)
+    {
+        return $this->security->current()->checkFilePermission($file, $priviledge);
     }
 }

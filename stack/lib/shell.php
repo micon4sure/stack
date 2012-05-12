@@ -19,11 +19,11 @@ namespace stack;
  * Facade to the underlying implementation levels: Security, File and Module.
  * Also handles the current User's session (for the lifetime of the Shell object) and their current working file.
  */
-class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface_ModuleRegistry {
+class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     /**
      * @var Filesystem
      */
-    private $filesystem;
+    private $fileSystem;
 
     /**
      * @var string
@@ -36,10 +36,17 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
     private $currentUser;
 
     /**
-     * @param \stack\Filesystem $filesystem
+     * @var Context
      */
-    public function __construct(\stack\Filesystem $filesystem) {
-        $this->filesystem = $filesystem;
+    private $context;
+
+    /**
+     * @param \stack\Context $context
+     * @param \stack\Filesystem $fileSystem
+     */
+    public function __construct(Context $context, \stack\Filesystem $fileSystem) {
+        $this->fileSystem = $fileSystem;
+        $this->context = $context;
     }
 
     /**
@@ -48,8 +55,8 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
      *
      * @param $uname
      * @param $password
+     * @throws Exception_CorruptModuleInUserFile
      * @return bool
-     * @throws Exception_UserNotFound
      */
     public function login($uname, $password) {
         $file = $this->readUser($uname);
@@ -74,7 +81,7 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
      */
     public function readUser($uname) {
         try {
-            return $this->filesystem->readFile(Root::ROOT_PATH_USERS . '/' . $uname);
+            return $this->fileSystem->readFile(Root::ROOT_PATH_USERS . '/' . $uname);
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             throw new Exception_UserNotFound("The user with the uname '$uname' was not found.");
         }
@@ -89,7 +96,7 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
      */
     public function readGroup($gname) {
         try {
-            return $this->filesystem->readFile(Root::ROOT_PATH_USERS . '/' . $gname);
+            return $this->fileSystem->readFile(Root::ROOT_PATH_USERS . '/' . $gname);
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             throw new Exception_GroupNotFound("The group with the gname '$gname' was not found.");
         }
@@ -125,7 +132,7 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
      * @throws Exception_ExecutionError
      */
     public function execute(Context $context, $fileName) {
-        $file = $this->filesystem->readFile($fileName);
+        $file = $this->fileSystem->readFile($fileName);
         $args = func_get_args();
         array_shift($args); // shift context argument
         array_shift($args); // shift fileName argument
@@ -145,23 +152,15 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
      */
     public function cd($path) {
         $this->checkLoggedIn();
-        $this->filesystem->checkTraversionPermissions($path);
-        return $this->filesystem->readFile($path);
+        $this->context->checkTraversionPermissions($path);
+        return $this->fileSystem->readFile($path);
     }
 
     /**
      * Initialize a new database
      */
     public function init() {
-        $this->filesystem->init();
-    }
-
-    /**
-     * Warning: destroys database
-     * @return void
-     */
-    public function nuke() {
-        $this->filesystem->nuke();
+        $this->fileSystem->init();
     }
 
     /**
@@ -183,55 +182,73 @@ class Shell implements Interface_SecurityAccess, Interface_FileAccess, Interface
     }
 
     /**
-     * @implements FileAccess
-     * @param string $path
-     * @return \stdClass
-     * @throws Exception_FileNotFound
-     */
-    public function readFile($path) {
-        return $this->filesystem->readFile($path);
-    }
-
-    /**
-     * @implements FileAccess
-     * @param File $file
-     * @return void
-     */
-    public function writeFile(\stack\filesystem\File $file) {
-        return $this->filesystem->writeFile($file);
-    }
-
-    /**
-     * @implements FileAccess
-     * @param File $file
-     * @return void
-     */
-    public function deleteFile(\stack\filesystem\File $file) {
-        return $this->filesystem->deleteFile($file);
-    }
-
-    /**
      * @implements Interface_ModuleRegistry
      * @param $name
      * @param $callable
      */
     public function registerModule($name, $callable) {
-        $this->filesystem->registerModule($name, $callable);
+        $this->fileSystem->registerModule($name, $callable);
+    }
+
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : FileAccess */
+    /**
+     * @param string $path
+     * @throws filesystem\Exception_PermissionDenied
+     * @return \stack\File
+     */
+    public function readFile($path) {
+        $file = $this->fileSystem->readFile($path);
+        if(!$this->context->checkFilePermission($file, Security_Priviledge::READ)) {
+            throw new \stack\filesystem\Exception_PermissionDenied("READ (r) permission to file at path '$path' was denied.");
+        }
+        return $file;
     }
 
     /**
-     * @implements Interface_SecurityAccess
-     * @param Security $security
+     * @param \stack\filesystem\File $file
+     * @return \stack\filesystem\File
+     * @throws Exception_PermissionDenied
      */
-    public function pushSecurity(Interface_Security $security) {
-        $this->filesystem->pushSecurity($security);
+    public function writeFile(\stack\filesystem\File $file) {
+        // check permission
+        if(!$this->context->checkFilePermission($file, Security_Priviledge::WRITE)) {
+            $path = $file->getPath();
+            throw new Exception_PermissionDenied("WRITE (w) permission to file at path '$path' was denied.");
+        }
+        $this->fileSystem->writeFile($file);
+        return $file;
     }
 
     /**
-     * @implements Interface_SecurityAccess
-     * @return Security
+     * @param \stack\filesystem\File $file
+     * @throws Exception_PermissionDenied
+     * @return void
      */
-    public function pullSecurity() {
-        return $this->filesystem->pullSecurity();
+    public function deleteFile(\stack\filesystem\File $file) {
+        // check permission
+        if(!$this->context->checkFilePermission($file, Security_Priviledge::DELETE)) {
+            $path = $file->getPath();
+            throw new Exception_PermissionDenied("DELETE (d) permission to file at path '$path' was denied.");
+        }
+        return $this->fileSystem->deleteFile($file);
     }
+
+    /**
+     * Factory reset method
+     * @return void
+     */
+    public function nuke() {
+        try {
+            $rootFile = $this->fileSystem->readFile('/');
+        }
+        catch(Exception $e) {
+            // database is not initialized
+            return;
+        }
+        if(!$this->context->checkFilePermission($rootFile, Security_Priviledge::DELETE)) {
+            throw new Exception_PermissionDenied("Permission to nuke denied!");
+        }
+        $this->fileSystem->nuke();
+    }
+
 }

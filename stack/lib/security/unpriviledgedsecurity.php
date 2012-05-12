@@ -15,12 +15,15 @@ namespace stack\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Will always deny permission
+ */
 class UnpriviledgedSecurity implements \stack\Interface_Security {
-    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
+    /**
+     * Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
-     * @param \stack\module\User $user
-     * @param \stack\filesystem\File          $file
-     * @param string                     $priviledge
+     * @param \stack\filesystem\File $file
+     * @param string $priviledge
      *
      * @return bool
      */

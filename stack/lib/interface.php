@@ -15,8 +15,12 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * I know how to decide if a file may be accessed or not.
+ */
 interface Interface_Security {
-    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
+    /**
+     * Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
      * @param \stack\filesystem\File  $file
      * @param string                  $priviledge
@@ -42,7 +46,6 @@ interface Interface_ModuleRegistry {
 
 /**
  * I know how to adapt couchDB documents to File objects and back.
- * I am also a ModuleRegistry
  */
 interface Interface_Adapter {
     public function fromDatabase($doc);
@@ -55,11 +58,14 @@ interface Interface_Adapter {
  */
 interface Interface_SecurityAccess {
     /**
-     * @param Security $security
+     * @abstract
+     * @param Interface_Security $security
+     * @return mixed
      */
     public function pushSecurity(Interface_Security $security);
     /**
-     * @return  Security
+     * @abstract
+     * @return mixed
      */
     public function pullSecurity();
 }
@@ -75,12 +81,15 @@ interface Interface_FileAccess {
      */
     public function readFile($path);
     /**
-     * @param File $file
-     * @return void
+     * @abstract
+     * @param filesystem\File $file
+     * @return mixed
      */
     public function writeFile(\stack\filesystem\File $file);
     /**
-     * @param File $file
+     * @abstract
+     * @param filesystem\File $file
+     * @return mixed
      */
     public function deleteFile(\stack\filesystem\File $file);
     /**
@@ -88,4 +97,20 @@ interface Interface_FileAccess {
      * @return void
      */
     public function nuke();
+}
+
+/**
+ * I know how to convert objects of my type from and to json
+ */
+interface Interface_JSONizable {
+    /**
+     * @abstract
+     * @return mixed
+     */
+    public function fromJSON();
+    /**
+     * @abstract
+     * @return string
+     */
+    public function toJSON();
 }

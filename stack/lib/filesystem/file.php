@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack\fileSystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -14,14 +14,6 @@ namespace stack\filesystem;
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-
-/**
- * Indicates that a class knows how to convert objects of its type from and to json
- */
-interface File_JSONizable {
-    public function fromJSON();
-    public function toJSON();
-}
 
 /**
  * Abstraction of a file in the file system
@@ -114,13 +106,7 @@ class File {
 }
 
 /**
- * Meta information about the file
- * - owner
- * - path
- * - revision
- * - (permissions)
- * - creationTime
- * - manipulationTime
+ * Meta information about the file and its contents
  */
 class File_Meta {
     /**
@@ -136,8 +122,8 @@ class File_Meta {
      */
     private $owner;
     /**
-      * @var null|string
-      */
+     * @var null|string
+     */
     private $revision;
     /**
      * @var array
@@ -198,9 +184,16 @@ class File_Meta {
         return $this->owner;
     }
 
+    /**
+     * @return array
+     */
     public function getPermissions() {
         return $this->permissions;
     }
+
+    /**
+     * @param \stack\security\Permission $permission
+     */
     public function addPermission(\stack\security\Permission $permission) {
         $this->permissions[] = $permission;
     }

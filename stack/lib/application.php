@@ -18,6 +18,7 @@ namespace stack;
 /**
  * Provides an interface for modules in /root/system/run.
  * A custom Application class is expected for projects written on stack.
+ * Also holds context.
  */
 class Application {
     /**

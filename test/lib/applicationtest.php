@@ -18,7 +18,7 @@ namespace stack;
 class ApplicationTest extends StackOSTest {
     public function testUser() {
         // push a priviledged security to be used in the application
-        $this->context->getFilesystem()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         // add a new user
         $application = new Application($this->context);
@@ -42,7 +42,7 @@ class ApplicationTest extends StackOSTest {
 
     public function testGroup() {
         // push a priviledged security to be used in the application
-        $this->context->getFilesystem()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         // push test user as founder for test group
         $application = new Application($this->context);

@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack\fileSystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -18,131 +18,37 @@ namespace stack\filesystem;
 use stack\Security_Priviledge;
 
 class PermissionTests extends StackOSTest {
-    /** Test if $uber has access to $file owned by $user
+
+    /**
+     * Test read* write* and deleteFile
      */
-    public function testCheckUber() {
-        // create arbitrary user, uber user and document
-        $uname = 'user';
-        $path = \stack\Root::ROOT_PATH_HOME . '/' . $uname;
-        $user = new \stack\module\User($uname, $path);
-        $uber = new \stack\module\User('uber', $path);
-        $uber->setUber(true);
-        $file = new File($path, $uname);
+    public function testReadWriteDelete() {
+        $fs = $this->getFileSystem();
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
-        // check for permission to be true due to user being uber
-        $security = new \stack\security\DefaultSecurity($uber);
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::WRITE));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::EXECUTE));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::DELETE));
+        // write the file
+        $file = $fs->createFile('/foo', \stack\Root::ROOT_UNAME);
+        $file->setOwner('test');
+        $fs->writeFile($file);
+
+        // assert that the written document matches the read
+        $this->assertEquals(
+            $file->getOwner(),
+            $fs->readFile('/foo')->getOwner()
+        );
+        $this->assertEquals(
+            $file->getPath(),
+            $fs->readFile('/foo')->getPath()
+        );
+
+        // delete file and assert that it's gone
+        $fs->deleteFile($file);
+        try {
+            $fs->readFile('/foo');
+            $this->fail();
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            // pass
+        }
     }
 
-    /** Test if $owner has access to file with empty groups and empty permissions
-     */
-    public function testCheckOwner() {
-        // create arbitrary user and document
-        $uname = 'user';
-        $path = \stack\Root::ROOT_PATH_HOME . '/' . $uname;
-        $user = new \stack\module\User($uname, $path);
-        $document = new File($path, $uname);
-        //$document->addPermission(new Permi)
-
-        // check for permission to be true due to user being uber (except execute)
-        $security = new \stack\security\DefaultSecurity($user);
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::DELETE));
-    }
-
-    public function testGroupPermission() {
-        // create arbitrary user and document
-        $uname = 'user';
-        $gname = 'group';
-        $path = \stack\Root::ROOT_PATH_GROUPS . '/' . $gname;
-        $group = new \stack\module\Group($gname);
-        // ROOT_UNAME is document owner: prevent owner permission conflicts
-        $file = new File($path, \stack\Root::ROOT_UNAME);
-        $user = new \stack\module\User($uname, $path);
-        $user->addToGroup($group);
-
-        $security = new \stack\security\DefaultSecurity($user);
-        // assert that user can do nothing on the document
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::READ));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::WRITE));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::DELETE));
-
-        // assert that user can now read
-        $file->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::READ));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::WRITE));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::DELETE));
-
-        // assert that user can now read and write
-        $file->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::WRITE));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::WRITE));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::DELETE));
-
-        // assert that user can now read, write and execute
-        $file->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::EXECUTE));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::WRITE));
-        $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($file, Security_Priviledge::DELETE));
-
-        // assert that user has all priviledges
-        $file->addPermission(new \stack\security\Permission_Group($gname, Security_Priviledge::DELETE));
-        $this->checkAllPriviledges($security, $file);
-    }
-    public function checkAllPriviledges($security, $document) {
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::DELETE));
-    }
-
-    public function testUserPermission() {
-        // create arbitrary user and document
-        $uname = 'user';
-        $path = \stack\Root::ROOT_PATH_USERS . '/' . $uname;
-        $user = new \stack\module\User($uname, $path);
-        // ROOT_UNAME is document owner: prevent owner permission conflicts
-        $document = new File($path, \stack\Root::ROOT_UNAME);
-
-        $security = new \stack\security\DefaultSecurity($user);
-        // assert that user can do nothing on the document
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::READ));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::WRITE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
-
-        // assert that user can now read
-        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::WRITE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
-
-        // assert that user can now read and write
-        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::WRITE));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
-
-        // assert that user can now read, write and execute
-        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::EXECUTE));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::WRITE));
-        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
-        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::DELETE));
-
-        // assert that user has all permissions
-        $document->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::DELETE));
-        $this->checkAllPriviledges($security, $document);
-    }
 }

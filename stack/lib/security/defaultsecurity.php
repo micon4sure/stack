@@ -15,20 +15,27 @@ namespace stack\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Checks permissions against a user
+ */
 class DefaultSecurity implements \stack\Interface_Security {
     /**
      * @var \stack\module\User
      */
     private $user;
 
+    /**
+     * @param \stack\module\User $user
+     */
     public function __construct(\stack\module\User $user) {
         $this->user = $user;
     }
 
-    /** Check if a user has permission to access a file in ways of $permission (r/w/x)
+    /**
+     * Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
-     * @param File $file
-     * @param string   $priviledge
+     * @param \stack\filesystem\File $file
+     * @param string $priviledge
      *
      * @return bool
      */

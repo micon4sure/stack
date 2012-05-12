@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack\fileSystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -17,31 +17,31 @@ namespace stack\filesystem;
 
 class ModuleTest extends StackOSTest {
     public function testContainsModule() {
-        $manager = $this->getFileManager();
+        $system = $this->getFileSystem();
 
         // write the document
         $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS . '/foo', \stack\Root::ROOT_UNAME);
         $user = new \stack\module\User('foo', \stack\Root::ROOT_UNAME, \stack\Root::ROOT_PATH_HOME . '/foo');
-        $user->setPassword('asd');
-        $file->setModule($manager->createModule('stack.user', $user));
-        $manager->writeFile($file);
+        $user->changePassword('asd');
+        $file->setModule($system->createModule('stack.user', $user));
+        $system->writeFile($file);
 
-        $user = $manager->readFile(\stack\Root::ROOT_PATH_USERS . '/foo')->getModule();
+        $user = $system->readFile(\stack\Root::ROOT_PATH_USERS . '/foo')->getModule();
         $this->assertTrue($user instanceof \stack\module\User);
     }
 
     public function testData() {
-        $fileManager = $this->getFileManager();
+        $fileSystem = $this->getFileSystem();
         // create the document
         $file = new \stack\filesystem\File(\stack\Root::ROOT_USER_PATH_HOME . '/plain', \stack\Root::ROOT_UNAME);
         // create module, set data to it  and place it in document
-        $plain = $fileManager->createModule('stack.plain', new \stack\module\Plain(null));
+        $plain = $fileSystem->createModule('stack.plain', new \stack\module\Plain(null));
         $plain->setData((object)array('foo'=>'bar'));
         $file->setModule($plain);
         // write document
-        $fileManager->writeFile($file);
+        $fileSystem->writeFile($file);
         //read document
-        $doc = $fileManager->readFile(\stack\Root::ROOT_USER_PATH_HOME . '/plain');
+        $doc = $fileSystem->readFile(\stack\Root::ROOT_USER_PATH_HOME . '/plain');
         $this->assertTrue($doc->getModule() instanceof \stack\module\Plain);
         $this->assertEquals('bar', $file->getModule()->getData()->foo);
     }
@@ -51,8 +51,8 @@ class ModuleTest extends StackOSTest {
      * @expectedException stack\filesystem\Exception_ModuleConflict
      */
     public function testModuleConflict() {
-        $manager = $this->getFileManager();
-        $manager->registerModule('stack.user', function($data) {
+        $system = $this->getFileSystem();
+        $system->registerModule('stack.user', function($data) {
 
         });
     }

@@ -23,6 +23,38 @@ class ContextTest extends StackOSTest {
         $this->assertTrue($context->getFilesystem() === $context->getFilesystem());
         $this->assertTrue($context->getEnvironment() === $context->getEnvironment());
         $this->assertTrue($context->getShell() === $context->getShell());
-        $this->assertTrue($context->getFileManager() === $context->getFileManager());
+        $this->assertTrue($context->getFileSystem() === $context->getFileSystem());
+    }
+
+    /**
+     * Test read* write* and deleteFile
+     */
+    public function testReadWriteDelete() {
+        $context = $this->context;
+        $context->pushSecurity(new \stack\security\PriviledgedSecurity());
+
+        // write the file
+        $file = new \stack\fileSystem\File('/foo', \stack\Root::ROOT_UNAME);
+        $file->setOwner('test');
+        $context->getShell()->writeFile($file);
+
+        // assert that the written document matches the read
+        $this->assertEquals(
+            $file->getOwner(),
+            $context->getShell()->readFile('/foo')->getOwner()
+        );
+        $this->assertEquals(
+            $file->getPath(),
+            $context->getShell()->readFile('/foo')->getPath()
+        );
+
+        // delete file and assert that it's gone
+        $context->getShell()->deleteFile($file);
+        try {
+            $context->getShell()->readFile('/foo');
+            $this->fail();
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            // pass
+        }
     }
 }

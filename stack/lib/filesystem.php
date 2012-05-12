@@ -15,180 +15,86 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// use
-use stack\filesystem\File;
-use stack\Interface_FileAccess;
-use stack\security;
-use stack\security_Priviledge;
+use stack\fileSystem\Exception_ModuleConflict;
 
 /**
- * Facade for the filesystem
+ * Lowest layer of abstraction looking up from the couch layer
+ * Handles adaption of couch documents and files including modules
  */
-class Filesystem implements \stack\Interface_FileAccess, Interface_SecurityAccess {
+class FileSystem implements \stack\Interface_FileAccess {
     /**
-     * @var FileManager
+     * @var \couchClient
      */
-    private $fileManager;
+    private $couchClient;
+
+    /**
+     * @var \stack\module\Adapter
+     */
+    protected $adapter;
     /**
      * @var array
      */
-    private $securityStack = array();
+    protected $factories = array();
+
     /**
-     * @param \stack\filesystem\FileManager_Module $module
+     * @var Context
      */
-    public function __construct(\stack\filesystem\FileManager_Module $module) {
-        $this->fileManager = $module;
+    private $context;
+
+    /**
+     * @param \stack\Context $context
+     * @param string $dsn
+     * @param string $dbName
+     */
+    public function __construct(Context $context, $dsn, $dbName) {
+        $this->context = $context;
+        $this->couchClient = new \couchClient($dsn, $dbName);
     }
 
     /**
-     * This method should ne called from outside \stack\filesystem
+     * @param Adapter $adapter
+     */
+    public function setAdapter(Adapter $adapter) {
+        $this->adapter = $adapter;
+    }
+
+    /**
+     * Lazy adapter loader.
+     * Deriving classes are encouraged to overwrite this and use the protected $adapter variable if doing so
      *
-     * @return FileManager|filesystem\FileManager_Module
+     * @return Adapter_File
      */
-    public function getFileManger() {
-        return $this->fileManager;
+    protected function getAdapter() {
+        return $this->adapter ?: $this->adapter = new \stack\fileSystem\Adapter_File($this);
     }
 
-    /**
-     * @param Interface_Security $security
-     */
-    public function pushSecurity(Interface_Security $security) {
-        array_push($this->securityStack, $security);
-    }
-    /**
-     * @return  Interface_Security
-     */
-    public function pullSecurity() {
-        return array_pop($this->securityStack);
-    }
 
     /**
-     * @throws filesystem\Exception_NoSecurity
-     * @return  Interface_Security
+     * Create the database
      */
-    protected function currentSecurity() {
-        if(!count($this->securityStack))
-            throw new \stack\filesystem\Exception_NoSecurity('Filesystem needs Security.');
-        return end($this->securityStack);
-    }
-
-    /**
-     * @param string $path
-     * @throws filesystem\Exception_PermissionDenied
-     * @return \stdClass
-     */
-    public function readFile($path) {
-        $file = $this->fileManager->readFile($path);
-        if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::READ)) {
-            throw new \stack\filesystem\Exception_PermissionDenied("READ (r) permission to file at path '$path' was denied.");
-        }
-        return $file;
-    }
-
-    /**
-     * Read all files in a path:
-     * /foo/bar/qux
-     * return [/foo, /foo/bar, /foo/bar/qux]
-     *
-     * @param $path
-     * @return array
-     */
-    public function readFilesInPath($path) {
-        $fileNames = array_filter(explode('/', $path));
-        $paths = array();
-        // attention: recycling path var
-        $path = '';
-        foreach($fileNames as $fileName) {
-            $paths[] = $path .= "/$fileName";
-        }
-        return $this->readFiles($paths);
-    }
-
-    /**
-     * Read an array of paths
-     *
-     * @param array $paths
-     * @return array
-     */
-    public function readFiles(array $paths) {
-        $result = array();
-        foreach($paths as $path) {
-            $result[] = $this->readFile($path);
-        }
-        return $result;
-    }
-
-    /**
-     * @param File $file
-     */
-    public function writeFile(File $file) {
-        // check permission
-        if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::WRITE)) {
-            $path = $file->getPath();
-            throw new Exception_PermissionDenied("WRITE (w) permission to file at path '$path' was denied.");
-        }
-        $this->fileManager->writeFile($file);
-        return $file;
-    }
-
-    /**
-     * @param File $file
-     * @throws Exception_PermissionDenied
-     * @return void
-     */
-    public function deleteFile(File $file) {
-        // check permission
-        if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::DELETE)) {
-            $path = $file->getPath();
-            throw new Exception_PermissionDenied("DELETE (d) permission to file at path '$path' was denied.");
-        }
-        return $this->fileManager->deleteFile($file);
-    }
-
-    /**
-     * Check if current security will allow READ(r) of all files in the path
-     * @param $path
-     * @throws \Exception|filesystem\Exception_PermissionDenied
-     * @return bool
-     */
-    public function checkTraversionPermissions($path) {
-        $this->pushSecurity(new \stack\security\PriviledgedSecurity());
-        try {
-            $files = $this->readFilesInPath($path);
-        }
-        catch(\stack\filesystem\Exception_PermissionDenied $e) {
-            $this->pullSecurity();
-            return false;
-        }
-        catch(\Exception $e) {
-            $this->pullSecurity();
-            throw $e;
-        }
-        $this->pullSecurity();
-        foreach($files as $file) {
-            if(!$this->currentSecurity()->checkFilePermission($file, Security_Priviledge::EXECUTE)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public function init() {
-        $this->fileManager->init();
+        $this->couchClient->createDatabase();
     }
 
     /**
-     * Warning: destroys database
-     * @return void
+     * Create a module instance via a registered factory callable
+     *
+     * @param string $name
+     * @param mixed $data
+     * @throws Exception_ModuleNotFound
+     * @throws filesystem\Exception_InvalidModule
+     * @return \stack\module\BaseModule_Abstract
      */
-    public function nuke() {
-        $this->fileManager->nuke();
-    }
-
-    public function createFile($path, $owner) {
-        $file = new \stack\filesystem\File($path, $owner);
-        $this->writeFile($file);
-        return $file;
+    public function createModule($name, $data) {
+        // call module factory to create module
+        if(!isset($this->factories[$name]))
+            throw new Exception_ModuleNotFound("The module of name '$name' could not be found.");
+        $module = call_user_func($this->factories[$name], $data);
+        // check for validity
+        if(!$module instanceof \stack\module\BaseModule) {
+            throw new \stack\filesystem\Exception_InvalidModule($name, $module, $data);
+        }
+        return $module;
     }
 
     /**
@@ -200,7 +106,66 @@ class Filesystem implements \stack\Interface_FileAccess, Interface_SecurityAcces
      * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable
      * @throws Exception_ModuleConflict
      */
-    public function registerModule($name, $factory) {
-        $this->fileManager->registerModule($name, $factory);
+      public function registerModule($name, $factory) {
+        if(!is_callable($factory))
+            throw new Exception_ModuleFactoryNotCallable("The module factory '$name' is not callable.");
+        if(array_key_exists($name, $this->factories))
+            throw new Exception_ModuleConflict("Module with name '$name' is already registered");
+        $this->factories[$name] = $factory;
+    }
+
+    /**
+     * @param string $path
+     * @return File
+     * @throws Exception_FileNotFound
+     */
+    public function readFile($path) {
+        try {
+            $doc = $this->couchClient->getDoc("stack:/$path");
+        } catch(\couchNotFoundException $e) {
+            throw new \stack\fileSystem\Exception_FileNotFound("File at path '$path' could not be found", null, $e);
+        }
+        $file = $this->getAdapter()->fromDatabase($doc);
+        return $file;
+    }
+
+    /**
+     * @param \stack\fileSystem\File $file
+     * @return \stack\fileSystem\File
+     */
+    public function writeFile(\stack\fileSystem\File $file) {
+        // write the file to the file system
+        // set revision to file instance
+        $doc = $this->getAdapter()->toDatabase($file);
+        $response = $this->couchClient->storeDoc($doc);
+        $file->setRevision($response->rev);
+        return $file;
+    }
+
+    /**
+     * @param \stack\fileSystem\File $file
+     */
+    public function deleteFile(\stack\fileSystem\File $file) {
+        $this->couchClient->deleteDoc($this->adapter->toDatabase($file));
+    }
+    /**
+     * @param string $path
+     * @param string $owner
+     * @return \stack\fileSystem\File
+     */
+    public function createFile($path, $owner) {
+        $file = new \stack\filesystem\File($path, $owner);
+        $this->writeFile($file);
+        return $file;
+    }
+
+    /**
+     * Factory reset method
+     * @return void
+     */
+    public function nuke() {
+        if ($this->couchClient->databaseExists()) {
+            $this->couchClient->deleteDatabase();
+        }
     }
 }

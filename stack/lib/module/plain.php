@@ -15,6 +15,9 @@ namespace stack\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Just stores data.
+ */
 class Plain extends BaseModule {
 
     const NAME = 'stack.plain';

@@ -20,7 +20,7 @@ class ShellTest extends \stack\filesystem\StackOSTest {
     public function setUp() {
         parent::setUp();
         // init default shell with priviledged security
-        $this->context->getFilesystem()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
     }
 
     public function testLogin() {
@@ -29,7 +29,7 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         $pass = 'bar';
         $path = Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
 
-        $this->context->getShell()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->context->getShell()->execute($this->context, $path, $uname, $pass);
 
         // saved user's uname must match original uname

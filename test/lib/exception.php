@@ -15,6 +15,6 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class Exception extends \Exception {
+class TestException extends \Exception {
 
 }

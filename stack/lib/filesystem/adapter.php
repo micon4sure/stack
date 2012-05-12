@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack\fileSystem;
     /*
     * Copyright (C) 2012 Michael Saller
     * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -16,20 +16,22 @@ namespace stack\filesystem;
     */
 
 /**
- * Adapts files from and to database for FileManager
+ * Adapts files from and to database for FileSystem
  * Including modules
+ * Module adaption counts on public final function BaseModule_Abstract::getData to return its name.
+ * This will be saved within the document.
  */
 class Adapter_File implements \stack\Interface_Adapter {
     /**
-     * @var \stack\filesystem\FileManager
+     * @var \stack\FileSystem
      */
-    private $fileManager;
+    private $fileSystem;
 
     /**
-     * @param \stack\filesystem\FileManager_Module $manager
+     * @param \stack\FileSystem_Module $fileSystem
      */
-    public function __construct(\stack\filesystem\FileManager_Module $manager) {
-        $this->fileManager = $manager;
+    public function __construct(\stack\FileSystem $fileSystem) {
+        $this->fileSystem = $fileSystem;
     }
 
     /**
@@ -61,7 +63,7 @@ class Adapter_File implements \stack\Interface_Adapter {
 
         // load module if module name exists
         if (isset($doc->module->name)) {
-            $module = $this->fileManager->createModule($doc->module->name, $doc->module);
+            $module = $this->fileSystem->createModule($doc->module->name, $doc->module);
             $file->setModule($module);
         }
         return $file;

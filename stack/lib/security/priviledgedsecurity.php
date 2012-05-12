@@ -15,13 +15,16 @@ namespace stack\security;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Will always grant security permission
+ */
 class PriviledgedSecurity implements \stack\Interface_Security {
     /** Check if a user has permission to access a file in ways of $permission (r/w/x)
      *
-     * @param \stack\module\User $user
-     * @param \stack\filesystem\File          $file
-     * @param string                     $priviledge
+     * @param \stack\filesystem\File $file
+     * @param string $priviledge
      *
+     * @internal param \stack\module\User $user
      * @return bool
      */
     public function checkFilePermission(\stack\filesystem\File $file, $priviledge) {

@@ -17,8 +17,8 @@ namespace stack;
 
 class GroupTest extends StackOSTest {
     public function testNamechange() {
-        $system = new \stack\Filesystem($this->getFileManager());
-        $system->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $fs = $this->getFileSystem();
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         $gname = 'foo';
         $path = '/bar';
@@ -32,10 +32,10 @@ class GroupTest extends StackOSTest {
             $gname,
             $file->getModule()->getGname()
         );
-        $system->writeFile($file);
+        $fs->writeFile($file);
 
         // reread document, check gname
-        $file = $this->getFileManager()->readFile($path);
+        $file = $this->getFileSystem()->readFile($path);
         $this->assertEquals(
             $gname,
             $file->getModule()->getGname()
@@ -43,11 +43,11 @@ class GroupTest extends StackOSTest {
 
         // again, with new uname
         $new = 'qux';
-        $file = $this->getFileManager()->readFile($path);
+        $file = $this->getFileSystem()->readFile($path);
         $file->getModule()->setGname($new);
-        $system->writeFile($file);
+        $fs->writeFile($file);
         // reread document, check new
-        $file = $this->getFileManager()->readFile($path);
+        $file = $this->getFileSystem()->readFile($path);
         $this->assertEquals(
             $new,
             $file->getModule()->getGname()

@@ -1,5 +1,5 @@
 <?php
-namespace stack\filesystem;
+namespace stack\fileSystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,6 +15,9 @@ namespace stack\filesystem;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Main exception class for the fileSystem namespace
+ */
 class Exception extends \stack\Exception {
 
 }
@@ -34,35 +37,24 @@ class Exception_FileNotFound extends Exception_Couch {
 /**
  * A module that was registered by name was not found
  */
-class Exception_ModuleNotFound extends Exception_Couch {
+class Exception_ModuleNotFound extends Exception {
 }
 
 /**
- * A database file had a module name in meta but no data under module
- */
-class Exception_ModuleDataNotFound extends Exception_Couch {
-}
-
-/**
- * A module in a file was not of the expected type
- */
-class Exception_UnexpectedModuleType extends Exception_Couch {
-}
-
-/**
- * A file could not be found
+ * Tried to add a module under a name that was already taken
  */
 class Exception_ModuleConflict extends Exception_Couch {
-    public function __construct($message, $code = self::MODULE_WITH_NAME_ALREADY_REGISTERED, $previous = null) {
-        parent::__construct($message, $code, $previous);
-    }
-    const MODULE_WITH_NAME_ALREADY_REGISTERED = 200;
 }
 
-
+/**
+ * Modules are being produced by ModuleFactorys. These need to be callables.
+ */
 class Exception_ModuleFactoryNotCallable extends Exception_Couch {
 }
 
+/**
+ * The module was not of the expected type
+ */
 class Exception_InvalidModule extends \Exception {
     private $moduleName;
     private $module;
@@ -86,20 +78,15 @@ class Exception_InvalidModule extends \Exception {
     }
 }
 
+/**
+ * The Permission to access a file was denied by the Security layer
+ */
 class Exception_PermissionDenied extends Exception {
-}
-
-class Exception_NeedAccess extends Exception {
-
 }
 
 /**
  * Indicates that access to security was requested while there is none
  */
 class Exception_NoSecurity extends Exception {
-
-}
-
-class Exception_UserNotFound extends Exception {
 
 }

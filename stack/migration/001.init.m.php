@@ -18,7 +18,7 @@ namespace stack;
 class MigrationInit001 implements \lean\Migration {
     /**
      * Create the database and write system files
-     * @internal $context Context
+     * @throws \Exception
      */
     public function up() {
         $context = \lean\Registry::instance()->get('stack.context');
@@ -35,7 +35,7 @@ class MigrationInit001 implements \lean\Migration {
             \stack\Root::ROOT_PATH_GROUPS,
             \stack\Root::ROOT_USER_PATH_HOME,
         );
-        $shell->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $context->pushSecurity(new \stack\security\PriviledgedSecurity());
         try {
             foreach ($files as $path) {
                 $file = new \stack\filesystem\File($path, \stack\Root::ROOT_UNAME);
@@ -46,7 +46,7 @@ class MigrationInit001 implements \lean\Migration {
             $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS_ROOT, \stack\Root::ROOT_UNAME);
             $user = new \stack\module\User(\stack\Root::ROOT_UNAME, \stack\Root::ROOT_USER_PATH_HOME);
             $password = uniqid();
-            $user->setPassword($password);
+            $user->changePassword($password);
             $file->setModule($user);
             $shell->writeFile($file);
 
@@ -66,13 +66,16 @@ class MigrationInit001 implements \lean\Migration {
                 $shell->writeFile($file);
             }
         } catch(\Exception $e) {
-            $shell->pullSecurity();
+            $context->pullSecurity();
             throw $e;
         }
-        $shell->pullSecurity();
+        $context->pullSecurity();
     }
 
     public function down() {
+        $context = \lean\Registry::instance()->get('stack.context');
+        $shell = $context->getShell();
+        $shell->nuke();
     }
 }
 

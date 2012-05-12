@@ -30,23 +30,24 @@ namespace stack {
     require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchClient.php';
     require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
 
-    // create register environment
-    $env = new Environment('test_dev');
-    $env->createFileManager();
-    // nuke database
-    $env->createShell()->nuke();
-    $registry = \lean\Registry::instance();
-    $registry->set('stack.environment', $env);
 
     class TestContext extends Context {
         // Expose manager in test context
         /**
-         * @return filesystem\FileManager
+         * @return FileSystem
          */
-        public function getFileManager() {
-            return parent::getFileManager();
+        public function getFileSystem() {
+            return parent::getFileSystem();
         }
     }
+
+    // create environment
+    $env = new Environment('test_dev');
+    // nuke database
+    $context = new TestContext($env);
+    $context->getFileSystem()->nuke();
+    $registry = \lean\Registry::instance();
+    $registry->set('stack.environment', $env);
 
     class StackOSTest extends \PHPUnit_Framework_TestCase {
         /**
@@ -63,8 +64,8 @@ namespace stack {
             return self::$migration ?: self::$migration = new \lean\Migration_Manager(STACK_ROOT . '/stack/migration');
         }
 
-        protected function getFileManager() {
-            return $this->context->getFileManager();
+        protected function getFileSystem() {
+            return $this->context->getFileSystem();
         }
 
         public function setUp() {
@@ -99,14 +100,14 @@ namespace stack {
             });
 
             // nuke and reset shell back into clean state
-            $this->context->getShell()->nuke();
+            $this->context->getFileSystem()->nuke();
             self::getMigrationManager()->reset();
             self::getMigrationManager()->upgrade();
         }
     }
 }
 
-namespace stack\filesystem {
+namespace stack\fileSystem {
     class StackOSTest extends \stack\StackosTest {
     }
 }

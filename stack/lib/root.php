@@ -15,6 +15,9 @@ namespace stack;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Holds constants about the root user and file + surroundings
+ */
 class Root {
     const ROOT_UNAME = 'root';
     const ROOT_PATH = '/';

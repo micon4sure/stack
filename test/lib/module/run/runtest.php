@@ -23,7 +23,7 @@ class RunTest extends \stack\StackOSTest {
         $pass = 'bar';
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
 
-        $this->context->getShell()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->context->getShell()->execute($this->context, $path, $uname, $pass);
 
         // saved user's uname must match original uname
@@ -48,7 +48,7 @@ class RunTest extends \stack\StackOSTest {
         $gname = 'foo';
         $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/addgroup';
 
-        $this->context->getShell()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->context->getShell()->execute($this->context, $path, $gname);
 
         // saved user's uname must match original uname

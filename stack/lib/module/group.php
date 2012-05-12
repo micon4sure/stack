@@ -15,7 +15,11 @@ namespace stack\module;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * Not more than a container for the group name at this point
+ */
 class Group extends BaseModule {
+
     const NAME = 'stack.group';
 
     private $gname;
