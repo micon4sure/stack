@@ -21,7 +21,7 @@ namespace stack;
  * (Like registering a module or pushing a Security)
  * Also handles security concerns over the implemented Interface_SecurityAccess
  */
-class Context extends \lean\Registry_State implements Interface_ModuleRegistry, Interface_Security, Interface_SecurityAccess {
+class Context extends \lean\Registry_State implements Interface_Security, Interface_SecurityAccess {
     /**
      * @var Environment
      */
@@ -76,17 +76,6 @@ class Context extends \lean\Registry_State implements Interface_ModuleRegistry, 
      */
     protected function getFileSystem() {
         return $this->fileSystem ?: $this->fileSystem = $this->environment->createFilesystem($this);
-    }
-
-    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :  : : : : ModuleRegistry*/
-    /**
-     * Register a module class bei their class name.
-     * Register module with the NAME constant of the class and the static method create as factory
-     * @param string $name
-     * @param $callable
-     */
-    public function registerModule($name, $callable) {
-        $this->getFileSystem()->registerModule($name, $callable);
     }
 
     /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : SecurityAccess */

@@ -72,10 +72,17 @@ class MigrationInit001 implements \lean\Migration {
         $context->pullSecurity();
     }
 
+    /**
+     * Nuke database
+     */
     public function down() {
         $context = \lean\Registry::instance()->get('stack.context');
         $shell = $context->getShell();
-        $shell->nuke();
+        try {
+            $shell->nuke();
+        } catch(\stack\fileSystem\Exception_FileNotFound $e) {
+            // pass
+        }
     }
 }
 

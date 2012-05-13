@@ -52,10 +52,10 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     /**
      * Check the given credentials, throw Exception_UserNotFound if user is not in the system.
      *
-     *
      * @param $uname
      * @param $password
      * @throws Exception_CorruptModuleInUserFile
+     * @throws Exception_UserNotFound
      * @return bool
      */
     public function login($uname, $password) {
@@ -68,12 +68,14 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
         if(!$loggedIn) {
             return false;
         }
+        $this->currentWorkingFile = $this->readFile($user->getHome());
         $this->currentUser = $user;
+        $this->context->pushSecurity(new \stack\security\DefaultSecurity($user));
         return true;
     }
 
     /**
-     * Read a user file and return its module
+     * Read a user file
      *
      * @param string $uname
      * @return \stack\module\User
@@ -88,7 +90,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     }
 
     /**
-     * Read a group file and return its module
+     * Read a group file
      *
      * @param string $gname
      * @return \stack\module\Group
@@ -119,7 +121,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
      * @throws Exception_NeedToBeLoggedIn
      */
     public function checkLoggedIn($message = null) {
-        if(!$this->currentUser !== null) {
+        if($this->currentUser === null) {
             throw new Exception_NeedToBeLoggedIn($message ?: 'Need to be logged in to perform this action.');
         }
     }
@@ -151,8 +153,8 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
      */
     public function cd($path) {
         $this->checkLoggedIn();
-        $this->context->checkTraversionPermissions($path);
-        return $this->fileSystem->readFile($path);
+        $this->currentWorkingFile = $this->fileSystem->readFile($path);
+        return $this;
     }
 
     /**
@@ -160,16 +162,6 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
      */
     public function init() {
         $this->fileSystem->init();
-    }
-
-    /**
-     * See if the
-     * @param $path
-     * @return bool
-     */
-    public function isInCWF($path) {
-        $this->checkLoggedIn();
-        return \lean\Text::left($this->getCurrentWorkingFile(), $path) == $path;
     }
 
     /**
@@ -234,13 +226,14 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
 
     /**
      * Factory reset method
+     * @throws Exception_PermissionDenied
      * @return void
      */
     public function nuke() {
         try {
             $rootFile = $this->fileSystem->readFile('/');
         }
-        catch(Exception $e) {
+        catch(Exception_FileNotFound $e) {
             // database is not initialized
             return;
         }

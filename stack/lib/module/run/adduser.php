@@ -29,5 +29,8 @@ class AddUser extends \stack\module\BaseModule {
         $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS . '/' . $user->getUname(), \stack\Root::ROOT_UNAME);
         $file->setModule($user);
         $context->getShell()->writeFile($file);
+
+        $home = $file = new \stack\filesystem\File($user->getHome(), $user->getUname());
+        $context->getShell()->writeFile($home);
     }
 }

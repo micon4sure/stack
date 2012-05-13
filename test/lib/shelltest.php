@@ -44,20 +44,6 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         $this->assertTrue($this->context->getShell()->login($uname, $pass));
     }
 
-    /*public function testChangeDir() {
-        // go unpriviledged
-        $fs = new Filesystem($this->getManager());
-        $fs->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $shell = Shell::instance($fs);
-
-        $shell->cd(Root::ROOT_USER_PATH_USERS_ROOT);
-        return;
-        $this->assertEquals(
-            Root::ROOT_USER_PATH_USERS_ROOT,
-            $shell->getPath()
-        );
-    }*/
-
     /**
      * @expectedException \stack\Exception_UserNotFound
      *
@@ -74,17 +60,17 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         $this->context->getShell()->init();
     }
 
-    /**
-     * Test that a user
-     */
-    public function testIsInCWF() {
-        $user = new \stack\module\User('test');
+    public function testChangeDir() {
+        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
+        $app = new Application($this->context);
+        $app->addUser('foo', 'bar');
+        $this->context->getShell()->login('foo', 'bar');
+
         $shell = $this->context->getShell();
-        return;
-        #$shell->execute();
-        $shell->login($user, 'foo');
-        $shell->cd('/foo');
-        $this->assertTrue($shell->isInCWF('/foo', '/foo/bar'));
-        $this->assertFalse($shell->isInCWF('/foo/bar', '/foo'));
+        $shell->cd(Root::ROOT_PATH_USERS_ROOT);
+        $this->assertEquals(
+            Root::ROOT_PATH_USERS_ROOT,
+            $shell->getCurrentWorkingFile()->getPath()
+        );
     }
 }
