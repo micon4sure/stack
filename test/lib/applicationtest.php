@@ -24,19 +24,18 @@ class ApplicationTest extends StackOSTest {
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         // add a new user
-        $application = new Application($this->context);
-        $application->addUser('test', 'foo');
+        $this->application->addUser('test', 'foo');
 
         // read the user and assert its type
-        $user = $application->getUser('test');
+        $user = $this->application->getUser('test');
         $this->assertTrue($user instanceof \stack\module\User);
 
         // delete the user
-        $application->delUser('test');
+        $this->application->delUser('test');
 
         // expect exception
         try {
-            $application->getUser('test');
+            $this->application->getUser('test');
             $this->fail();
         } catch(Exception_UserNotFound $e) {
             // pass
@@ -51,12 +50,11 @@ class ApplicationTest extends StackOSTest {
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         // push test user as founder for test group
-        $application = new Application($this->context);
+        $application = $this->application;
         $application->addUser('user', 'foo');
 
-
         // add a new group
-        $application = new Application($this->context);
+        $application = $this->application;
         $application->addGroup('test', 'user');
 
         // read the group and assert its type

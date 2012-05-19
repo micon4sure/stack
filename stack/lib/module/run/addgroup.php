@@ -17,7 +17,7 @@ namespace stack\module\run;
 
 class AddGroup extends \stack\module\BaseModule {
 
-    const NAME = 'stack.system.addgroup';
+    const NAME = \stack\Root_Modules::MODULE_ADDGROUP;
 
     protected function export($data) {
         return $data;

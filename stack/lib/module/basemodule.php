@@ -53,7 +53,7 @@ abstract class BaseModule_Abstract {
      * @return mixed
      */
     public final function getData() {
-        $data = $this->export($this->data);
+        $data = $this->export($this->data) ?: new \stdClass;
         $data->name = $this->getName();
         return $data;
     }

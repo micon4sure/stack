@@ -26,14 +26,14 @@ namespace stack {
     $autoload->loadLean();
     $autoload->register('stack', STACK_TEST_ROOT . '/../stack/lib');
 
-    require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couch.php';
-    require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchClient.php';
-    require_once STACK_TEST_ROOT . '/../external/PHP-on-Couch/lib/couchDocument.php';
-
+    require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couch.php';
+    require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couchClient.php';
+    require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
 
     class TestContext extends Context {
-        // Expose manager in test context
         /**
+         * Expose fs in test context
+         *
          * @return FileSystem
          */
         public function getFileSystem() {
@@ -59,11 +59,23 @@ namespace stack {
          */
         protected static $migration;
 
+        /**
+         * @var Application
+         */
+        protected $application;
+
+        /**
+         * @static
+         * @return \lean\Migration_Manager
+         */
         private static function getMigrationManager() {
             // need to make sure there's only one instance for migration manager reads the files outright
             return self::$migration ?: self::$migration = new \lean\Migration_Manager(STACK_ROOT . '/stack/migration');
         }
 
+        /**
+         * @return FileSystem
+         */
         protected function getFileSystem() {
             return $this->context->getFileSystem();
         }
@@ -71,33 +83,9 @@ namespace stack {
         public function setUp() {
             // create test environment
             $env = new Environment('test_dev');
-            // create context around environment
             $this->context = new TestContext($env);
-            // put created context into static registry
-            \lean\Registry::instance()->set('stack.context', $this->context);
-
-            // registering module factories from the outside
-            $this->context->getShell()->registerModule('stack.plain', function($data) {
-                return new \stack\module\Plain($data);
-            });
-            $this->context->getShell()->registerModule('stack.user', function($data) {
-                return \stack\module\User::create($data);
-            });
-            $this->context->getShell()->registerModule('stack.group', function($data) {
-                return \stack\module\Group::create($data);
-            });
-            $this->context->getShell()->registerModule('stack.system.adduser', function($data) {
-                return \stack\module\run\AddUser::create($data);
-            });
-            $this->context->getShell()->registerModule('stack.system.deluser', function($data) {
-                return \stack\module\run\DelUser::create($data);
-            });
-            $this->context->getShell()->registerModule('stack.system.addgroup', function($data) {
-                return \stack\module\run\AddGroup::create($data);
-            });
-            $this->context->getShell()->registerModule('stack.system.delgroup', function($data) {
-                return \stack\module\run\DelGroup::create($data);
-            });
+            \lean\util\Dump::create()->methods()->goes($this->context->getFileSystem());
+            $this->application = new Application($this->context);
 
             // nuke and reset shell back into clean state
             $this->context->getFileSystem()->nuke();

@@ -31,7 +31,61 @@ class Application {
      */
     public function __construct(Context $context) {
         $this->context = $context;
+        $this->init();
+        \lean\Registry::instance()->set('stack.application', $this);
+        \lean\Registry::instance()->set('stack.context', $this->context);
     }
+
+    /**
+     * Initialize Modules.
+     * @Overridable
+     */
+    protected function init() {
+        // registering module factories from the outside
+        $this->context->getShell()->registerModule(Root_Modules::MODULE_PLAIN, function($data) {
+            return new \stack\module\Plain($data);
+        });
+        $this->context->getShell()->registerModule(Root_Modules::MODULE_USER, function($data) {
+            return \stack\module\User::create($data);
+        });
+        $this->context->getShell()->registerModule(Root_Modules::MODULE_GROUP, function($data) {
+            return \stack\module\Group::create($data);
+        });
+        $this->context->getShell()->registerModule(Root_Modules::MODULE_ADDUSER, function($data) {
+            return \stack\module\run\AddUser::create($data);
+        });
+        $this->context->getShell()->registerModule(Root_Modules::MODULE_DELUSER, function($data) {
+            return \stack\module\run\DelUser::create($data);
+        });
+        $this->context->getShell()->registerModule(Root_Modules::MODULE_ADDGROUP, function($data) {
+            return \stack\module\run\AddGroup::create($data);
+        });
+        $this->context->getShell()->registerModule(Root_Modules::MODULE_DELGROUP, function($data) {
+            return \stack\module\run\DelGroup::create($data);
+        });
+    }
+
+    /**
+     * @return Context
+     */
+    public function getContext() {
+        return $this->context;
+    }
+
+    /**
+     * @return Shell
+     */
+    public function getShell() {
+        return $this->getContext()->getShell();
+    }
+
+    /**
+     * @return Environment
+     */
+    public function getEnvironment() {
+        return $this->getContext()->getEnvironment();
+    }
+
 
     /**
      * @param string $path

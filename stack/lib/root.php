@@ -29,3 +29,13 @@ class Root {
     const ROOT_PATH_USERS_ROOT = '/users/root';
     const ROOT_USER_PATH_HOME = '/root';
 }
+
+class Root_Modules {
+    const MODULE_PLAIN = 'stack.plain';
+    const MODULE_USER = 'stack.user';
+    const MODULE_GROUP = 'stack.group';
+    const MODULE_ADDUSER = 'stack.adduser';
+    const MODULE_DELUSER = 'stack.deluser';
+    const MODULE_ADDGROUP = 'stack.addgroup';
+    const MODULE_DELGROUP = 'stack.delgroup';
+}

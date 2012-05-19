@@ -1,0 +1,23 @@
+body, html {
+    background: black;
+    color: white;
+}
+
+header {
+    /*color:#ef2929;*/
+}
+
+
+
+#stack_ascii {
+    white-space: pre;
+    font-size: 35px;
+    font-family: monospace;
+    position:absolute;
+}
+
+input.login {
+    background: transparent;
+    border:0;
+    color:white;
+}

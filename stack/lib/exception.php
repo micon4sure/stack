@@ -57,3 +57,10 @@ class Exception_NeedToBeLoggedIn extends \Exception {
 class Exception_CorruptModuleInUserFile extends \Exception {
 
 }
+
+/**
+ * The module could not be found
+ */
+class Exception_ModuleNotFound extends \Exception {
+
+}

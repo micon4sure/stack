@@ -62,7 +62,7 @@ class ShellTest extends \stack\filesystem\StackOSTest {
 
     public function testChangeDir() {
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $app = new Application($this->context);
+        $app = $this->application;
         $app->addUser('foo', 'bar');
         $this->context->getShell()->login('foo', 'bar');
 

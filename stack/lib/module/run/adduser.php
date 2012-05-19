@@ -17,7 +17,7 @@ namespace stack\module\run;
 
 class AddUser extends \stack\module\BaseModule {
 
-    const NAME = 'stack.system.adduser';
+    const NAME = \stack\Root_Modules::MODULE_ADDUSER;
 
     protected function export($data) {
         return $data;

@@ -1,5 +1,5 @@
 <?php
-namespace stack\module\run;
+namespace stack\web;
 /*
  * Copyright (C) 2012 Michael Saller
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -15,13 +15,5 @@ namespace stack\module\run;
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-class DelGroup extends \stack\module\BaseModule {
-
-    const NAME = \stack\Root_Modules::MODULE_DELGROUP;
-
-    public function run(\stack\Context $context, $gname) {
-        $path = \stack\Root::ROOT_PATH_USERS . "/$gname";
-        $file = $context->getShell()->readFile($path);
-        $context->getShell()->deleteFile($file);
-    }
+class Application extends \stack\Application {
 }
