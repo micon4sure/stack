@@ -2,21 +2,13 @@
 namespace stack\module;
 /*
  * Copyright (C) 2012 Michael Saller
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions
- * of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
 /**
  * User module.
+ * Password is saved in SHA1 by changePassword.
+ *
  */
 class User extends BaseModule {
     const NAME = 'stack.user';
@@ -30,7 +22,7 @@ class User extends BaseModule {
      * System internal user name
      * @var string
      */
-    private $uname;
+    private $uName;
     /**
      * Home directory of the user
      * @var string
@@ -45,17 +37,17 @@ class User extends BaseModule {
      * Hashing is done internally
      * @var string
      */
-    private $password;
+    private $uPass;
 
     /**
      * @param string $uname
      * @param string $home
      */
-    public function __construct($uname, $home = null) {
+    public function __construct($uName, $home = null) {
         if($home === null) {
-            $home = \stack\Root::ROOT_PATH_HOME . "/$uname";
+            $home = \stack\Root::ROOT_PATH_HOME . "/$uName";
         }
-        $this->setUname($uname);
+        $this->setUname($uName);
         $this->setHome($home);
     }
 
@@ -78,14 +70,14 @@ class User extends BaseModule {
      * @return string
      */
     public function getUname() {
-        return $this->uname;
+        return $this->uName;
     }
     /**
      * @param $uname
      * @return User
      */
-    public function setUname($uname) {
-        $this->uname = $uname;
+    public function setUname($uName) {
+        $this->uName = $uName;
         return $this;
     }
 
@@ -127,14 +119,14 @@ class User extends BaseModule {
         if(!\lean\Text::len($password)) {
             throw new \InvalidArgumentException('No password provided. Password must not be empty.');
         }
-        $this->password = sha1($password);
+        $this->uPass = sha1($password);
     }
 
     /**
      * @param $password
      */
     public function setPasswordHash($hash) {
-        $this->password = $hash;
+        $this->uPass = $hash;
     }
 
     /**
@@ -143,8 +135,8 @@ class User extends BaseModule {
      */
     protected function export($data) {
         return (object)array(
-            'uname' => $this->getUname(),
-            'password' => $this->password,
+            'uName' => $this->getUname(),
+            'uPass' => $this->uPass,
             'home' => $this->getHome(),
             'uber' => $this->isUber(),
             'groups' => $this->groups);
@@ -157,13 +149,12 @@ class User extends BaseModule {
      * @throws \InvalidArgumentException
      */
     public static function create($data) {
-        if(!isset($data->uname, $data->home))
-            throw new \InvalidArgumentException('User parameters are missing data. Need uname and home.');
-        $instance = new static($data->uname, $data->home);
+        if(!isset($data->uName, $data->uPass, $data->home))
+            throw new \InvalidArgumentException('User parameters are missing data. Need uName, uPass and home.');
+        $instance = new static($data->uName, $data->home);
         $uber = isset($data->uber) ? $data->uber : false;
         $instance->setUber($uber);
-        $password = isset($data->password) ? $data->password : false;
-        $instance->setPasswordHash($password);
+        $instance->setPasswordHash($data->uPass);
         return $instance;
     }
 
@@ -173,7 +164,7 @@ class User extends BaseModule {
      * @return bool
      */
     public function auth($password) {
-        return sha1($password) == $this->password;
+        return $password == $this->uPass;
     }
 
 }

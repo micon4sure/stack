@@ -2,18 +2,9 @@
 namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions
- * of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ * Licensed under MIT License, see /path/to/stack/LICENSE
  */
+
 
 /**
  * Context is the way to provide access among units inside the Shell.
@@ -23,7 +14,7 @@ namespace stack;
  */
 class Context extends \lean\Registry_State implements Interface_Security, Interface_SecurityAccess {
     /**
-     * @var Environment
+     * @var TestEnvironment
      */
     private $environment;
     /**
@@ -44,7 +35,7 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
     /**
      * Initiate a context for the passed environment
      *
-     * @param Environment $environment
+     * @param TestEnvironment $environment
      */
     public function __construct(Environment $environment) {
         $this->environment = $environment;
@@ -53,7 +44,7 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
 
     /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :  accessors for internals */
     /**
-      * @return Environment
+      * @return TestEnvironment
       */
     public function getEnvironment() {
         return $this->environment;
@@ -108,8 +99,11 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
      * @param string                  $priviledge
      * @return bool
      */
-    public function checkFilePermission(\stack\filesystem\File $file, $priviledge)
-    {
+    public function checkFilePermission(\stack\filesystem\File $file, $priviledge) {
+        if($this->security->count() == 0) {
+            throw new \stack\fileSystem\Exception_NoSecurity();
+        }
+
         return $this->security->current()->checkFilePermission($file, $priviledge);
     }
 }

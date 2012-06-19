@@ -8,26 +8,40 @@
     <script type="text/javascript" src="/jquery/jquery-ui-1.8.20.custom.min.js"></script>
     <link rel="stylesheet" type="text/css" media="screen" href="/jquery/ui/jquery-ui-1.8.20.custom.css" />
 
+    <script type="text/javascript" src="/js/sha1.js"></script>
     <script type="text/javascript" src="/js/global.js"></script>
     <link rel="stylesheet" type="text/css" media="screen" href="/css/global.css" />
 </head>
 <body>
-    <header>
-        <div id="stack_ascii">
-<span>     _             _</span>
-<span> ___| |_ __ _  ___| | __</span>
-<span>/ __| __/ _` |/ __| |/ /</span>
-<span>\__ \ || (_| | (__|   &lt;</span>
-<span>|___/\__\__,_|\___|_|\_\</span>
-        </div>
-    </header>
+<table>
+    <tr>
+        <td>uname</td>
+        <td>
+            <input type="text" id="uName" value="root"/>
+        </td>
+    </tr>
+    <tr>
+        <td>password</td>
+        <td>
+            <input type="text" id="uPass" value="9fcef39a891ef52925c2b843f295ec8f5eaeeca7"/>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <input type="button" value="login" id="login"/>
+        </td>
+    </tr>
+</table>
 
-    <div id="terminal">
+<script type="text/javascript">
+    var stack = new namespace.stack.Application();
+    jQuery('#login').click(function() {
+        stack.login($('#uName').val(), SHA1($('#uPass').val()));
+    });
+</script>
 
-    </div>
+<div id="debug">
 
-    <!--<footer>
-        <a href="http://github.com/klawd-prime/stack">github</a>
-    </footer>-->
+</div>
 </body>
 </html>

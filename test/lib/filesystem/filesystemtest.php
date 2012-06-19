@@ -2,17 +2,7 @@
 namespace stack\fileSystem;
 /*
  * Copyright (C) 2012 Michael Saller
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions
- * of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
 class FileSystemTest extends StackOSTest {
@@ -69,7 +59,7 @@ class FileSystemTest extends StackOSTest {
         // test fs's ability to create valid modules
         // - user
         $user = new \stack\module\User('foo', '/foo');
-        $module = $fs->createModule(\stack\module\User::NAME, (object)array('uname' => 'foo', 'home' => '/foo/bar', 'password' => 'foo'));
+        $module = $fs->createModule(\stack\module\User::NAME, (object)array('uName' => 'foo', 'home' => '/foo/bar', 'uPass' => 'foo'));
         $this->assertTrue($module instanceof \stack\module\User);
         // - group
         $module = $fs->createModule(\stack\module\Group::NAME, (object)array('gname' => 'qux'));

@@ -2,17 +2,7 @@
 namespace stack;
 /*
  * Copyright (C) 2012 Michael Saller
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions
- * of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
 class MigrationInit001 implements \lean\Migration {
@@ -45,12 +35,12 @@ class MigrationInit001 implements \lean\Migration {
             // create root user file + module
             $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS_ROOT, \stack\Root::ROOT_UNAME);
             $user = new \stack\module\User(\stack\Root::ROOT_UNAME, \stack\Root::ROOT_USER_PATH_HOME);
-            $password = uniqid();
+            $password = sha1(uniqid());
             $user->changePassword($password);
             $file->setModule($user);
             $shell->writeFile($file);
 
-            file_put_contents(STACK_ROOT . '/rootpw', $password);
+            file_put_contents(STACK_ROOT . '/rootpw', "This is the automatically created root password: $password\nIt is to be changed ASAP, then this file is to be deleted.");
 
             // create system run files
             $modules = array(

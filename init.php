@@ -2,11 +2,11 @@
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', 1);
 
-define('APPLICATION_ROOT', __DIR__);
+define('STACK_APPLICATION_ROOT', __DIR__);
 
 include '../external/lean/lean/init.php';
 
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
-$autoload->register('stack', APPLICATION_ROOT . '/lib');
+$autoload->register('stack', STACK_APPLICATION_ROOT . '/lib');
 ?>

@@ -9,11 +9,10 @@ header {
 
 
 
-#stack_ascii {
+#menu {
     white-space: pre;
-    font-size: 35px;
+    font-size: 7px;
     font-family: monospace;
-    position:absolute;
 }
 
 input.login {

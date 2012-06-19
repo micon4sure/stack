@@ -2,18 +2,69 @@
 namespace stack\web;
 /*
  * Copyright (C) 2012 Michael Saller
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
- * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions
- * of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
 class Application extends \stack\Application {
+
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * @var \lean\Session
+     */
+    private $session;
+
+    /**
+     * Override parent constructor to start session
+     *
+     * @param \stack\Context $context
+     */
+    public function __construct(\stack\Context $context) {
+        parent::__construct($context);
+        $this->session = new \lean\Session('stack.web.application');
+    }
+
+    /**
+     * Run the web application.
+     * If target is '/login', try to log in the user.
+     * Elsewise, get the user from the filesystem and execute the module inside
+     *
+     * @param $target
+     * @param $request
+     */
+    public function run($target, $request) {
+        $this->request = new Request($request);
+        // intercept path /login to dispatch login event
+        if($target == '/login') {
+            $response = $this->login();
+        }
+        else {
+            $response = new Response_JSON_HTTP404();
+        }
+        $response->send();
+    }
+
+    /**
+     * Try to log the user in.
+     * Send 401 if user/password combo wrong or user does not exist entirely.
+     *
+     * @return Response_JSON
+     */
+    protected function login() {
+        $this->getContext()->pushSecurity(new \stack\security\PriviledgedSecurity());
+        try {
+            $loggedIn = $this->getShell()->login($this->request->uName, $this->request->uPass);
+            $this->getContext()->pullSecurity();
+            if($loggedIn) {
+                $this->session->user = $this->request->uName;
+                return new Response_JSON(['message' => 'Access granted.']);
+            }
+        } catch(\stack\Exception_UserNotFound $e) {
+            $this->getContext()->pullSecurity();
+        }
+        return new Response_JSON(['message' => 'Access denied.'], 401);
+    }
 }
