@@ -33,6 +33,11 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
     private $security;
 
     /**
+     * @var \stack\module\User
+     */
+    private $user;
+
+    /**
      * Initiate a context for the passed environment
      * @param \stack\Environment $environment
      */
@@ -57,6 +62,23 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
         }
         $fs = $this->getFilesystem();
         return $this->shell = $this->environment->createShell($this, $fs);
+    }
+
+    /**
+     * Check the given credentials, throw Exception_UserNotFound if user is not in the system.
+     *
+     * @param $uName
+     * @param $uPass
+     * @throws Exception_CorruptModuleInUserFile
+     * @return bool
+     */
+    public function checkCredentials($uName, $uPass) {
+        $file = $this->getShell()->readUser($uName);
+        if(!$file->getModule() instanceof \stack\module\User) {
+            throw new Exception_CorruptModuleInUserFile();
+        }
+        $user = $file->getModule();
+        return $user->auth($uPass);
     }
 
     /**

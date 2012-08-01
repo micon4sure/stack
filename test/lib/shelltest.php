@@ -13,36 +13,6 @@ class ShellTest extends \stack\filesystem\StackOSTest {
     }
 
     /**
-     * Test if a user can log in
-     */
-    public function testLogin() {
-        // save a new user
-        $uName = 'foo';
-        $uPass = 'bar';
-        $path = Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
-
-        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $this->context->getShell()->execute($path, $uName, $uPass);
-
-        // saved user's uname must match original uname
-        $this->assertEquals(
-            $uName,
-            $this->context->getShell()->readFile(Root::ROOT_PATH_USERS . "/$uName")->getModule()->getUname()
-        );
-
-        // assert that user can log in
-        $this->assertTrue($this->context->getShell()->login($uName, sha1($uPass)));
-    }
-
-    /**
-     * @expectedException \stack\Exception_UserNotFound
-     *
-     */
-    public function testUserNotFound() {
-        $this->context->getShell()->login('asd', 'asd');
-    }
-
-    /**
      * Test that a database can be nuked and initialized
      */
     public function testNukeAndInit() {
@@ -50,17 +20,28 @@ class ShellTest extends \stack\filesystem\StackOSTest {
         $this->context->getShell()->init();
     }
 
-    public function testChangeDir() {
-        $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
-        $app = $this->application;
-        $app->addUser('foo', 'bar');
-        $this->context->getShell()->login('foo', sha1('bar'));
-
+    /**
+     * Test read* write* and deleteFile
+     */
+    public function testReadWriteDelete() {
         $shell = $this->context->getShell();
-        $shell->cd(Root::ROOT_PATH_USERS_ROOT);
-        $this->assertEquals(
-            Root::ROOT_PATH_USERS_ROOT,
-            $shell->getCurrentWorkingFile()->getPath()
-        );
+
+        // write the document
+        $document = new \stack\filesystem\File('/foo', \stack\Root::ROOT_UNAME);
+        $shell->writeFile($document);
+
+        // assert that the written document matches the read
+        $this->assertEquals($document->getOwner(), $shell->readFile('/foo')->getOwner());
+        $this->assertEquals($document->getPath(), $shell->readFile('/foo')->getPath());
+
+        // delete file and assert that it's gone
+        $shell->deleteFile($shell->readFile('/foo'));
+        try {
+            $shell->readFile('/foo');
+            $this->fail();
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
+            // pass
+        }
     }
+
 }

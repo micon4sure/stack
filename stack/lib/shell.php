@@ -16,16 +16,6 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     private $fileSystem;
 
     /**
-     * @var string
-     */
-    private $currentWorkingFile;
-
-    /**
-     * @var \stack\module\User
-     */
-    private $currentUser;
-
-    /**
      * @var Context
      */
     private $context;
@@ -37,38 +27,6 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     public function __construct(Context $context, \stack\Filesystem $fileSystem) {
         $this->fileSystem = $fileSystem;
         $this->context = $context;
-    }
-
-    /**
-     * @return \stack\module\User
-     */
-    public function getCurrentUser() {
-        return $this->currentUser;
-    }
-
-    /**
-     * Check the given credentials, throw Exception_UserNotFound if user is not in the system.
-     *
-     * @param $uname
-     * @param $password
-     * @throws Exception_CorruptModuleInUserFile
-     * @throws Exception_UserNotFound
-     * @return bool
-     */
-    public function login($uname, $password) {
-        $file = $this->readUser($uname);
-        if(!$file->getModule() instanceof \stack\module\User) {
-            throw new Exception_CorruptModuleInUserFile();
-        }
-        $user = $file->getModule();
-        $loggedIn = $user->auth($password);
-        if(!$loggedIn) {
-            return false;
-        }
-        $this->currentWorkingFile = $this->readFile($user->getHome());
-        $this->currentUser = $user;
-        $this->context->pushSecurity(new \stack\security\DefaultSecurity($user));
-        return true;
     }
 
     /**
@@ -102,36 +60,18 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     }
 
     /**
-     * Unset the currently active user
-     *
-     * @return Shell
-     */
-    public function logout() {
-        unset($this->currentUser);
-        return $this;
-    }
-
-    /**
-     * Check if a user is logged in to the shell
-     *
-     * @param null $message
-     * @throws Exception_NeedToBeLoggedIn
-     */
-    public function checkLoggedIn($message = null) {
-        if($this->currentUser === null) {
-            throw new Exception_NeedToBeLoggedIn($message ?: 'Need to be logged in to perform this action.');
-        }
-    }
-
-    /**
      * Read a file, take out its module, call run on it with the args passed to the method (slightly changed)
      *
-     * @param Context $context
      * @param string $path
      * @throws Exception_ExecutionError
+     * @throws filesystem\Exception_PermissionDenied
+     * @internal param \stack\Context $context
      */
     public function execute($path) {
         $file = $this->readFile($path);
+        if(!$this->context->checkFilePermission($file, Security_Priviledge::READ)) {
+            throw new \stack\filesystem\Exception_PermissionDenied("Execute (x) permission to file at path '$path' was denied.");
+        }
         $args = func_get_args();
         array_shift($args); // shift fileName argument
         array_unshift($args, $this->context); // unshift the context as new first argument
@@ -144,29 +84,10 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     }
 
     /**
-     * Classic change dir
-     * @param string $path
-     * @return \stack\filesystem\File
-     */
-    public function cd($path) {
-        $this->checkLoggedIn();
-        $this->currentWorkingFile = $this->fileSystem->readFile($path);
-        return $this;
-    }
-
-    /**
      * Initialize a new database
      */
     public function init() {
         $this->fileSystem->init();
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrentWorkingFile() {
-        $this->checkLoggedIn();
-        return $this->currentWorkingFile;
     }
 
     /**
