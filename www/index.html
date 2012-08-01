@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="/jquery/ui/jquery-ui-1.8.20.custom.css" />
 
     <script type="text/javascript" src="/js/sha1.js"></script>
-    <script type="text/javascript" src="/js/global.js"></script>
+    <script type="text/javascript" src="/js/login.js"></script>
     <link rel="stylesheet" type="text/css" media="screen" href="/css/global.css" />
 </head>
 <body>
@@ -34,9 +34,8 @@
 </table>
 
 <script type="text/javascript">
-    var stack = new namespace.stack.Application();
     jQuery('#login').click(function() {
-        stack.login($('#uName').val(), SHA1($('#uPass').val()));
+        login($('#uName').val(), SHA1($('#uPass').val()));
     });
 </script>
 

@@ -113,25 +113,50 @@ class Response_JSON extends Response  {
 }
 
 /**
- * Response_JSON_Error - not found flavour - 404
+ * Temporary redirect response
  */
-class Response_JSON_HTTP404 extends Response_JSON {
-    /**
-     * @param array $data
-     */
-    public function __construct(array $data = null) {
-        parent::__construct($data, 404, 'Not Found');
+class Response_HTTP302 extends Response {
+    public function __construct($redirect) {
+        $this->setHeader("Location: $redirect");
+        parent::__construct(302, 'Found');
     }
 }
 
+/**
+ * Response not found flavour - 404
+ */
+class Response_HTTP404 extends Response {
+    /**
+     * @param array $data
+     */
+    public function __construct() {
+        parent::__construct(404, 'Not Found');
+    }
+}
+
+
+/**
+ *
+ */
 class Response_HTML extends Response {
+    /**
+     * @var string
+     */
     private $markup;
 
+    /**
+     * @param int $code
+     * @param string $message
+     * @param string|null $html
+     */
     public function __construct($code = 200, $message = 'OK', $html = null) {
         parent::__construct($code, $message);
         $this->markup = $html;
     }
 
+    /**
+     *
+     */
     public function send() {
         $this->setContentType('text/html');
         parent::send();

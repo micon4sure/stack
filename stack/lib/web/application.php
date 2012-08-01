@@ -40,10 +40,11 @@ class Application extends \stack\Application {
         // intercept path /login to dispatch login event
         if($target == '/login') {
             $response = $this->login();
+        } else {
+            // run stack
+            $this->renderInterface();
         }
-        else {
-            $response = new Response_JSON_HTTP404();
-        }
+
         $response->send();
     }
 
@@ -60,11 +61,12 @@ class Application extends \stack\Application {
             $this->getContext()->pullSecurity();
             if($loggedIn) {
                 $this->session->user = $this->request->uName;
-                return new Response_JSON(['message' => 'Access granted.']);
+                return new Response_HTTP302($this->getShell()->getCurrentUser()->getHome());
             }
         } catch(\stack\Exception_UserNotFound $e) {
             $this->getContext()->pullSecurity();
         }
+
         return new Response_JSON(['message' => 'Access denied.'], 401);
     }
 }

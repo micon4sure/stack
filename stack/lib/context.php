@@ -34,8 +34,7 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
 
     /**
      * Initiate a context for the passed environment
-     *
-     * @param TestEnvironment $environment
+     * @param \stack\Environment $environment
      */
     public function __construct(Environment $environment) {
         $this->environment = $environment;

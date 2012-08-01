@@ -40,6 +40,13 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     }
 
     /**
+     * @return \stack\module\User
+     */
+    public function getCurrentUser() {
+        return $this->currentUser;
+    }
+
+    /**
      * Check the given credentials, throw Exception_UserNotFound if user is not in the system.
      *
      * @param $uname
@@ -50,7 +57,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
      */
     public function login($uname, $password) {
         $file = $this->readUser($uname);
-        if(!$file->getModule() instanceof \stack\module\BaseModule) {
+        if(!$file->getModule() instanceof \stack\module\User) {
             throw new Exception_CorruptModuleInUserFile();
         }
         $user = $file->getModule();
@@ -120,11 +127,11 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
      * Read a file, take out its module, call run on it with the args passed to the method (slightly changed)
      *
      * @param Context $context
-     * @param $fileName
+     * @param string $path
      * @throws Exception_ExecutionError
      */
-    public function execute($fileName) {
-        $file = $this->fileSystem->readFile($fileName);
+    public function execute($path) {
+        $file = $this->readFile($path);
         $args = func_get_args();
         array_shift($args); // shift fileName argument
         array_unshift($args, $this->context); // unshift the context as new first argument
@@ -132,7 +139,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
         try {
             call_user_func_array(array($module, 'run'), $args);
         } catch(\Exception $e) {
-            throw new Exception_ExecutionError("The file at path '$fileName' could not be executed\n\n : " . $e->getMessage() . "\n\n", 0, $e);
+            throw new Exception_ExecutionError("The file at path '$path' could not be executed\n\n : " . $e->getMessage() . "\n\n", 0, $e);
         }
     }
 

@@ -28,8 +28,11 @@ $shutdown = function($error = null) {
         });
     }
 };
-// register
+// shutdown and error handlers
 register_shutdown_function($shutdown);
+set_error_handler(function($code, $message, $file, $line) {
+    throw new \ErrorException($message, $code, null, $file, $line);
+});
 
 // run application, handle uncaught exceptions with shutdown function
 try {

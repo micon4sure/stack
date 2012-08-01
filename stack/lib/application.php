@@ -1,9 +1,9 @@
 <?php
 namespace stack;
-    /*
-    * Copyright (C) 2012 Michael Saller
-    * Licensed under MIT License, see /path/to/stack/LICENSE
-    */
+/*
+ * Copyright (C) 2012 Michael Saller
+ * Licensed under MIT License, see /path/to/stack/LICENSE
+ */
 
 
 /**
@@ -135,18 +135,18 @@ class Application {
     }
 
     /**
-     * @param $gname
-     */
-    public function delGroup($gname) {
-        $this->runFile($this->getRunPath('delgroup'), $gname);
-    }
-
-    /**
      * @param string $gname
      * @return \stack\module\Group
      */
     public function getGroup($gname) {
         $group = $this->context->getShell()->readGroup($gname);
         return $group->getModule();
+    }
+
+    /**
+     * @param string $gname
+     */
+    public function delGroup($gname) {
+        $this->runFile($this->getRunPath('delgroup'), $gname);
     }
 }
