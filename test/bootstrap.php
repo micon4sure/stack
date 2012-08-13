@@ -78,9 +78,9 @@ namespace stack {
             $env = new Environment('test_dev');
             $this->context = new TestContext($env);
             $this->application = new Application($this->context);
+            (new Bundle_Web())->registerModules($this->context->getShell());
 
             // nuke and reset shell back into clean state
-            $this->context->getFileSystem()->nuke();
             self::getMigrationManager()->reset();
             self::getMigrationManager()->upgrade();
         }

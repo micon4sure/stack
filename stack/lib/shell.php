@@ -103,7 +103,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     /**
      * @param string $path
      * @throws filesystem\Exception_PermissionDenied
-     * @return \stack\File
+     * @return \stack\fileSystem\File
      */
     public function readFile($path) {
         $file = $this->fileSystem->readFile($path);

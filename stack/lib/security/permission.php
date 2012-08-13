@@ -27,6 +27,12 @@ class Permission {
     }
 }
 
+class Permission_All extends Permission {
+    const ENTITY_ID = 'a';
+    public function __construct($priviledge) {
+        parent::__construct(null, $priviledge, self::ENTITY_ID);
+    }
+}
 class Permission_Group extends Permission {
     const ENTITY_ID = 'g';
     public function __construct($holder, $priviledge) {

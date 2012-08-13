@@ -14,7 +14,7 @@ namespace stack;
  */
 class Context extends \lean\Registry_State implements Interface_Security, Interface_SecurityAccess {
     /**
-     * @var TestEnvironment
+     * @var Environment
      */
     private $environment;
     /**
@@ -48,8 +48,8 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
 
     /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :  accessors for internals */
     /**
-      * @return TestEnvironment
-      */
+     * @return \stack\Environment
+     */
     public function getEnvironment() {
         return $this->environment;
     }

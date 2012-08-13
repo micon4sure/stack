@@ -23,7 +23,7 @@
     <tr>
         <td>password</td>
         <td>
-            <input type="text" id="uPass" value="9fcef39a891ef52925c2b843f295ec8f5eaeeca7"/>
+            <input type="text" id="uPass" value="<?= $this->rootpw ?>"/>
         </td>
     </tr>
     <tr>

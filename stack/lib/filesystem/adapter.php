@@ -47,6 +47,10 @@ class Adapter_File implements \stack\Interface_Adapter {
                 // group
                 $file->addPermission(new \stack\security\Permission_Group($permission->holder, $permission->priviledge));
             }
+            else if ($permission->entity == \stack\security\Permission_All::ENTITY_ID) {
+                // group
+                $file->addPermission(new \stack\security\Permission_All($permission->priviledge));
+            }
             else
                 throw new Exception('Unknown entity in permission');
         }

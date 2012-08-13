@@ -155,6 +155,27 @@ class SecurityTest extends StackOSTest {
         $file->addPermission(new \stack\security\Permission_User($uname, Security_Priviledge::DELETE));
         $this->checkAllPriviledges($security, $file);
     }
+
+    /**
+     * Test if everybody has access after adding "all" permissions
+     */
+    public function testCheckAll() {
+        // create arbitrary user and file
+        $uname = 'foo';
+        $path = \stack\Root::ROOT_PATH_HOME . '/' . $uname;
+        $user = new \stack\module\User($uname, $path);
+        $document = new File($path, 'bar');
+        $document->addPermission(new \stack\security\Permission_All(Security_Priviledge::READ));
+        $document->addPermission(new \stack\security\Permission_All(Security_Priviledge::DELETE));
+
+        // check for permission to be true due to user being uber (except execute)
+        $security = new \stack\security\DefaultSecurity($user);
+        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::READ));
+        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::WRITE));
+        $this->assertFalse($security->checkFilePermission($document, Security_Priviledge::EXECUTE));
+        $this->assertTrue($security->checkFilePermission($document, Security_Priviledge::DELETE));
+    }
+
     public function checkAllPriviledges($security, $file) {
         $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::READ));
         $this->assertTrue($security->checkFilePermission($file, Security_Priviledge::WRITE));

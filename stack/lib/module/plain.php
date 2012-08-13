@@ -16,3 +16,4 @@ class Plain extends BaseModule {
         return $data;
     }
 }
+?>

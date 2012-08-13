@@ -12,7 +12,8 @@ class ContextTest extends StackOSTest {
     public function testContext() {
         // get the preconfigured context from StackOSTest
         $context = $this->context;
-        // assert that context das not make up new instanced as it goes.
+
+        // assert that context das not make up new instances as it goes.
         $this->assertTrue($context->getEnvironment() === $context->getEnvironment());
         $this->assertTrue($context->getShell() === $context->getShell());
         $this->assertTrue($context->getFileSystem() === $context->getFileSystem());

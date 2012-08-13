@@ -13,14 +13,6 @@ class ShellTest extends \stack\filesystem\StackOSTest {
     }
 
     /**
-     * Test that a database can be nuked and initialized
-     */
-    public function testNukeAndInit() {
-        $this->context->getShell()->nuke();
-        $this->context->getShell()->init();
-    }
-
-    /**
      * Test read* write* and deleteFile
      */
     public function testReadWriteDelete() {
@@ -43,5 +35,4 @@ class ShellTest extends \stack\filesystem\StackOSTest {
             // pass
         }
     }
-
 }

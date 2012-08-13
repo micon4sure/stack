@@ -18,6 +18,11 @@ class Application extends \stack\Application {
     private $session;
 
     /**
+     * @var \stack\module\User
+     */
+    private $user;
+
+    /**
      * Override parent constructor to start session
      *
      * @param \stack\Context $context
@@ -25,6 +30,15 @@ class Application extends \stack\Application {
     public function __construct(\stack\Context $context) {
         parent::__construct($context);
         $this->session = new \lean\Session('stack.web.application');
+        $context->getEnvironment()->setDefaultSettings($this->getDefaultSettings());
+    }
+
+    /**
+     * Register login module
+     */
+    public function init() {
+        parent::init();
+        (new \stack\Bundle_Web())->registerModules($this->getShell());
     }
 
     /**
@@ -33,40 +47,98 @@ class Application extends \stack\Application {
      * Elsewise, get the user from the filesystem and execute the module inside
      *
      * @param $target
-     * @param $request
      */
-    public function run($target, $request) {
-        $this->request = new Request($request);
-        // intercept path /login to dispatch login event
-        if($target == '/login') {
-            $response = $this->login();
-        } else {
-            // run stack
-            $this->renderInterface();
-        }
+    public function run() {
+        $request = new Request();
 
+        // push user security if user is logged in, unpriviledged otherwise
+        if($this->session->user) {
+            // push user priv
+        }
+        else {
+            $this->getContext()->pushSecurity(new \stack\security\AnonymousSecurity());
+        }
+        try {
+            // get file
+            $file = $this->getShell()->readFile($request->getPath());
+
+            // init module arguments
+            $args = func_get_args();
+            array_shift($args); // shift off param $path
+            array_unshift($args, $request); // unshift request as new second argument
+            array_unshift($args, $this->getContext()); // unshift context as new first argument
+
+            // run module
+            $response = call_user_func_array(array($file->getModule(), 'run'), $args);
+            if(!$response instanceof Response) {
+                throw new \stack\Exception('Malformed response');
+            }
+        }
+        catch(\stack\fileSystem\Exception_FileNotFound $e) {
+            if($this->getEnvironment()->get('debug')) {
+                throw $e;
+            } else {
+                $response = new Response_HTTP404("File at " . $request->getPath() . " not found");
+            }
+        }
+        catch(\Exception $e) {
+            if($this->getEnvironment()->get('debug')) {
+                if($request->isXHR()) {
+                    throw $e;
+                }
+            } else {
+                $response = new \stack\web\Response(500, 'Internal Server Error.');
+            }
+        }
+        $this->getContext()->pullSecurity();
         $response->send();
     }
 
     /**
-     * Try to log the user in.
-     * Send 401 if user/password combo wrong or user does not exist entirely.
+     * Save user to session
      *
-     * @return Response_JSON
+     * @param \stack\module\User $user
      */
-    protected function login() {
-        $this->getContext()->pushSecurity(new \stack\security\PriviledgedSecurity());
-        try {
-            $loggedIn = $this->getShell()->login($this->request->uName, $this->request->uPass);
-            $this->getContext()->pullSecurity();
-            if($loggedIn) {
-                $this->session->user = $this->request->uName;
-                return new Response_HTTP302($this->getShell()->getCurrentUser()->getHome());
-            }
-        } catch(\stack\Exception_UserNotFound $e) {
-            $this->getContext()->pullSecurity();
-        }
+    protected function setUser(\stack\module\User $user) {
+        $this->session->user = $user;
+    }
 
-        return new Response_JSON(['message' => 'Access denied.'], 401);
+    /**
+     * Retrieve user from session
+     *
+     * @return \stack\module\User
+     */
+    public function getUser() {
+        return $this->session->user;
+    }
+
+    /**
+     * Get default settings
+     *
+     * @return array default settings
+     */
+    protected function getDefaultSettings() {
+        $settings = array();
+        // environment
+        $settings['stack.environment.name'] = 'development';
+        $settings['stack.environment.file'] = STACK_APPLICATION_ROOT . '/config/environment.ini';
+        // templates
+        $settings['stack.template.directory'] = STACK_APPLICATION_ROOT . '/template';
+        $settings['stack.template.document.directory'] = STACK_APPLICATION_ROOT . '/template/document';
+        $settings['stack.template.layout.directory'] = STACK_APPLICATION_ROOT . '/template/layout';
+        $settings['stack.template.view.directory'] = STACK_APPLICATION_ROOT . '/template/view';
+        $settings['stack.template.partial.directory'] = STACK_APPLICATION_ROOT . '/template/partial';
+        return $settings;
+    }
+
+    /**
+     * Get an application setting
+     *
+     * @param string $setting
+     * @return mixed setting value
+     * @throws Exception
+     */
+    public function getSetting($setting) {
+        return $this->environment->get($setting);
     }
 }

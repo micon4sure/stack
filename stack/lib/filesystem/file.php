@@ -38,7 +38,7 @@ class File {
     }
 
     /**
-     * @return module\BaseModule
+     * @return \stack\module\BaseModule
      */
     public function getModule() {
         return $this->module;
@@ -72,12 +72,12 @@ class File {
      * @param string $owner
      */
     public function setOwner($owner) {
-        $this->owner = $owner;
+        $this->meta->setOwner($owner);
     }
 
     /**
      * meta
-     * @param security\Permission $permission
+     * @param \stack\security\Permission $permission
      */
     public function addPermission(\stack\security\Permission $permission) {
         $this->meta->addPermission($permission);

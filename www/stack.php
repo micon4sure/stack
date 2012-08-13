@@ -16,7 +16,12 @@ $shutdown = function($error = null) {
     }
     if($error) {
         // an uncaught exception has occured
-        (new \stack\web\Response_HTML(500, 'Internal Server Error'))->send();
+        (new \stack\web\Response_HTML(null, 500, 'Internal Server Error'))->send();
+        printf("<h1>%d: %s</h1><h2>%s#%d</h2>",
+            $error->getCode(),
+            \lean\Text::len($error->getMessage()) ? $error->getMessage() : get_class($error),
+            $error->getFile(),
+            $error->getLine());
         \lean\util\Dump::create()->flush()->goes($error);
         \lean\util\Dump::create(2)->flush()->goes('trace:');
         $temp = debug_backtrace();
@@ -39,7 +44,7 @@ try {
     $environment = new Environment('development');
     $context = new Context($environment);
     $application = new \stack\web\Application($context);
-    $application->run($_SERVER['PHP_SELF'], $_REQUEST);
+    $application->run();
 } catch(\Exception $e) {
     $shutdown($e);
 }

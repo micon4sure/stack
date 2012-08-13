@@ -12,9 +12,11 @@ function login(uName, uPass) {
         uName: uName,
         uPass: uPass
     };
-    var request = jQuery.get('/login', params);
+    var request = jQuery.getJSON(window.location, params);
     request.success(function(response) {
-        console.log(response)
+        if(response.authorized === true) {
+            window.location = response.target;
+        }
     });
     request.error(function() {
         console.log(this)

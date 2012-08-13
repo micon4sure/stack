@@ -39,5 +39,4 @@ class PermissionTests extends StackOSTest {
             // pass
         }
     }
-
 }

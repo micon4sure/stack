@@ -15,7 +15,6 @@ class MigrationInit001 implements \lean\Migration {
         $shell = $context->getShell();
         $shell->init();
 
-
         // create initial files
         $files = array(
             \stack\Root::ROOT_PATH,
@@ -67,11 +66,13 @@ class MigrationInit001 implements \lean\Migration {
      */
     public function down() {
         $context = \lean\Registry::instance()->get('stack.context');
+        $context->pushSecurity(new \stack\security\PriviledgedSecurity());
         $shell = $context->getShell();
         try {
             $shell->nuke();
         } catch(\stack\fileSystem\Exception_FileNotFound $e) {
             // pass
+            // might happen if a unit test crashes
         }
     }
 }

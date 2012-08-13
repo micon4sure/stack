@@ -10,6 +10,10 @@ namespace stack\web;
  */
 class Response {
 
+    /**
+     * stack.anonymous are headers without values, stack.id is for headers with key/value
+     * @var array
+     */
     private $headers = ['stack.anonymous' => [], 'stack.id' => []];
 
     /**
@@ -27,7 +31,6 @@ class Response {
      * @param string $message
      */
     public function __construct($code = 200, $message = 'OK') {
-        $this->setContentType('text/plain');
         $this->setStatusCode($code);
         $this->setStatusMessage($message);
     }
@@ -73,13 +76,42 @@ class Response {
      * If the key is numeric (array),
      */
     public function send() {
-        header('HTTP/1.0 ' . $this->statusCode . ' ' . $this->statusMessage);
+        header('HTTP/1.1 ' . $this->statusCode . ' ' . $this->statusMessage);
         foreach($this->headers['stack.anonymous'] as $value) {
             header($value);
         }
         foreach($this->headers['stack.id'] as $id => $value) {
             header("$id: $value");
         }
+    }
+}
+
+/**
+ * Plain text response
+ */
+class Response_Plain extends Response {
+
+    /**
+     * @var string
+     */
+    private $content;
+
+    /**
+     * @param string $content
+     * @param int $code
+     * @param string $message
+     */
+    public function __construct($content = '', $code = 200, $message = 'OK') {
+        parent::__construct($code, $message);
+        $this->content = $content;
+    }
+
+    /**
+     *
+     */
+    public function send() {
+        parent::send();
+        echo $this->content;
     }
 }
 
@@ -93,11 +125,11 @@ class Response_JSON extends Response  {
     protected $data;
 
     /**
-     * @param array $data
+     * @param mixed $data
      * @param int $code
      * @param string $message
      */
-    public function __construct(array $data, $code = 200, $message = 'OK') {
+    public function __construct($data, $code = 200, $message = 'OK') {
         parent::__construct($code, $message);
         $this->data = new \lean\util\Object($data);
     }
@@ -125,12 +157,12 @@ class Response_HTTP302 extends Response {
 /**
  * Response not found flavour - 404
  */
-class Response_HTTP404 extends Response {
+class Response_HTTP404 extends Response_Plain {
     /**
      * @param array $data
      */
-    public function __construct() {
-        parent::__construct(404, 'Not Found');
+    public function __construct($content = '') {
+        parent::__construct($content, 404, 'Not Found');
     }
 }
 
@@ -149,7 +181,7 @@ class Response_HTML extends Response {
      * @param string $message
      * @param string|null $html
      */
-    public function __construct($code = 200, $message = 'OK', $html = null) {
+    public function __construct($html, $code = 200, $message = 'OK') {
         parent::__construct($code, $message);
         $this->markup = $html;
     }

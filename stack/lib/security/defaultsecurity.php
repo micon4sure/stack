@@ -46,8 +46,13 @@ class DefaultSecurity implements \stack\Interface_Security {
             if ($permission->getPriviledge() != $priviledge) {
                 continue;
             }
+
+            // check for "all" permission
+            if ($permission->getEntity() == \stack\security\Permission_All::ENTITY_ID) {
+                return true;
+            }
             // check if user has a group permission
-            if ($permission->getEntity() == \stack\security\Permission_Group::ENTITY_ID) {
+            elseif ($permission->getEntity() == \stack\security\Permission_Group::ENTITY_ID) {
                 if (in_array($permission->getHolder(), $this->user->getGroups()))
                     return true;
             }
