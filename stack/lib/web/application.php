@@ -74,20 +74,15 @@ class Application extends \stack\Application {
 
         // run requested file
         try {
-            // init module arguments
-            $args = func_get_args();
-            array_shift($args); // shift off param $path
-            array_unshift($args, $request); // unshift request as new second argument
-            array_unshift($args, $this->getContext()); // unshift context as new first argument
+            // initialize module
+            $module = $file->getModule();
+            if(!$module instanceof \stack\module\BaseModule_Abstract) {
+                $module = new \stack\web\module\DirectoryModule();
+            }
+            $module->init($this, $request);
 
             // run module
-            $module = $file->getModule();
-
-            if(!$module instanceof \stack\BaseModule) {
-                $module = new DirectoryModule();
-            }
-
-            $response = call_user_func_array(array($module, 'run'), $args);
+            $response = $module->run();
             if(!$response instanceof Response) {
                 throw new \stack\Exception('Malformed response');
             }

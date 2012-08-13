@@ -1,11 +1,21 @@
 <?php
-namespace stack;
+namespace stack\web\module;
 /*
  * Copyright (C) 2012 Michael Saller
  * Licensed under MIT License, which is found under /path/to/stack/LICENSE
  */
 
 class BaseModule extends \stack\module\BaseModule {
+
+    /**
+     * @var \stack\web\Application
+     */
+    private $application;
+
+    /**
+     * @var \stack\web\Request
+     */
+    private $request;
 
     /**
      * @var \lean\Document;
@@ -30,18 +40,19 @@ class BaseModule extends \stack\module\BaseModule {
     protected $data;
 
     /**
-     * @param \lean\Application $application
      */
-    public function __construct(\lean\Application $application) {
-        parent::__construct($application);
-        $this->data = new \ArrayObject(null, \ArrayObject::ARRAY_AS_PROPS);
+    public function __construct() {
+        $this->data = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
     }
 
     /**
      * Create document, view and layout
      */
-    public function init() {
-        parent::init();
+    public function init(\stack\Application $application, \stack\web\Request $request) {
+        parent::init($application);
+
+        $this->application = $application;
+        $this->request = $request;
 
         $this->document = $this->createDocument();
         $this->layout = $this->createLayout();
@@ -80,7 +91,7 @@ class BaseModule extends \stack\module\BaseModule {
      * @return \lean\Template
      */
     protected function createLayout() {
-        $file = $this->getApplication()->getSetting('lean.template.layout.directory') . '/default.php';
+        $file = $this->getContext()->getApplication()->getSetting('lean.template.layout.directory') . '/default.php';
         return new \lean\Template($file);
     }
 
@@ -124,5 +135,19 @@ class BaseModule extends \stack\module\BaseModule {
      */
     protected function getView() {
         return $this->view;
+    }
+
+    /**
+     * @return \stack\web\Application
+     */
+    protected function getApplication() {
+        return parent::getAppliction();
+    }
+
+    /**
+     * @return \stack\web\Request
+     */
+    protected function getRequest() {
+        return $this->request;
     }
 }

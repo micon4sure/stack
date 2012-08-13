@@ -25,6 +25,11 @@ class BaseModule extends BaseModule_Abstract {
 abstract class BaseModule_Abstract {
 
     /**
+     * @var \stack\Application
+     */
+    private $application;
+
+    /**
      * @var null|\stdClass
      */
     protected $data;
@@ -36,6 +41,13 @@ abstract class BaseModule_Abstract {
         if($data = null)
             $data = new \stdClass();
         $this->data = $data;
+    }
+
+    /**
+     * Initialize the module
+     */
+    public function init(\stack\Application $application) {
+        $this->application = $application;
     }
 
     /**
@@ -72,5 +84,12 @@ abstract class BaseModule_Abstract {
      */
     public function getName() {
         return static::NAME;
+    }
+
+    /**
+     * @return \stack\Application
+     */
+    public function getAppliction() {
+        return $this->application;
     }
 }

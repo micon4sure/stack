@@ -75,9 +75,13 @@ class Application {
         $shell = $this->context->getShell();
         $file = $shell->readFile($path);
 
+        $module = $file->getModule();
+
+        $module->init();
+
         $args = func_get_args();
         array_shift($args); // shift off param $path
         array_unshift($args, $this->context); // unshift application context as new first argument
-        return call_user_func_array(array($file->getModule(), 'run'), $args);
+        return call_user_func_array(array($module, 'run'), $args);
     }
 }

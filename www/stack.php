@@ -1,5 +1,19 @@
 <?php
 namespace stack;
+
+class A {
+    public function init() {
+
+    }
+}
+
+class B extends A {
+    public function init($foo) {
+
+    }
+}
+
+return;
 /*
  * Copyright (C) 2012 Michael Saller
  * Licensed under MIT License, see /path/to/stack/LICENSE
