@@ -21,16 +21,20 @@ class Login extends \stack\module\BaseModule {
             $context->pushSecurity(new \stack\security\PriviledgedSecurity());
             try {
                 // read user and create response
-                $user = $context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . '/' . $request->post('uName'));
+                $userFile = $context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . '/' . $request->post('uName'));
+                $user = $userFile->getModule();
                 /**
                  * @var \stack\module\User $user
                  */
-                $loggedIn = $user->auth($request->post('uPass'));
-                $response = new \stack\web\Response_JSON(['authorized' => $loggedIn]);
 
                 // if user is actually auth'd, save it in session
+                $loggedIn = $user->auth($request->post('uPass'));
                 if($loggedIn) {
-                    //FIXME LOGIN!
+                    $context->setUser($request->post('uName'));
+                    $response = new \stack\web\Response_JSON(['authorized' => true, 'home' => $user->getHome()]);
+                }
+                else {
+                    $response = new \stack\web\Response_JSON(['authorized' => false]);
                 }
             }
             catch(\stack\fileSystem\Exception_FileNotFound $e) {

@@ -52,27 +52,17 @@ class Application extends \stack\Application {
         $request = new Request();
 
         // push user security if user is logged in, unpriviledged otherwise
-        if($this->session->user) {
-            // push user priv
+        if($this->getContext()->getUser()) {
+            // push user security
+            $this->getContext()->pushSecurity(new \stack\security\DefaultSecurity($this->getContext()->getUser()));
         }
         else {
             $this->getContext()->pushSecurity(new \stack\security\AnonymousSecurity());
         }
+
+        // try to read requested file
         try {
-            // get file
             $file = $this->getShell()->readFile($request->getPath());
-
-            // init module arguments
-            $args = func_get_args();
-            array_shift($args); // shift off param $path
-            array_unshift($args, $request); // unshift request as new second argument
-            array_unshift($args, $this->getContext()); // unshift context as new first argument
-
-            // run module
-            $response = call_user_func_array(array($file->getModule(), 'run'), $args);
-            if(!$response instanceof Response) {
-                throw new \stack\Exception('Malformed response');
-            }
         }
         catch(\stack\fileSystem\Exception_FileNotFound $e) {
             if($this->getEnvironment()->get('debug')) {
@@ -81,16 +71,36 @@ class Application extends \stack\Application {
                 $response = new Response_HTTP404("File at " . $request->getPath() . " not found");
             }
         }
+
+        // run requested file
+        try {
+            // init module arguments
+            $args = func_get_args();
+            array_shift($args); // shift off param $path
+            array_unshift($args, $request); // unshift request as new second argument
+            array_unshift($args, $this->getContext()); // unshift context as new first argument
+
+            // run module
+            $module = $file->getModule();
+
+            if(!$module instanceof \stack\BaseModule) {
+                $module = new DirectoryModule();
+            }
+
+            $response = call_user_func_array(array($module, 'run'), $args);
+            if(!$response instanceof Response) {
+                throw new \stack\Exception('Malformed response');
+            }
+        }
         catch(\Exception $e) {
             if($this->getEnvironment()->get('debug')) {
-                if($request->isXHR()) {
-                    throw $e;
-                }
+                throw $e;
             } else {
                 $response = new \stack\web\Response(500, 'Internal Server Error.');
             }
         }
         $this->getContext()->pullSecurity();
+
         $response->send();
     }
 

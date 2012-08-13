@@ -10,7 +10,8 @@ namespace stack;
  * Context is the way to provide access among units inside the Shell.
  * It may also be passed around outside the Shell to alter the context.
  * (Like registering a module or pushing a Security)
- * Also handles security concerns over the implemented Interface_SecurityAccess
+ * Also handles security concerns via the implemented security interfaces
+ * Last but not least: provides access to the default session and the user
  */
 class Context extends \lean\Registry_State implements Interface_Security, Interface_SecurityAccess {
     /**
@@ -31,6 +32,11 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
      * @var \lean\Stack
      */
     private $security;
+
+    /**
+     * @var \lean\Session
+     */
+    private $session;
 
     /**
      * @var \stack\module\User
@@ -65,29 +71,54 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
     }
 
     /**
-     * Check the given credentials, throw Exception_UserNotFound if user is not in the system.
-     *
-     * @param $uName
-     * @param $uPass
-     * @throws Exception_CorruptModuleInUserFile
-     * @return bool
-     */
-    public function checkCredentials($uName, $uPass) {
-        $file = $this->getShell()->readUser($uName);
-        if(!$file->getModule() instanceof \stack\module\User) {
-            throw new Exception_CorruptModuleInUserFile();
-        }
-        $user = $file->getModule();
-        return $user->auth($uPass);
-    }
-
-    /**
      * Use this method only to access the file system.
      *
      * @return Filesystem
      */
     protected function getFileSystem() {
         return $this->fileSystem ?: $this->fileSystem = $this->environment->createFilesystem($this);
+    }
+
+    /**
+     * Get previously set user from session
+     *
+     * @return null|module\User
+     * @throws \Exception
+     */
+    public function getUser() {
+        if($this->user)
+            return $this->user;
+        if(!$this->getSession()->uName) {
+            return null;
+        }
+
+        $this->pushSecurity(new \stack\security\PriviledgedSecurity());
+        try {
+            $file = $this->getShell()->readFile(Root::ROOT_PATH_USERS . '/' . $this->getSession()->uName);
+            $this->user = $file->getModule();
+        } catch(\Exception $e) {
+            $this->pullSecurity();
+            throw $e;
+        }
+        return $this->user;
+    }
+
+    /**
+     * Set user to session to use in later requests
+     *
+     * @param $uName
+     */
+    public function setUser($uName) {
+        $this->getSession()->uName = $uName;
+    }
+
+    /**
+     * Lazy get session
+     *
+     * @return \lean\Session
+     */
+    public function getSession() {
+        return $this->session ?: $this->session = new \lean\Session('stack.context');
     }
 
     /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : SecurityAccess */

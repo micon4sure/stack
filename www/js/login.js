@@ -15,7 +15,7 @@ function login(uName, uPass) {
     var request = jQuery.getJSON(window.location, params);
     request.success(function(response) {
         if(response.authorized === true) {
-            window.location = response.target;
+            window.location = response.home;
         }
     });
     request.error(function() {
