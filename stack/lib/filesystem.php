@@ -97,7 +97,7 @@ class FileSystem implements \stack\Interface_FileAccess {
      */
       public function registerModule($name, $factory) {
         if(!is_callable($factory))
-            throw new Exception_ModuleFactoryNotCallable("The module factory '$name' is not callable.");
+            throw new Exception("The module factory '$name' is not callable.");
         if(array_key_exists($name, $this->factories))
             throw new Exception_ModuleConflict("Module with name '$name' is already registered");
         $this->factories[$name] = $factory;
