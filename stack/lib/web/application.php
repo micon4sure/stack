@@ -82,7 +82,7 @@ class Application extends \stack\Application {
             $module->init($this, $request);
 
             // run module
-            $response = $module->run();
+            $response = $module->run($this->getContext(), $request);
             if(!$response instanceof Response) {
                 throw new \stack\Exception('Malformed response');
             }

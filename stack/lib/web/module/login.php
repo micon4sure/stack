@@ -13,7 +13,7 @@ class Login extends \stack\module\BaseModule {
         if(!$request->isXHR()) {
             // initial request, show form
             $template = new \lean\Template(STACK_ROOT . '/stack/template/login.php');
-            $template->rootpw = '71e7e7cd158bbf8342a4cc6aee2f3503c1c57d8c';
+            $template->rootpw = '244be46c5860e5a5c50ab3b2c4896e84d7bd0f7e';
             $markup = $template->render();
             $response = new \stack\web\Response_HTML($markup);
         } else {

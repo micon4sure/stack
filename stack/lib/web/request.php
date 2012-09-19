@@ -144,6 +144,7 @@ class Request {
      * @return string
      */
     public function getPath() {
-        return $_SERVER['PHP_SELF'];
+        $uri = parse_url($_SERVER['REQUEST_URI']);
+        return $uri['path'];
     }
 }
