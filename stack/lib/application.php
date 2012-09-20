@@ -77,7 +77,7 @@ class Application {
 
         $module = $file->getModule();
 
-        $module->init();
+        $module->init($this);
 
         $args = func_get_args();
         array_shift($args); // shift off param $path

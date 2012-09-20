@@ -147,10 +147,13 @@ class Response_JSON extends Response  {
 /**
  * Temporary redirect response
  */
-class Response_HTTP302 extends Response {
+class Response_HTTP303 extends Response {
+    /**
+     * @param string $redirect
+     */
     public function __construct($redirect) {
         $this->setHeader("Location: $redirect");
-        parent::__construct(302, 'Found');
+        parent::__construct(303, 'Found');
     }
 }
 
@@ -159,7 +162,7 @@ class Response_HTTP302 extends Response {
  */
 class Response_HTTP404 extends Response_Plain {
     /**
-     * @param array $data
+     * @param string $content
      */
     public function __construct($content = '') {
         parent::__construct($content, 404, 'Not Found');

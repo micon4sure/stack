@@ -55,7 +55,10 @@ class Bundle_Web implements Bundle {
      */
     public function registerModules(Shell $shell) {
         $shell->registerModule(\stack\web\module\Login::NAME, function($data) {
-            return new \stack\web\module\Login($data);
-        });
+                return new \stack\web\module\Login($data);
+            });
+        $shell->registerModule(\stack\web\module\Forward::NAME, function($data) {
+                return new \stack\web\module\Forward($data);
+            });
     }
 }

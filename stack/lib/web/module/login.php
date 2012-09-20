@@ -5,15 +5,18 @@ namespace stack\web\module;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
-class Login extends \stack\module\BaseModule {
+class Login extends BaseModule {
 
     const NAME = 'stack.web.login';
 
-    public function run(\stack\Context $context, \stack\web\Request $request) {
+    public function run() {
+        $request = $this->getRequest();
+        $context = $this->getApplication()->getContext();
+
         if(!$request->isXHR()) {
             // initial request, show form
             $template = new \lean\Template(STACK_ROOT . '/stack/template/login.php');
-            $template->rootpw = '244be46c5860e5a5c50ab3b2c4896e84d7bd0f7e';
+            $template->rootpw = 'c90b0156c3eab18c626efd69fed96b30441bffed';
             $markup = $template->render();
             $response = new \stack\web\Response_HTML($markup);
         } else {

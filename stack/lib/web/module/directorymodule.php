@@ -7,6 +7,8 @@ namespace stack\web\module;
 
 class DirectoryModule extends BaseModule {
     public function run() {
-        \lean\util\Dump::flat($this);
+        ob_start();
+        \lean\util\Dump::create()->flush()->goes($this);
+        return new \stack\web\Response_HTML(ob_get_clean());
     }
 }

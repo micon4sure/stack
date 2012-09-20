@@ -9,7 +9,7 @@ namespace stack\module;
 /**
  * Default implements BaseModule_Abstract
  */
-class BaseModule extends BaseModule_Abstract {
+abstract class BaseModule extends BaseModule_Abstract {
     protected function export($data) {
         return $data;
     }
@@ -51,13 +51,10 @@ abstract class BaseModule_Abstract {
     }
 
     /**
-     * final to ensure that name always is in data
-     *
      * @return mixed
      */
-    public final function getData() {
+    public function getData() {
         $data = $this->export($this->data) ?: new \stdClass;
-        $data->name = $this->getName();
         return $data;
     }
 
@@ -89,7 +86,7 @@ abstract class BaseModule_Abstract {
     /**
      * @return \stack\Application
      */
-    public function getAppliction() {
+    protected function getApplication() {
         return $this->application;
     }
 }

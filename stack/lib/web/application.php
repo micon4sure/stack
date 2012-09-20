@@ -49,7 +49,6 @@ class Application extends \stack\Application {
      * @param $target
      */
     public function run() {
-        $request = new Request();
 
         // push user security if user is logged in, unpriviledged otherwise
         if($this->getContext()->getUser()) {
@@ -60,6 +59,29 @@ class Application extends \stack\Application {
             $this->getContext()->pushSecurity(new \stack\security\AnonymousSecurity());
         }
 
+        try {
+            // run the module inside the currently requested file
+            $response = $this->createResponse();
+        } catch(\Exception $e) {
+            $this->getContext()->pullSecurity();
+            throw $e;
+        }
+
+        $this->getContext()->pullSecurity();
+        $response->send();
+    }
+
+    /**
+     * Create the actual response by module
+     *
+     * @return Response|Response_HTTP404
+     * @throws \stack\fileSystem\Exception_FileNotFound
+     * @throws \stack\Exception
+     * @throws \Exception
+     */
+    protected function createResponse() {
+        $request = new Request();
+
         // try to read requested file
         try {
             $file = $this->getShell()->readFile($request->getPath());
@@ -68,7 +90,7 @@ class Application extends \stack\Application {
             if($this->getEnvironment()->get('debug')) {
                 throw $e;
             } else {
-                $response = new Response_HTTP404("File at " . $request->getPath() . " not found");
+                return new Response_HTTP404("File at " . $request->getPath() . " not found");
             }
         }
 
@@ -79,24 +101,25 @@ class Application extends \stack\Application {
             if(!$module instanceof \stack\module\BaseModule_Abstract) {
                 $module = new \stack\web\module\DirectoryModule();
             }
-            $module->init($this, $request);
+            $module->init($this);
+            if($module instanceof \stack\web\module\BaseModule) {
+                $module->initRequest($request);
+            }
 
             // run module
             $response = $module->run($this->getContext(), $request);
             if(!$response instanceof Response) {
-                throw new \stack\Exception('Malformed response');
+                throw new \stack\Exception("Malformed response from module '" . get_class($module) . '"');
             }
+            return $response;
         }
         catch(\Exception $e) {
             if($this->getEnvironment()->get('debug')) {
                 throw $e;
             } else {
-                $response = new \stack\web\Response(500, 'Internal Server Error.');
+                return new \stack\web\Response(500, 'Internal Server Error.');
             }
         }
-        $this->getContext()->pullSecurity();
-
-        $response->send();
     }
 
     /**
@@ -144,6 +167,6 @@ class Application extends \stack\Application {
      * @throws Exception
      */
     public function getSetting($setting) {
-        return $this->environment->get($setting);
+        return $this->getEnvironment()->get($setting);
     }
 }

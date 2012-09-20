@@ -56,8 +56,8 @@ class Adapter_File implements \stack\Interface_Adapter {
         }
 
         // load module if module name exists
-        if (isset($doc->module->name)) {
-            $module = $this->fileSystem->createModule($doc->module->name, $doc->module);
+        if (isset($doc->moduleName)) {
+            $module = $this->fileSystem->createModule($doc->moduleName, $doc->module);
             $file->setModule($module);
         }
         return $file;
@@ -93,6 +93,7 @@ class Adapter_File implements \stack\Interface_Adapter {
         // -- module
         if ($file->getModule() instanceof \stack\module\BaseModule) {
             $doc->module = $file->getModule()->getData();
+            $doc->moduleName = $file->getModule()->getName();
         }
         else {
             $doc->module = null;
