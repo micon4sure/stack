@@ -1,6 +1,0 @@
-RewriteEngine On
-RewriteBase /
-
-# to index rewrite
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ stack.php [QSA,L]
