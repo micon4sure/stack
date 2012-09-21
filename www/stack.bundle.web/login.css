@@ -1,0 +1,22 @@
+body, html {
+    background: black;
+    color: white;
+}
+
+header {
+    /*color:#ef2929;*/
+}
+
+
+
+#menu {
+    white-space: pre;
+    font-size: 7px;
+    font-family: monospace;
+}
+
+input.login {
+    background: transparent;
+    border:0;
+    color:white;
+}

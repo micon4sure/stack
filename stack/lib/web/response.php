@@ -55,7 +55,11 @@ class Response {
      * @param string $charset
      */
     public function setContentType($type, $charset = 'utf-8') {
-        $this->setHeader('Content-Type', "$type;charset=$charset");
+        if($charset === null) {
+            $this->setHeader('Content-Type', "$type");
+        } else {
+            $this->setHeader('Content-Type', "$type;charset=$charset");
+        }
     }
 
     /**
@@ -80,7 +84,7 @@ class Response {
         foreach($this->headers['stack.anonymous'] as $value) {
             header($value);
         }
-        foreach($this->headers['stack.id'] as $id => $value) {
+        foreach($this->headers['stack.id'] as $value => $id) {
             header("$id: $value");
         }
     }
@@ -103,6 +107,7 @@ class Response_Plain extends Response {
      */
     public function __construct($content = '', $code = 200, $message = 'OK') {
         parent::__construct($code, $message);
+        $this->setContentType('text/plain');
         $this->content = $content;
     }
 
@@ -196,5 +201,48 @@ class Response_HTML extends Response {
         $this->setContentType('text/html');
         parent::send();
         echo $this->markup;
+    }
+}
+
+class Response_Exception extends Response_HTML {
+    public static function fromException(\Exception $e) {
+        ob_start();
+        \lean\util\Dump::create()->flush()->goes($e->getTraceAsString());
+        $trace = ob_get_clean();
+        $print = sprintf("<h1>%d: %s</h1><h2>%s#%d</h2><h3>STACK TRACE (no pun intended)</h3>%s",
+            $e->getCode(),
+            \lean\Text::len($e->getMessage()) ? $e->getMessage() : get_class($e),
+            $e->getFile(),
+            $e->getLine(),
+            $trace
+        );
+        return new static($print, 500, 'Server Error');
+    }
+}
+
+/**
+ * Respond with a file
+ */
+class Response_File extends Response {
+    /**
+     * @var string
+     */
+    private $filename;
+
+    /**
+     * @param string $filename
+     */
+    public function __construct($filename) {
+        parent::__construct();
+        $this->setContentType(mime_content_type($filename), null);
+        $this->filename = $filename;
+    }
+
+    /**
+     *
+     */
+    public function send() {
+        parent::send();
+        readfile($this->filename);
     }
 }

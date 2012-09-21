@@ -31,14 +31,15 @@ class Application extends \stack\Application {
         parent::__construct($context);
         $this->session = new \lean\Session('stack.web.application');
         $context->getEnvironment()->setDefaultSettings($this->getDefaultSettings());
+        $this->request = new Request();
     }
 
     /**
-     * Register login module
+     * Register web bundle
      */
     public function init() {
         parent::init();
-        (new \stack\Bundle_Web())->registerModules($this->getShell());
+        $this->registerBundle(new \stack\Bundle_Web($this));
     }
 
     /**
@@ -49,7 +50,6 @@ class Application extends \stack\Application {
      * @param $target
      */
     public function run() {
-
         // push user security if user is logged in, unpriviledged otherwise
         if($this->getContext()->getUser()) {
             // push user security
@@ -59,57 +59,71 @@ class Application extends \stack\Application {
             $this->getContext()->pushSecurity(new \stack\security\AnonymousSecurity());
         }
 
+        // dispatch request, catch output in buffer and print if debug is on
         try {
-            // run the module inside the currently requested file
-            $response = $this->createResponse();
+            ob_start();
+            $response = $this->dispatchStackRequest();
+            $ob = ob_get_clean();
+            $response->send();
+
+            $this->getContext()->pullSecurity();
         } catch(\Exception $e) {
             $this->getContext()->pullSecurity();
-            throw $e;
+            $ob = ob_get_clean();
+
+            Response_Exception::fromException($e)->send();
         }
 
-        $this->getContext()->pullSecurity();
-        $response->send();
+        if($this->getEnvironment()->isDebug() && strlen($ob)) {
+            echo '<h1>DEBUG</h1>';
+            echo $ob;
+        }
     }
 
     /**
      * Create the actual response by module
      *
      * @return Response|Response_HTTP404
-     * @throws \stack\fileSystem\Exception_FileNotFound
+     * @throws \stack\filesystem\Exception_FileNotFound
      * @throws \stack\Exception
      * @throws \Exception
      */
-    protected function createResponse() {
-        $request = new Request();
-
+    protected function dispatchStackRequest() {
         // try to read requested file
         try {
-            $file = $this->getShell()->readFile($request->getPath());
+            if(\lean\Text::left($this->request->getPath(), \stack\module\web\StaticFiles::LOCATION) == \stack\module\web\StaticFiles::LOCATION) {
+                // static file has been requested.
+                $file = $this->getShell()->readFile(\stack\module\web\StaticFiles::LOCATION);
+            } else {
+                // dynamic stack file
+                $file = $this->getShell()->readFile($this->request->getPath());
+            }
         }
-        catch(\stack\fileSystem\Exception_FileNotFound $e) {
+        catch(\stack\filesystem\Exception_FileNotFound $e) {
             if($this->getEnvironment()->get('debug')) {
                 throw $e;
             } else {
-                return new Response_HTTP404("File at " . $request->getPath() . " not found");
+                return new Response_HTTP404("File at " . $this->request->getPath() . " not found");
             }
         }
 
         // run requested file
         try {
+            //TODO plain json if file has no module
             // initialize module
             $module = $file->getModule();
             if(!$module instanceof \stack\module\BaseModule_Abstract) {
-                $module = new \stack\web\module\DirectoryModule();
+                $module = new \stack\module\web\DirectoryModule();
             }
             $module->init($this);
-            if($module instanceof \stack\web\module\BaseModule) {
-                $module->initRequest($request);
+            if($module instanceof \stack\module\web\BaseModule) {
+                $module->initRequest($this->request);
             }
 
             // run module
-            $response = $module->run($this->getContext(), $request);
+            $response = $module->run($this->getContext(), $this->request);
             if(!$response instanceof Response) {
-                throw new \stack\Exception("Malformed response from module '" . get_class($module) . '"');
+                throw new \stack\Exception("Malformed response from module '" . get_class($module) . "'");
             }
             return $response;
         }

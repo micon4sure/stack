@@ -54,3 +54,10 @@ class Exception_ModuleNotFound extends Exception {
 class Exception_PermissionDenied extends Exception {
 
 }
+
+/**
+ * A bundle was requested that was not found / not registered
+ */
+class Exception_BundleNotFound extends Exception {
+
+}

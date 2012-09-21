@@ -9,7 +9,7 @@ use stack\Filesystem;
 /**
  * Custom stack environment
  */
-class Environment extends \lean\Environment_Local {
+class Environment extends \lean\Environment {
     /**
      * @param string $environmentName
      */

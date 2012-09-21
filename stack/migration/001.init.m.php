@@ -17,7 +17,6 @@ class MigrationInit001 implements \lean\Migration {
 
         // create initial files
         $files = array(
-            \stack\Root::ROOT_PATH,
             \stack\Root::ROOT_PATH_SYSTEM,
             \stack\Root::ROOT_PATH_SYSTEM_RUN,
             \stack\Root::ROOT_PATH_USERS,
@@ -25,6 +24,11 @@ class MigrationInit001 implements \lean\Migration {
             \stack\Root::ROOT_USER_PATH_HOME,
         );
         $context->pushSecurity(new \stack\security\PriviledgedSecurity());
+
+        $file = new \stack\filesystem\File(Root::ROOT_PATH, \stack\Root::ROOT_UNAME);
+        $shell->writeFile($file);
+        $file->addPermission(new \stack\security\Permission_All(Security_Priviledge::READ));
+
         try {
             foreach ($files as $path) {
                 $file = new \stack\filesystem\File($path, \stack\Root::ROOT_UNAME);
@@ -70,7 +74,7 @@ class MigrationInit001 implements \lean\Migration {
         $shell = $context->getShell();
         try {
             $shell->nuke();
-        } catch(\stack\fileSystem\Exception_FileNotFound $e) {
+        } catch(\stack\filesystem\Exception_FileNotFound $e) {
             // pass
             // might happen if a unit test crashes
         }

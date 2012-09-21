@@ -18,6 +18,11 @@ class Application {
     private $context;
 
     /**
+     * @var array
+     */
+    private $bundles = array();
+
+    /**
      * @param Context $context
      */
     public function __construct(Context $context) {
@@ -32,7 +37,27 @@ class Application {
      * @Overridable
      */
     protected function init() {
-        (new \stack\Bundle_Core())->registerModules($this->getShell());
+        $this->registerBundle(new Bundle_Core($this));
+    }
+
+    /**
+     * @param Bundle $bundle
+     */
+    public function registerBundle(Bundle $bundle) {
+        $this->bundles[$bundle->getName()] = $bundle;
+        $bundle->registerModules($this->getShell());
+    }
+
+    /**
+     * @param $name
+     *
+     * @return Bundle
+     */
+    public function getBundle($name) {
+        if(!array_key_exists($name, $this->bundles)) {
+            throw new Exception_BundleNotFound("The bundle with the name '$name' was not found. Maybe it is not registered?");
+        }
+        return $this->bundles[$name];
     }
 
     /**

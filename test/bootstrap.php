@@ -62,7 +62,7 @@ namespace stack {
          * @return \lean\Migration_Manager
          */
         private static function getMigrationManager() {
-            // need to make sure there's only one instance for migration manager reads the files outright
+            // need to make sure there's only one instance for migration manager; reads the files outright
             return self::$migration ?: self::$migration = new \lean\Migration_Manager(STACK_ROOT . '/stack/migration');
         }
 
@@ -78,7 +78,7 @@ namespace stack {
             $env = new Environment('test_dev');
             $this->context = new TestContext($env);
             $this->application = new Application($this->context);
-            (new Bundle_Web())->registerModules($this->context->getShell());
+            (new Bundle_Web($this->application))->registerModules($this->context->getShell());
 
             // nuke and reset shell back into clean state
             self::getMigrationManager()->reset();

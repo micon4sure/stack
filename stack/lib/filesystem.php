@@ -4,7 +4,7 @@ namespace stack;
  * Copyright (C) 2012 Michael Saller
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
-use stack\fileSystem\Exception_ModuleConflict;
+use stack\filesystem\Exception_ModuleConflict;
 
 /**
  * Lowest layer of abstraction looking up from the couch layer
@@ -54,7 +54,7 @@ class FileSystem implements \stack\Interface_FileAccess {
      * @return Adapter_File
      */
     protected function getAdapter() {
-        return $this->adapter ?: $this->adapter = new \stack\fileSystem\Adapter_File($this);
+        return $this->adapter ?: $this->adapter = new \stack\filesystem\Adapter_File($this);
     }
 
 
@@ -112,17 +112,17 @@ class FileSystem implements \stack\Interface_FileAccess {
         try {
             $doc = $this->couchClient->getDoc("stack:/$path");
         } catch(\couchNotFoundException $e) {
-            throw new \stack\fileSystem\Exception_FileNotFound("File at path '$path' could not be found", null, $e);
+            throw new \stack\filesystem\Exception_FileNotFound("File at path '$path' could not be found", null, $e);
         }
         $file = $this->getAdapter()->fromDatabase($doc);
         return $file;
     }
 
     /**
-     * @param \stack\fileSystem\File $file
-     * @return \stack\fileSystem\File
+     * @param \stack\filesystem\File $file
+     * @return \stack\filesystem\File
      */
-    public function writeFile(\stack\fileSystem\File $file) {
+    public function writeFile(\stack\filesystem\File $file) {
         // write the file to the file system
         // set revision to file instance
         $doc = $this->getAdapter()->toDatabase($file);
@@ -132,15 +132,15 @@ class FileSystem implements \stack\Interface_FileAccess {
     }
 
     /**
-     * @param \stack\fileSystem\File $file
+     * @param \stack\filesystem\File $file
      */
-    public function deleteFile(\stack\fileSystem\File $file) {
+    public function deleteFile(\stack\filesystem\File $file) {
         $this->couchClient->deleteDoc($this->adapter->toDatabase($file));
     }
     /**
      * @param string $path
      * @param string $owner
-     * @return \stack\fileSystem\File
+     * @return \stack\filesystem\File
      */
     public function createFile($path, $owner) {
         $file = new \stack\filesystem\File($path, $owner);

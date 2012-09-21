@@ -27,7 +27,7 @@ class ContextTest extends StackOSTest {
         $context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
         // write the file
-        $file = new \stack\fileSystem\File('/foo', \stack\Root::ROOT_UNAME);
+        $file = new \stack\filesystem\File('/foo', \stack\Root::ROOT_UNAME);
         $file->setOwner('test');
         $context->getShell()->writeFile($file);
 

@@ -153,7 +153,7 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
      */
     public function checkFilePermission(\stack\filesystem\File $file, $priviledge) {
         if($this->security->count() == 0) {
-            throw new \stack\fileSystem\Exception_NoSecurity();
+            throw new \stack\filesystem\Exception_NoSecurity();
         }
 
         return $this->security->current()->checkFilePermission($file, $priviledge);

@@ -1,5 +1,5 @@
 <?php
-namespace stack\fileSystem;
+namespace stack\filesystem;
 /*
  * Copyright (C) 2012 Michael Saller
  * Licensed under MIT License, see /path/to/stack/LICENSE
