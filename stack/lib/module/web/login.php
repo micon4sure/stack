@@ -25,7 +25,11 @@ class Login extends LayeredModule {
 
         // initial view
         if(!$request->isXHR()) {
-            $this->getDocument()->addCSSheet($this->getAssetWebPath('login.css'));
+            $this->getDocument()->addCSSheet($this->getAssetWebPath('/login.css'));
+
+            $this->getDocument()->addScript($this->getAssetWebPath('/login.js'));
+            $this->getDocument()->addScript($this->getApplication()->getShell()->createModule(Core::NAME, null)->getAssetWebPath('/jquery/jquery-1.7.2.min.js'));
+            $this->getDocument()->addScript($this->getApplication()->getShell()->createModule(Core::NAME, null)->getAssetWebPath('/sha1.js'));
 
             // initial request, show form
             $view = $this->view = $this->createView('login.php');
@@ -43,8 +47,7 @@ class Login extends LayeredModule {
              * @var \stack\module\User $user
              */
             // if user is actually auth'd, save it in session
-            #$loggedIn = $user->auth($request->post('uPass'));
-            $loggedIn = false;
+            $loggedIn = $user->auth($request->post('uPass'));
             if($loggedIn) {
                 $context->setUser($request->post('uName'));
                 $response = new \stack\web\Response_JSON(['authorized' => true, 'home' => $user->getHome()]);
@@ -97,6 +100,6 @@ class Login extends LayeredModule {
      * @return mixed
      */
     public function getAssetWebPath($asset) {
-        return '/static/' . self::NAME . '/' . $asset;
+        return '/static/' . self::NAME . $asset;
     }
 }

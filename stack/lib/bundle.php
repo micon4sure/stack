@@ -120,6 +120,10 @@ class Bundle_Web extends Bundle_Abstract implements Bundle_AssetProvider {
                 return new \stack\module\web\Login($data);
             });
 
+        $shell->registerModule(\stack\module\web\Core::NAME, function($data) {
+               return new \stack\module\web\Core($data);
+            });
+
         $application = $this->getApplication();
         $shell->registerModule(\stack\module\web\StaticFiles::NAME, function($data) use ($application) {
                 return new \stack\module\web\StaticFiles($data, $application);

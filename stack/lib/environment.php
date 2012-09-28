@@ -33,7 +33,7 @@ class Environment extends \lean\Environment {
      * @param \stack\Context $context
      * @return Filesystem
      */
-    public function createFilesystem(Context $context, Interface_Adapter $adapter) {
+    public function createFilesystem(Interface_Adapter $adapter) {
         return new \stack\FileSystem($this->get('stack.database.url'), $this->get('stack.database.name'), $adapter);
     }
 

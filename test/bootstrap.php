@@ -27,7 +27,7 @@ namespace stack {
     $env = new Environment('test_dev');
     // nuke database
     $context = new Context($env);
-    $fs = $env->createFilesystem($context, new \stack\filesystem\Adapter_File($context->getShell()));
+    $fs = $env->createFilesystem(new \stack\filesystem\Adapter_File($context->getShell()));
     $fs->nuke();
     $registry = \lean\Registry::instance();
     $registry->set('stack.environment', $env);
@@ -37,7 +37,7 @@ namespace stack {
          * @return \stack\Filesystem
          */
         public function getFileSystem() {
-            return $this->context->getEnvironment()->createFileSystem($this->context, new \stack\filesystem\Adapter_File($this->context->getShell()));
+            return $this->context->getEnvironment()->createFileSystem(new \stack\filesystem\Adapter_File($this->context->getShell()));
         }
 
         /**

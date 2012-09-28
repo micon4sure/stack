@@ -33,7 +33,7 @@ class Core extends BaseModule {
      * @return mixed
      */
     public function getAssetWebPath($asset) {
-        return '/static/' . self::NAME . '/' . $asset;
+        return '/static/' . self::NAME . $asset;
     }
 }
 ?>

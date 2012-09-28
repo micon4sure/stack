@@ -33,7 +33,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
         $this->context = $context;
         $this->moduleFactories = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
         $adapter = new \stack\filesystem\Adapter_File($this);
-        $this->fileSystem = $context->getEnvironment()->createFilesystem($context, $adapter);
+        $this->fileSystem = $context->getEnvironment()->createFilesystem($adapter);
     }
 
     /**
