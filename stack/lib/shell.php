@@ -21,12 +21,19 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
     private $context;
 
     /**
+     * @var ArrayObject
+     */
+    private $moduleFactories;
+
+    /**
      * @param \stack\Context $context
      * @param \stack\Filesystem $fileSystem
      */
-    public function __construct(Context $context, \stack\Filesystem $fileSystem) {
-        $this->fileSystem = $fileSystem;
+    public function __construct(Context $context) {
         $this->context = $context;
+        $this->moduleFactories = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+        $adapter = new \stack\filesystem\Adapter_File($this);
+        $this->fileSystem = $context->getEnvironment()->createFilesystem($context, $adapter);
     }
 
     /**
@@ -90,16 +97,49 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
         $this->fileSystem->init();
     }
 
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :Modules */
     /**
+     * Register a module factory callable
+     *
      * @implements Interface_ModuleRegistry
-     * @param $name
-     * @param $callable
+     *
+     * @param string   $name
+     * @param \Closure $factory
+     *
+     * @throws Exception
+     * @throws Exception_ModuleConflict
+     * @return void
      */
-    public function registerModule($name, $callable) {
-        $this->fileSystem->registerModule($name, $callable);
+    public function registerModule($name, $factory) {
+        if(!is_callable($factory))
+            throw new Exception("The module factory '$name' is not callable.");
+        if(array_key_exists($name, $this->moduleFactories))
+            throw new Exception_ModuleConflict("Module with name '$name' is already registered");
+        $this->moduleFactories[$name] = $factory;
+    }
+    /**
+     * Create a module instance via a registered factory callable
+     *
+     * @param string $name
+     * @param mixed $data
+     * @throws Exception_ModuleNotFound
+     * @throws filesystem\Exception_InvalidModule
+     * @return \stack\module\BaseModule_Abstract
+     */
+    public function createModule($name, $data) {
+        // call module factory to create module
+        if(!isset($this->moduleFactories[$name])) {
+            throw new Exception_ModuleNotFound("The module of name '$name' could not be found.");
+        }
+        $module = call_user_func($this->moduleFactories[$name], $data);
+        // check for validity
+        if(!$module instanceof \stack\module\BaseModule) {
+            throw new \stack\filesystem\Exception_InvalidModule($name, $module, $data);
+        }
+        return $module;
     }
 
-    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : FileAccess */
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : FileAccess */
     /**
      * @param string $path
      * @throws filesystem\Exception_PermissionDenied
@@ -139,6 +179,12 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
             $path = $file->getPath();
             throw new Exception_PermissionDenied("DELETE (d) permission to file at path '$path' was denied.");
         }
+
+        // avoid deletion of root file
+        if($file->getPath() == '/') {
+            throw new Exception("Root file '/' can not be deleted.");
+        }
+
         return $this->fileSystem->deleteFile($file);
     }
 
@@ -151,7 +197,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
         try {
             $rootFile = $this->fileSystem->readFile('/');
         }
-        catch(Exception_FileNotFound $e) {
+        catch(\stack\filesystem\Exception_FileNotFound $e) {
             // database is not initialized
             return;
         }

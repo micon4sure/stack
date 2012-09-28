@@ -23,7 +23,7 @@ interface Bundle {
 }
 
 /**
- * I have assets and I know where they are.
+ * I have web assets and I know where they are.
  */
 interface Bundle_AssetProvider {
     /**

@@ -13,15 +13,15 @@ namespace stack\filesystem;
  */
 class Adapter_File implements \stack\Interface_Adapter {
     /**
-     * @var \stack\FileSystem
+     * @var \stack\Shell
      */
-    private $fileSystem;
+    private $shell;
 
     /**
      * @param \stack\FileSystem_Module $fileSystem
      */
-    public function __construct(\stack\FileSystem $fileSystem) {
-        $this->fileSystem = $fileSystem;
+    public function __construct(\stack\Shell $shell) {
+        $this->shell = $shell;
     }
 
     /**
@@ -57,7 +57,7 @@ class Adapter_File implements \stack\Interface_Adapter {
 
         // load module if module name exists
         if (isset($doc->moduleName)) {
-            $module = $this->fileSystem->createModule($doc->moduleName, $doc->module);
+            $module = $this->shell->createModule($doc->moduleName, $doc->module);
             $file->setModule($module);
         }
         return $file;

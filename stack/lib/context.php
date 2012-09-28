@@ -52,7 +52,7 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
         $this->security = new \lean\Stack();
     }
 
-    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :  accessors for internals */
+    /* : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : :  accessors for internals */
     /**
      * @return \stack\Environment
      */
@@ -66,17 +66,7 @@ class Context extends \lean\Registry_State implements Interface_Security, Interf
         if($this->shell) {
             return $this->shell;
         }
-        $fs = $this->getFilesystem();
-        return $this->shell = $this->environment->createShell($this, $fs);
-    }
-
-    /**
-     * Use this method only to access the file system.
-     *
-     * @return Filesystem
-     */
-    protected function getFileSystem() {
-        return $this->fileSystem ?: $this->fileSystem = $this->environment->createFilesystem($this);
+        return $this->shell = $this->environment->createShell($this);
     }
 
     /**

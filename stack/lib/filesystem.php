@@ -17,34 +17,18 @@ class FileSystem implements \stack\Interface_FileAccess {
     private $couchClient;
 
     /**
-     * @var \stack\module\Adapter
+     * @var Interface_Adapter
      */
     protected $adapter;
-    /**
-     * @var array
-     */
-    protected $factories = array();
 
     /**
-     * @var Context
+     * @param string            $dsn
+     * @param string            $dbName
+     * @param Interface_Adapter $adapter
      */
-    private $context;
-
-    /**
-     * @param \stack\Context $context
-     * @param string $dsn
-     * @param string $dbName
-     */
-    public function __construct(Context $context, $dsn, $dbName) {
-        $this->context = $context;
-        $this->couchClient = new \couchClient($dsn, $dbName);
-    }
-
-    /**
-     * @param Adapter $adapter
-     */
-    public function setAdapter(Adapter $adapter) {
+    public function __construct($dsn, $dbName, Interface_Adapter $adapter) {
         $this->adapter = $adapter;
+        $this->couchClient = new \couchClient($dsn, $dbName);
     }
 
     /**
@@ -63,44 +47,6 @@ class FileSystem implements \stack\Interface_FileAccess {
      */
     public function init() {
         $this->couchClient->createDatabase();
-    }
-
-    /**
-     * Create a module instance via a registered factory callable
-     *
-     * @param string $name
-     * @param mixed $data
-     * @throws Exception_ModuleNotFound
-     * @throws filesystem\Exception_InvalidModule
-     * @return \stack\module\BaseModule_Abstract
-     */
-    public function createModule($name, $data) {
-        // call module factory to create module
-        if(!isset($this->factories[$name]))
-            throw new Exception_ModuleNotFound("The module of name '$name' could not be found.");
-        $module = call_user_func($this->factories[$name], $data);
-        // check for validity
-        if(!$module instanceof \stack\module\BaseModule) {
-            throw new \stack\filesystem\Exception_InvalidModule($name, $module, $data);
-        }
-        return $module;
-    }
-
-    /**
-     * Register a module factory callable
-     *
-     * @implements Interface_ModuleRegistry
-     * @param string $name
-     * @param \Closure $factory
-     * @throws Exception_ModuleConflict|Exception_ModuleFactoryNotCallable
-     * @throws Exception_ModuleConflict
-     */
-      public function registerModule($name, $factory) {
-        if(!is_callable($factory))
-            throw new Exception("The module factory '$name' is not callable.");
-        if(array_key_exists($name, $this->factories))
-            throw new Exception_ModuleConflict("Module with name '$name' is already registered");
-        $this->factories[$name] = $factory;
     }
 
     /**

@@ -5,7 +5,7 @@ namespace stack\filesystem;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
-class FileTest extends StackOSTest {
+class FileTest extends \stack\StackOSTest {
     public function testFoo() {
         $this->assertTrue(true);
     }

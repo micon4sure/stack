@@ -7,7 +7,7 @@ namespace stack\filesystem;
 
 use stack\Security_Priviledge;
 
-class SecurityTest extends StackOSTest {
+class SecurityTest extends \stack\StackOSTest {
     /**
      * Test that priviledged security always returns true
      */

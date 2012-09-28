@@ -32,12 +32,6 @@ class Exception_ModuleNotFound extends Exception {
 }
 
 /**
- * Tried to add a module under a name that was already taken
- */
-class Exception_ModuleConflict extends Exception_Couch {
-}
-
-/**
  * Modules are being produced by ModuleFactorys. These need to be callables.
  */
 class Exception_ModuleFactoryNotCallable extends Exception_Couch {

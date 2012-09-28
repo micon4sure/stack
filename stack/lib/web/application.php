@@ -164,6 +164,8 @@ class Application extends \stack\Application {
         // environment
         $settings['stack.environment.name'] = 'development';
         $settings['stack.environment.file'] = STACK_APPLICATION_ROOT . '/config/environment.ini';
+        $settings['stack.web.directory'] = STACK_ROOT . '/www';
+        $settings['stack.application.web.directory'] = STACK_APPLICATION_ROOT . '/www';
         // templates
         $settings['stack.template.directory'] = STACK_APPLICATION_ROOT . '/template';
         $settings['stack.template.document.directory'] = STACK_APPLICATION_ROOT . '/template/document';

@@ -17,20 +17,16 @@ class StaticFiles extends BaseModule {
         // shift off static prefix
         array_shift($path);
 
-        $bundleName = array_shift($path);
+        $moduleName = array_shift($path);
 
         $path = join('/', $path);
 
-        $bundle = $this->getApplication()->getBundle($bundleName);
+        $module = $this->getApplication()->getShell()->createModule($moduleName, null);
 
-        if(!$bundle instanceof \stack\Bundle_AssetProvider) {
-            throw new Exception('Bundle is not an asset provider');
-        }
         /**
          * @var \stack\Bundle_AssetProvider $bundle
          */
-
-        $fileName = $bundle->getAssetPath() . "/$path";
+        $fileName = $module->getAssetPath("/$path");
 
         if(!file_exists($fileName)) {
             if($this->getApplication()->getEnvironment()->isDebug()) {

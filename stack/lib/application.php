@@ -87,7 +87,7 @@ class Application {
      * @return string
      */
     protected function getRunPath($path) {
-        return Root::ROOT_PATH_SYSTEM_RUN . "/$path";
+        return Root::ROOT_PATH_RUN . "/$path";
     }
 
     /**

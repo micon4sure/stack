@@ -13,12 +13,11 @@ class Root {
     const ROOT_UNAME = 'root';
     const ROOT_PATH = '/';
     const ROOT_PATH_HOME = '/home';
-    const ROOT_PATH_SYSTEM = '/system';
-    const ROOT_PATH_SYSTEM_RUN = '/system/run';
-    const ROOT_PATH_GROUPS = '/groups';
-    const ROOT_PATH_USERS = '/users';
-    const ROOT_PATH_USERS_ROOT = '/users/root';
-    const ROOT_USER_PATH_HOME = '/root';
+    const ROOT_PATH_SYSTEM = '/stack/system';
+    const ROOT_PATH_RUN = '/stack/run';
+    const ROOT_PATH_GROUPS = '/stack/groups';
+    const ROOT_PATH_USERS = '/stack/users';
+    const ROOT_PATH_USERS_ROOT = '/stack/users/root';
 }
 
 class Root_Modules {

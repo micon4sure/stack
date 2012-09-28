@@ -23,28 +23,32 @@ namespace stack {
     require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couchClient.php';
     require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
 
-    class TestContext extends Context {
-        /**
-         * Expose fs in test context
-         *
-         * @return FileSystem
-         */
-        public function getFileSystem() {
-            return parent::getFileSystem();
-        }
-    }
-
     // create environment
     $env = new Environment('test_dev');
     // nuke database
-    $context = new TestContext($env);
-    $context->getFileSystem()->nuke();
+    $context = new Context($env);
+    $fs = $env->createFilesystem($context, new \stack\filesystem\Adapter_File($context->getShell()));
+    $fs->nuke();
     $registry = \lean\Registry::instance();
     $registry->set('stack.environment', $env);
 
     class StackOSTest extends \PHPUnit_Framework_TestCase {
         /**
-         * @var TestContext
+         * @return \stack\Filesystem
+         */
+        public function getFileSystem() {
+            return $this->context->getEnvironment()->createFileSystem($this->context, new \stack\filesystem\Adapter_File($this->context->getShell()));
+        }
+
+        /**
+         * @return \stack\Shell
+         */
+        public function getShell() {
+            return $this->context->getShell();
+        }
+
+        /**
+         * @var Context
          */
         protected $context;
         /**
@@ -66,28 +70,19 @@ namespace stack {
             return self::$migration ?: self::$migration = new \lean\Migration_Manager(STACK_ROOT . '/stack/migration');
         }
 
-        /**
-         * @return FileSystem
-         */
-        protected function getFileSystem() {
-            return $this->context->getFileSystem();
-        }
-
         public function setUp() {
             // create test environment
             $env = new Environment('test_dev');
-            $this->context = new TestContext($env);
+            $this->context = new Context($env);
             $this->application = new Application($this->context);
             (new Bundle_Web($this->application))->registerModules($this->context->getShell());
 
             // nuke and reset shell back into clean state
             self::getMigrationManager()->reset();
+            $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
+            $this->context->getShell()->nuke();
+            $this->context->pullSecurity();
             self::getMigrationManager()->upgrade();
         }
-    }
-}
-
-namespace stack\fileSystem {
-    class StackOSTest extends \stack\StackosTest {
     }
 }

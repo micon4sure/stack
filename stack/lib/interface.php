@@ -104,3 +104,26 @@ interface Interface_JSONizable {
      */
     public function toJSON();
 }
+
+/**
+ * I have assets and know where to find them
+ */
+interface Interface_WebAssetProvider {
+    /**
+     * Get a complete absolute (web) path
+     *
+     * @param $asset
+     *
+     * @return mixed
+     */
+    public function getAssetWebPath($asset);
+
+    /**
+     * Get a complete absolute filesystem path
+     *
+     * @param $asset
+     *
+     * @return mixed
+     */
+    public function getAssetPath($asset);
+}

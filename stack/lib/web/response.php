@@ -209,11 +209,12 @@ class Response_Exception extends Response_HTML {
         ob_start();
         \lean\util\Dump::create()->flush()->goes($e->getTraceAsString());
         $trace = ob_get_clean();
-        $print = sprintf("<h1>%d: %s</h1><h2>%s#%d</h2><h3>STACK TRACE (no pun intended)</h3>%s",
+        $print = sprintf("<h1>%d %s</h1><h2>%s#%d</h2><h3>%s</h3><h4>STACK TRACE (no pun intended)</h4>%s",
             $e->getCode(),
-            \lean\Text::len($e->getMessage()) ? $e->getMessage() : get_class($e),
+            $e->getMessage(),
             $e->getFile(),
             $e->getLine(),
+            get_class($e),
             $trace
         );
         return new static($print, 500, 'Server Error');
@@ -234,7 +235,8 @@ class Response_File extends Response {
      */
     public function __construct($filename) {
         parent::__construct();
-        $this->setContentType(mime_content_type($filename), null);
+
+        $this->setContentType(\lean\util\Misc::mime_content_type($filename), null);
         $this->filename = $filename;
     }
 

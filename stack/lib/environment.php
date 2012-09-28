@@ -25,16 +25,16 @@ class Environment extends \lean\Environment {
      * @param Filesystem $fileSystem
      * @return Shell
      */
-    public function createShell(Context $context, $fileSystem) {
-        return new Shell($context, $fileSystem);
+    public function createShell(Context $context) {
+        return new Shell($context);
     }
 
     /**
      * @param \stack\Context $context
      * @return Filesystem
      */
-    public function createFilesystem(Context $context) {
-        return new \stack\FileSystem($context, $this->get('stack.database.url'), $this->get('stack.database.name'));
+    public function createFilesystem(Context $context, Interface_Adapter $adapter) {
+        return new \stack\FileSystem($this->get('stack.database.url'), $this->get('stack.database.name'), $adapter);
     }
 
     public function isDebug() {

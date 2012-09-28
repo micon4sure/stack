@@ -5,7 +5,7 @@ namespace stack\filesystem;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
-class FileSystemTest extends StackOSTest {
+class FileSystemTest extends \stack\StackOSTest {
 
     /**
      * Test if the initial files are being written
@@ -23,7 +23,6 @@ class FileSystemTest extends StackOSTest {
         $this->assertTrue($fs->readFile(\stack\Root::ROOT_PATH_USERS) instanceof \stack\filesystem\File);
         $this->assertTrue($fs->readFile(\stack\Root::ROOT_PATH_USERS_ROOT) instanceof \stack\filesystem\File);
         $this->assertTrue($fs->readFile(\stack\Root::ROOT_PATH_GROUPS) instanceof \stack\filesystem\File);
-        $this->assertTrue($fs->readFile(\stack\Root::ROOT_USER_PATH_HOME) instanceof \stack\filesystem\File);
     }
 
     /**
@@ -48,22 +47,6 @@ class FileSystemTest extends StackOSTest {
         } catch(\stack\filesystem\Exception_FileNotFound $e) {
             // pass
         }
-    }
-
-    /**
-     * Test that module creation works as expected
-     */
-     public function testCreateModule() {
-        $fs = $this->getFileSystem();
-
-        // test fs's ability to create valid modules
-        // - user
-        $user = new \stack\module\User('foo', '/foo');
-        $module = $fs->createModule(\stack\module\User::NAME, (object)array('uName' => 'foo', 'home' => '/foo/bar', 'uPass' => 'foo'));
-        $this->assertTrue($module instanceof \stack\module\User);
-        // - group
-        $module = $fs->createModule(\stack\module\Group::NAME, (object)array('gname' => 'qux'));
-        $this->assertTrue($module instanceof \stack\module\Group);
     }
 
     /**

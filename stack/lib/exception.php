@@ -61,3 +61,9 @@ class Exception_PermissionDenied extends Exception {
 class Exception_BundleNotFound extends Exception {
 
 }
+
+/**
+ * Tried to add a module under a name that was already taken
+ */
+class Exception_ModuleConflict extends Exception {
+}

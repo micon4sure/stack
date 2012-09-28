@@ -13,7 +13,7 @@ class RunTest extends \stack\StackOSTest {
         // save a new user
         $uname = 'foo';
         $pass = 'bar';
-        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/adduser';
+        $path = \stack\Root::ROOT_PATH_RUN . '/adduser';
 
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->context->getShell()->execute($path, $uname, $pass);
@@ -24,7 +24,7 @@ class RunTest extends \stack\StackOSTest {
             $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$uname")->getModule()->getUname()
         );
 
-        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
+        $path = \stack\Root::ROOT_PATH_RUN . '/deluser';
         $this->context->getShell()->execute($path, $uname);
 
         try {
@@ -41,7 +41,7 @@ class RunTest extends \stack\StackOSTest {
     public function testGroup() {
         // save a new user
         $gname = 'foo';
-        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/addgroup';
+        $path = \stack\Root::ROOT_PATH_RUN . '/addgroup';
 
         $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
         $this->context->getShell()->execute($path, $gname);
@@ -52,7 +52,7 @@ class RunTest extends \stack\StackOSTest {
             $this->context->getShell()->readFile(\stack\Root::ROOT_PATH_USERS . "/$gname")->getModule()->getGname()
         );
 
-        $path = \stack\Root::ROOT_PATH_SYSTEM_RUN . '/deluser';
+        $path = \stack\Root::ROOT_PATH_RUN . '/deluser';
         $this->context->getShell()->execute($path, $gname);
 
         try {

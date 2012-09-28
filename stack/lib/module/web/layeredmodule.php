@@ -5,7 +5,7 @@ namespace stack\module\web;
  * Licensed under MIT License, which is found under /path/to/stack/LICENSE
  */
 
-abstract class LayeredModule extends \stack\module\BaseModule {
+abstract class LayeredModule extends BaseModule {
     /**
      * @var \lean\Document;
      */
@@ -17,18 +17,12 @@ abstract class LayeredModule extends \stack\module\BaseModule {
     private $layout;
 
     /**
-     * @var \lean\Template
-     */
-    private $view;
-
-    /**
      * Create document, layout and view
      */
     public function init(\stack\Application $application) {
         parent::init($application);
         $this->document = $this->createDocument();
         $this->layout = $this->createLayout();
-        $this->view = $this->createView();
     }
 
     /**
@@ -42,13 +36,12 @@ abstract class LayeredModule extends \stack\module\BaseModule {
         $document = $this->getDocument();
         $layout = $this->getLayout();
         $view = $this->getView();
-        $view->setData($this->data->getArrayCopy());
 
         // stack
         $document->set('layout', $layout);
         $layout->set('view', $view);
 
-        $document->display();
+        return new \stack\web\Response_HTML($document->render());
     }
 
     /**
@@ -63,14 +56,8 @@ abstract class LayeredModule extends \stack\module\BaseModule {
      * @return \lean\Template
      */
     protected function createLayout() {
-        $file = $this->getApplication()->getSetting('stack.template.layout.directory') . '/default.php';
-        return new \lean\Template($file);
+        return \stack\Template::createTemplate(\stack\Template::APPLICATION_TEMPLATE_DIRECTORY_LAYOUT, '/default.php');
     }
-
-    /**
-     * @return \lean\Template
-     */
-    abstract protected function createView();
 
     /**
      * @param \lean\Partial $partial
@@ -94,10 +81,16 @@ abstract class LayeredModule extends \stack\module\BaseModule {
     }
 
     /**
+     * @param $template
+     *
      * @return \lean\Template
      */
-    protected function getView() {
-        return $this->view;
+    protected function createView($template) {
+        return \stack\Template::createTemplate(\stack\Template::APPLICATION_TEMPLATE_DIRECTORY_VIEW, '/' . static::NAME . '/' . $template);
     }
 
+    /**
+     * @return \lean\Template
+     */
+    abstract protected function getView();
 }

@@ -17,33 +17,34 @@ class MigrationInit001 implements \lean\Migration {
 
         // create initial files
         $files = array(
-            \stack\Root::ROOT_PATH_SYSTEM,
-            \stack\Root::ROOT_PATH_SYSTEM_RUN,
-            \stack\Root::ROOT_PATH_USERS,
-            \stack\Root::ROOT_PATH_GROUPS,
-            \stack\Root::ROOT_USER_PATH_HOME,
+            Root::ROOT_PATH_SYSTEM,
+            Root::ROOT_PATH_RUN,
+            Root::ROOT_PATH_USERS,
+            Root::ROOT_PATH_GROUPS,
+            Root::ROOT_PATH_HOME,
+            Root::ROOT_PATH_HOME . '/' . Root::ROOT_UNAME
         );
         $context->pushSecurity(new \stack\security\PriviledgedSecurity());
 
-        $file = new \stack\filesystem\File(Root::ROOT_PATH, \stack\Root::ROOT_UNAME);
+        $file = new \stack\filesystem\File(Root::ROOT_PATH, Root::ROOT_UNAME);
         $shell->writeFile($file);
         $file->addPermission(new \stack\security\Permission_All(Security_Priviledge::READ));
 
         try {
             foreach ($files as $path) {
-                $file = new \stack\filesystem\File($path, \stack\Root::ROOT_UNAME);
+                $file = new \stack\filesystem\File($path, Root::ROOT_UNAME);
                 $shell->writeFile($file);
             }
 
             // create root user file + module
-            $file = new \stack\filesystem\File(\stack\Root::ROOT_PATH_USERS_ROOT, \stack\Root::ROOT_UNAME);
-            $user = new \stack\module\User(\stack\Root::ROOT_UNAME, \stack\Root::ROOT_USER_PATH_HOME);
+            $file = new \stack\filesystem\File(Root::ROOT_PATH_USERS_ROOT, Root::ROOT_UNAME);
+            $user = new \stack\module\User(Root::ROOT_UNAME, Root::ROOT_PATH_HOME . '/' . Root::ROOT_UNAME);
             $password = sha1(uniqid());
             $user->changePassword($password);
             $file->setModule($user);
             $shell->writeFile($file);
 
-            file_put_contents(STACK_ROOT . '/rootpw', "This is the automatically created root password: $password\nIt is to be changed ASAP, then this file is to be deleted.");
+            file_put_contents(STACK_APPLICATION_ROOT . '/rootpw', $password);
 
             // create system run files
             $modules = array(
@@ -53,8 +54,8 @@ class MigrationInit001 implements \lean\Migration {
                 'delgroup' => new \stack\module\run\DelGroup($shell),
             );
             foreach($modules as $name => $module) {
-                $path = Root::ROOT_PATH_SYSTEM_RUN . "/$name";
-                $file = new \stack\filesystem\File($path, \stack\Root::ROOT_UNAME);
+                $path = Root::ROOT_PATH_RUN . "/$name";
+                $file = new \stack\filesystem\File($path, Root::ROOT_UNAME);
                 $file->setModule($module);
                 $shell->writeFile($file);
             }

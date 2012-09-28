@@ -6,7 +6,7 @@ namespace stack\filesystem;
  */
 use stack\Security_Priviledge;
 
-class PermissionTests extends StackOSTest {
+class PermissionTests extends \stack\StackOSTest {
 
     /**
      * Test read* write* and deleteFile
