@@ -4,7 +4,6 @@ namespace stack;
  * Copyright (C) 2012 Michael Saller
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
-use stack\filesystem\Exception_ModuleConflict;
 
 /**
  * Lowest layer of abstraction looking up from the couch layer
@@ -32,6 +31,13 @@ class FileSystem implements \stack\Interface_FileAccess {
     }
 
     /**
+     * @return \couchClient
+     */
+    public function getCouchClient() {
+        return $this->couchClient;
+    }
+
+    /**
      * Lazy adapter loader.
      * Deriving classes are encouraged to overwrite this and use the protected $adapter variable if doing so
      *
@@ -51,8 +57,8 @@ class FileSystem implements \stack\Interface_FileAccess {
 
     /**
      * @param string $path
+     * @throws filesystem\Exception_FileNotFound
      * @return File
-     * @throws Exception_FileNotFound
      */
     public function readFile($path) {
         try {

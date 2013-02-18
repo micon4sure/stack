@@ -11,6 +11,9 @@ class MigrationInit001 implements \lean\Migration {
      * @throws \Exception
      */
     public function up() {
+        /**
+         * @param Context $context
+         */
         $context = \lean\Registry::instance()->get('stack.context');
         $shell = $context->getShell();
         $shell->init();
@@ -44,7 +47,8 @@ class MigrationInit001 implements \lean\Migration {
             $file->setModule($user);
             $shell->writeFile($file);
 
-            file_put_contents(STACK_APPLICATION_ROOT . '/rootpw', $password);
+
+            file_put_contents(APPLICATION_ROOT_PATH . '/rootpw', $password);
 
             // create system run files
             $modules = array(

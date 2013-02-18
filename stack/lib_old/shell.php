@@ -173,7 +173,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
      * @throws Exception_PermissionDenied
      * @return void
      */
-    public function deleteFile(\stack\filesystem\File $file) {
+    public function deleteFile(\stack\filesystem\File $file, $force = false) {
         // check permission
         if(!$this->context->checkFilePermission($file, Security_Priviledge::DELETE)) {
             $path = $file->getPath();
@@ -181,7 +181,7 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
         }
 
         // avoid deletion of root file
-        if($file->getPath() == '/') {
+        if($file->getPath() == '/' && !$force) {
             throw new Exception("Root file '/' can not be deleted.");
         }
 
@@ -207,4 +207,28 @@ class Shell implements Interface_ModuleRegistry, Interface_FileAccess {
         $this->fileSystem->nuke();
     }
 
+    /**
+     * Create a couch view
+     *
+     * @param $namespace
+     * @param $name
+     */
+    public function createIndex($namespace, $name, $map) {
+        $path = "_design/$namespace";
+
+        $client = $this->fileSystem->getCouchClient();
+        try {
+            $doc = $client->getDoc($path);
+        } catch(\couchNotFoundException $e) {
+            $doc = new \couchDocument($client);
+            $doc->_id = $path;
+        }
+
+        $views = $doc->views ?: new \stdClass();
+
+        $views->{$name} = [
+            'map' => $map
+        ];
+        $doc->views = $views;
+    }
 }

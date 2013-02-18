@@ -1,0 +1,22 @@
+{
+    "name": "stack/stack",
+    "type": "library",
+    "description": "Micro library for php5.4",
+    "keywords": ["microlib"],
+    "homepage": "http://github.com/klawd-prime/stack",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Saller",
+            "email": "klawd+lean@kamundo.de",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "lean/lean": "2.*"
+    },
+    "autoload": {
+        "classmap": ["stack/lib"]
+    }
+}

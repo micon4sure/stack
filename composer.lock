@@ -1,0 +1,98 @@
+{
+    "hash": "605b6b68549b1f7db3f77c69eefb21f3",
+    "packages": [
+        {
+            "name": "lean/lean",
+            "version": "2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/klawd-prime/lean.git",
+                "reference": "2.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/klawd-prime/lean/zipball/2.0",
+                "reference": "2.0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "slim/slim": "2.*"
+            },
+            "time": "2013-02-16 10:45:21",
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "lean/lib"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Saller",
+                    "email": "klawd+lean@kamundo.de",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Micro library for php5.4",
+            "homepage": "http://github.com/klawd-prime/stack",
+            "keywords": [
+                "microlib"
+            ]
+        },
+        {
+            "name": "slim/slim",
+            "version": "2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/codeguy/Slim",
+                "reference": "2.2.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/codeguy/Slim/archive/2.2.0.zip",
+                "reference": "2.2.0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "time": "2012-12-13 02:15:50",
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Slim": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Josh Lockhart",
+                    "email": "info@joshlockhart.com",
+                    "homepage": "http://www.joshlockhart.com/"
+                }
+            ],
+            "description": "Slim Framework, a PHP micro framework",
+            "homepage": "http://github.com/codeguy/Slim",
+            "keywords": [
+                "microframework",
+                "rest",
+                "router"
+            ]
+        }
+    ],
+    "packages-dev": null,
+    "aliases": [
+
+    ],
+    "minimum-stability": "stable",
+    "stability-flags": [
+
+    ]
+}

@@ -5,7 +5,7 @@ namespace stack\module\web;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
-class Login extends LayeredModule {
+class Login extends LayeredModule implements \stack\web\Requestable {
 
     const NAME = 'stack.web.login';
 
@@ -14,8 +14,8 @@ class Login extends LayeredModule {
      */
     private $view;
 
-    public function run() {
-        $request = $this->getRequest();
+
+    public function dispatchWebRequest(\stack\web\Request $request) {
         $context = $this->getApplication()->getContext();
 
         if($user = $context->getUser()) {
@@ -33,7 +33,7 @@ class Login extends LayeredModule {
 
             // initial request, show form
             $view = $this->view = $this->createView('login.php');
-            $view->set('rootpw', file_get_contents(STACK_APPLICATION_ROOT . '/rootpw'));
+            $view->set('rootpw', file_get_contents(APPLICATION_ROOT_PATH . '/rootpw'));
             return $this->display();
         }
 
@@ -90,7 +90,7 @@ class Login extends LayeredModule {
      * @return mixed
      */
     public function getAssetPath($asset) {
-        return STACK_ROOT . '/stack/www/' . static::NAME . $asset;
+        return STACK_ROOT_PATH . '/stack/www/' . static::NAME . $asset;
     }
     /**
      * Get a relative (web) path

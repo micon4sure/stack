@@ -17,8 +17,9 @@ class Web002 implements \lean\Migration {
         $context = \lean\Registry::instance()->get('stack.context');
         $shell = $context->getShell();
 
-        // LOGIN
         $context->pushSecurity(new \stack\security\PriviledgedSecurity());
+
+        // LOGIN
         $file = $shell->readFile(\stack\Root::ROOT_PATH);
         $file->setModule(new \stack\module\web\Login());
         $file->addPermission(new \stack\security\Permission_All(\stack\Security_Priviledge::READ));
@@ -26,12 +27,16 @@ class Web002 implements \lean\Migration {
         $shell->writeFile($file);
 
         // STATIC FILES
-        $context->pushSecurity(new \stack\security\PriviledgedSecurity());
         $path = '/static';
         $file = new \stack\filesystem\File($path, \stack\Root::ROOT_UNAME);
         $file->setModule(new \stack\module\web\StaticFiles());
         $file->addPermission(new \stack\security\Permission_All(\stack\Security_Priviledge::READ));
         $file->addPermission(new \stack\security\Permission_All(\stack\Security_Priviledge::EXECUTE));
+        $shell->writeFile($file);
+
+        // ROOT HOME FILE
+        $file = $shell->readFile(Root::ROOT_PATH_HOME . '/' . Root::ROOT_UNAME);
+        $file->setModule(new \stack\module\web\Browser());
         $shell->writeFile($file);
 
         $context->pullSecurity();
@@ -49,7 +54,7 @@ class Web002 implements \lean\Migration {
          */
         try {
             $file = $shell->readFile(\stack\Root::ROOT_PATH);
-            $shell->deleteFile($file);
+            $shell->deleteFile($file, true);
         } catch(\stack\fileSystem\Exception_FileNotFound $e) {
             // pass
             // might happen if a unit test crashes

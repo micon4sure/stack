@@ -12,7 +12,7 @@ class Forward extends BaseModule {
 
     const NAME = 'stack.forward';
 
-    public function run() {
+    public function dispatch() {
         return new \stack\web\Response_HTTP303('/system/web/login');
     }
 }

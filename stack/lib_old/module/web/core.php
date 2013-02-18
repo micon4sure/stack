@@ -12,7 +12,7 @@ class Core extends BaseModule {
 
     const NAME = 'stack.web.core';
 
-    public function run() {
+    public function dispatch() {
     }
 
     /**
@@ -23,7 +23,7 @@ class Core extends BaseModule {
      * @return mixed
      */
     public function getAssetPath($asset) {
-        return STACK_ROOT . '/stack/www/' . static::NAME . $asset;
+        return STACK_ROOT_PATH . '/stack/www/' . static::NAME . $asset;
     }
     /**
      * Get a relative (web) path

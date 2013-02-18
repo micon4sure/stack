@@ -5,13 +5,13 @@ namespace stack\module\web;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
-class StaticFiles extends BaseModule {
+class StaticFiles extends BaseModule  implements \stack\web\Requestable {
 
     const NAME = 'stack.web.static_files';
     const LOCATION = '/static';
 
-    public function run() {
-        $path = explode('/', $this->getRequest()->getPath());
+    public function dispatchWebRequest(\stack\web\Request $request) {
+        $path = explode('/', $request->getPath());
         // shift off empty entry for leading slash
         array_shift($path);
         // shift off static prefix

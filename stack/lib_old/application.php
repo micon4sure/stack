@@ -110,3 +110,21 @@ class Application {
         return call_user_func_array(array($module, 'run'), $args);
     }
 }
+
+class Application_Request {
+    private $path;
+    private $arguments;
+
+    public function __construct($path, $arguments) {
+        $this->path = $path;
+        $this->arguments = $arguments;
+    }
+
+    public function getPath() {
+        return $this->path;
+    }
+
+    public function getArguments() {
+        return $this->arguments;
+    }
+}

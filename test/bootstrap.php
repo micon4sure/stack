@@ -1,88 +1,57 @@
 <?php
+namespace stack\test;
 /*
 * Copyright (C) 2012 Michael Saller
 * Licensed under MIT License, see /path/to/stack/LICENSE
 */
-namespace stack {
 
-    date_default_timezone_set('Europe/Berlin');
 
-    define('STACK_ROOT', realpath(__DIR__ . '/..'));
-    define('STACK_APPLICATION_ROOT', __DIR__);
+use lean\Registry;
+use lean\util\Dump;
+use stack\Environment;
 
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
+date_default_timezone_set('Europe/Berlin');
 
-    // initialize lean
-    require '../external/lean/lean/init.php';
-    $autoload = new \lean\Autoload();
-    $autoload->loadLean();
-    $autoload->register('stack', STACK_APPLICATION_ROOT . '/../stack/lib');
+define('STACK_ROOT', realpath(__DIR__ . '/..'));
+define('STACK_APPLICATION_ROOT', __DIR__);
 
-    require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couch.php';
-    require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couchClient.php';
-    require_once STACK_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-    // create environment
-    $env = new Environment('test_dev');
-    // nuke database
-    $context = new Context($env);
-    $fs = $env->createFilesystem(new \stack\filesystem\Adapter_File($context->getShell()));
-    $fs->nuke();
-    $registry = \lean\Registry::instance();
-    $registry->set('stack.environment', $env);
+// initialize lean
+include STACK_ROOT . '/vendor/lean/lean/lean/init.php';
+$autoload = new \lean\Autoload();
+$autoload->loadLean();
+$autoload->register('stack', STACK_APPLICATION_ROOT . '/../stack/lib');
 
-    class StackOSTest extends \PHPUnit_Framework_TestCase {
-        /**
-         * @return \stack\Filesystem
-         */
-        public function getFileSystem() {
-            return $this->context->getEnvironment()->createFileSystem(new \stack\filesystem\Adapter_File($this->context->getShell()));
+require STACK_ROOT . '/external/PHP-on-Couch/lib/couch.php';
+require STACK_ROOT . '/external/PHP-on-Couch/lib/couchClient.php';
+require STACK_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
+
+class StackTest extends \PHPUnit_Framework_TestCase {
+
+    protected $environment;
+
+    public function setUp() {
+        // create environment
+        $this->environment = new Environment('test');
+        $client = new \couchClient($this->environment->get('stack.database.dsn'), $this->environment->get('stack.database.name'));
+        if($client->databaseExists()) {
+            $client->deleteDatabase();
         }
+        $client->createDatabase();
+    }
 
-        /**
-         * @return \stack\Shell
-         */
-        public function getShell() {
-            return $this->context->getShell();
-        }
+    protected function createTestDocument() {
+        $doc = new \stdClass;
 
-        /**
-         * @var Context
-         */
-        protected $context;
-        /**
-         * @var \lean\Migration_Manager
-         */
-        protected static $migration;
+        // path and owner
+        $doc->_id = '/foo';
+        $doc->owner = 'klawd';
 
-        /**
-         * @var Application
-         */
-        protected $application;
-
-        /**
-         * @static
-         * @return \lean\Migration_Manager
-         */
-        private static function getMigrationManager() {
-            // need to make sure there's only one instance for migration manager; reads the files outright
-            return self::$migration ?: self::$migration = new \lean\Migration_Manager(STACK_ROOT . '/stack/migration');
-        }
-
-        public function setUp() {
-            // create test environment
-            $env = new Environment('test_dev');
-            $this->context = new Context($env);
-            $this->application = new Application($this->context);
-            (new Bundle_Web($this->application))->registerModules($this->context->getShell());
-
-            // nuke and reset shell back into clean state
-            self::getMigrationManager()->reset();
-            $this->context->pushSecurity(new \stack\security\PriviledgedSecurity());
-            $this->context->getShell()->nuke();
-            $this->context->pullSecurity();
-            self::getMigrationManager()->upgrade();
-        }
+        // data
+        $doc->data = new \stdClass;
+        $doc->data->foo = 'bar';
+        return $doc;
     }
 }

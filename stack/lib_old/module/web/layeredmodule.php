@@ -36,6 +36,7 @@ abstract class LayeredModule extends BaseModule {
         $document = $this->getDocument();
         $layout = $this->getLayout();
         $view = $this->getView();
+        $view->setData((array)$this->data);
 
         // stack
         $document->set('layout', $layout);

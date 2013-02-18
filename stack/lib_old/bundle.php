@@ -124,6 +124,10 @@ class Bundle_Web extends Bundle_Abstract implements Bundle_AssetProvider {
                return new \stack\module\web\Core($data);
             });
 
+        $shell->registerModule(\stack\module\web\Browser::NAME, function($data) {
+            return new \stack\module\web\Browser($data);
+        });
+
         $application = $this->getApplication();
         $shell->registerModule(\stack\module\web\StaticFiles::NAME, function($data) use ($application) {
                 return new \stack\module\web\StaticFiles($data, $application);

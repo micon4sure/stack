@@ -236,7 +236,7 @@ class Response_File extends Response {
     public function __construct($filename) {
         parent::__construct();
 
-        $this->setContentType(\lean\util\Misc::mime_content_type($filename), null);
+        $this->setContentType(\lean\util\File::getMimeType($filename), null);
         $this->filename = $filename;
     }
 

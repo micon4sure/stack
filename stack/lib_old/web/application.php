@@ -44,12 +44,8 @@ class Application extends \stack\Application {
 
     /**
      * Run the web application.
-     * If target is '/login', try to log in the user.
-     * Elsewise, get the user from the filesystem and execute the module inside
-     *
-     * @param $target
      */
-    public function run() {
+    public function dispatch(Request $request) {
         // push user security if user is logged in, unpriviledged otherwise
         if($this->getContext()->getUser()) {
             // push user security
@@ -59,36 +55,6 @@ class Application extends \stack\Application {
             $this->getContext()->pushSecurity(new \stack\security\AnonymousSecurity());
         }
 
-        // dispatch request, catch output in buffer and print if debug is on
-        try {
-            ob_start();
-            $response = $this->dispatchStackRequest();
-            $ob = ob_get_clean();
-            $response->send();
-
-            $this->getContext()->pullSecurity();
-        } catch(\Exception $e) {
-            $this->getContext()->pullSecurity();
-            $ob = ob_get_clean();
-
-            Response_Exception::fromException($e)->send();
-        }
-
-        if($this->getEnvironment()->isDebug() && strlen($ob)) {
-            echo '<h1>DEBUG</h1>';
-            echo $ob;
-        }
-    }
-
-    /**
-     * Create the actual response by module
-     *
-     * @return Response|Response_HTTP404
-     * @throws \stack\filesystem\Exception_FileNotFound
-     * @throws \stack\Exception
-     * @throws \Exception
-     */
-    protected function dispatchStackRequest() {
         // try to read requested file
         try {
             if(\lean\Text::left($this->request->getPath(), \stack\module\web\StaticFiles::LOCATION) == \stack\module\web\StaticFiles::LOCATION) {
@@ -107,32 +73,30 @@ class Application extends \stack\Application {
             }
         }
 
-        // run requested file
+        // dispatch request, catch output in buffer and print if debug is on
         try {
-            //TODO plain json if file has no module
-            // initialize module
+            ob_start();
             $module = $file->getModule();
-            if(!$module instanceof \stack\module\BaseModule_Abstract) {
-                $module = new \stack\module\web\DirectoryModule();
+            if(!$module instanceof Requestable) {
+                throw new Exception_NotRequestable('Module of file is not requestable');
             }
             $module->init($this);
-            if($module instanceof \stack\module\web\BaseModule) {
-                $module->initRequest($this->request);
-            }
+            $response = $module->dispatchWebRequest($request);
 
-            // run module
-            $response = $module->run($this->getContext(), $this->request);
-            if(!$response instanceof Response) {
-                throw new \stack\Exception("Malformed response from module '" . get_class($module) . "'");
-            }
-            return $response;
+            $ob = ob_get_clean();
+            $response->send();
+
+            $this->getContext()->pullSecurity();
+        } catch(\Exception $e) {
+            $this->getContext()->pullSecurity();
+            $ob = ob_get_clean();
+
+            Response_Exception::fromException($e)->send();
         }
-        catch(\Exception $e) {
-            if($this->getEnvironment()->get('debug')) {
-                throw $e;
-            } else {
-                return new \stack\web\Response(500, 'Internal Server Error.');
-            }
+
+        if($this->getEnvironment()->isDebug() && strlen($ob)) {
+            echo '<h1>DEBUG</h1>';
+            echo $ob;
         }
     }
 
@@ -163,15 +127,15 @@ class Application extends \stack\Application {
         $settings = array();
         // environment
         $settings['stack.environment.name'] = 'development';
-        $settings['stack.environment.file'] = STACK_APPLICATION_ROOT . '/config/environment.ini';
-        $settings['stack.web.directory'] = STACK_ROOT . '/www';
-        $settings['stack.application.web.directory'] = STACK_APPLICATION_ROOT . '/www';
+        $settings['stack.environment.file'] = APPLICATION_ROOT_PATH . '/config/environment.ini';
+        $settings['stack.web.directory'] = STACK_ROOT_PATH . '/www';
+        $settings['stack.application.web.directory'] = APPLICATION_ROOT_PATH . '/www';
         // templates
-        $settings['stack.template.directory'] = STACK_APPLICATION_ROOT . '/template';
-        $settings['stack.template.document.directory'] = STACK_APPLICATION_ROOT . '/template/document';
-        $settings['stack.template.layout.directory'] = STACK_APPLICATION_ROOT . '/template/layout';
-        $settings['stack.template.view.directory'] = STACK_APPLICATION_ROOT . '/template/view';
-        $settings['stack.template.partial.directory'] = STACK_APPLICATION_ROOT . '/template/partial';
+        $settings['stack.template.directory'] = STACK_ROOT_PATH . '/template';
+        $settings['stack.template.document.directory'] = STACK_ROOT_PATH . '/template/document';
+        $settings['stack.template.layout.directory'] = STACK_ROOT_PATH . '/template/layout';
+        $settings['stack.template.view.directory'] = STACK_ROOT_PATH . '/template/view';
+        $settings['stack.template.partial.directory'] = STACK_ROOT_PATH . '/template/partial';
         return $settings;
     }
 

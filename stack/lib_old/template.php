@@ -20,7 +20,7 @@ class Template {
         switch($pathId) {
             // stack template directories
             case self::STACK_TEMPLATE_DIRECTORY:
-                return STACK_ROOT . '/stack/template';
+                return STACK_ROOT_PATH . '/stack/template';
             case self::STACK_TEMPLATE_DIRECTORY_DOCUMENT:
                 return self::getTemplatePath(self::STACK_TEMPLATE_DIRECTORY) . '/document';
             case self::STACK_TEMPLATE_DIRECTORY_VIEW:
@@ -28,7 +28,7 @@ class Template {
 
             // application template paths
             case self::APPLICATION_TEMPLATE_DIRECTORY:
-                return STACK_APPLICATION_ROOT . '/template';
+                return APPLICATION_ROOT_PATH . '/template';
             case self::APPLICATION_TEMPLATE_DIRECTORY_LAYOUT:
                 return self::getTemplatePath(self::APPLICATION_TEMPLATE_DIRECTORY) . '/layout';
             case self::APPLICATION_TEMPLATE_DIRECTORY_VIEW:

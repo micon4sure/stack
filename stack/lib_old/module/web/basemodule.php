@@ -37,9 +37,4 @@ abstract class BaseModule extends \stack\module\BaseModule {
     protected function getRequest() {
         return $this->request;
     }
-
-    /**
-     * @return mixed
-     */
-    public abstract function run();
 }

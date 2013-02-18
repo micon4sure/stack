@@ -7,22 +7,9 @@ namespace stack\module;
 
 
 /**
- * Default implements BaseModule_Abstract
- */
-abstract class BaseModule extends BaseModule_Abstract {
-    protected function export($data) {
-        return $data;
-    }
-
-    public static function create($data) {
-        return new static($data);
-    }
-}
-
-/**
  * Module to be saved in a file
  */
-abstract class BaseModule_Abstract {
+abstract class BaseModule {
 
     /**
      * @var \stack\Application
@@ -59,17 +46,8 @@ abstract class BaseModule_Abstract {
     }
 
     /**
-     * Create JSONizable data
-     *
-     * @abstract
      * @param $data
-     * @return \stdClass
-     */
-    protected abstract function export($data);
-
-    /**
-     * @param $data
-     * @return \stack\module\BaseModule_Abstract
+     * @return \stack\module\BaseModule
      */
     public function setData($data) {
         $this->data = $data;
@@ -88,5 +66,26 @@ abstract class BaseModule_Abstract {
      */
     protected function getApplication() {
         return $this->application;
+    }
+
+    /**
+     * Create an instance of the called class with data as the arguments
+     *
+     * @param $data
+     * @return BaseModule
+     */
+    public static function create($data) {
+        return new static($data);
+    }
+
+    /**
+     * Create JSONizable data
+     *
+     * @abstract
+     * @param $data
+     * @return \stdClass
+     */
+    protected function export($data) {
+        return $data;
     }
 }
