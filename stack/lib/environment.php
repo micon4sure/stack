@@ -7,7 +7,9 @@ namespace stack;
 use stack\Filesystem;
 
 /**
- * Custom stack environment
+ * Class Environment
+ *
+ * @package stack
  */
 class Environment extends \lean\Environment {
     /**

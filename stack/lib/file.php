@@ -5,12 +5,31 @@ namespace stack;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
+/**
+ * Class File provides an abstraction layer around a couch document and holds a module if provided
+ *
+ * @package stack
+ */
 class File {
+
+    /**
+     * @var \stdClass
+     */
+    private $document;
+    /**
+     * @var Module
+     */
+    private $module;
+
     /**
      * @param \stdClass $document the raw document
+     * @param Module    $module
+     *
+     * @return \stack\File
      */
-    public function __construct(\stdClass $document) {
+    public function __construct(\stdClass $document, Module $module) {
         $this->document = $document;
+        $this->module = $module;
     }
 
     /**
@@ -32,16 +51,9 @@ class File {
     }
 
     /**
-     * @param mixed $data
+     * @return Module
      */
-    public function setData($data) {
-        $this->document->data = $data;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getData() {
-        return $this->document->data;
+    public function getModule() {
+        return $this->module;
     }
 }

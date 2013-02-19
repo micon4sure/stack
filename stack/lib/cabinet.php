@@ -5,12 +5,27 @@ namespace stack;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
+/**
+ * Class Cabinet provides abstracted access to the underlying couch database
+ *
+ * @package stack
+ */
 class Cabinet {
+    /**
+     * @var \couchClient
+     */
+    private $client;
+    /**
+     * @var ModuleFactory
+     */
+    private $moduleFactory;
+
     /**
      * @param \couchClient $client
      */
-    public function __construct(\couchClient $client) {
+    public function __construct(\couchClient $client, ModuleFactory $moduleFactory) {
         $this->client = $client;
+        $this->moduleFactory = $moduleFactory;
     }
 
     /**
@@ -21,8 +36,8 @@ class Cabinet {
     public function createFile($path) {
         $document = new \stdClass();
         $document->_id = 'stack:/' . $path;
-        $file = new File($document);
-        $this->saveFile($file);
+        $file = new File($document, new Module_Default( new \stdClass()));
+        $this->storeFile($file);
         return $file;
     }
 
@@ -31,8 +46,16 @@ class Cabinet {
      *
      * @param File $file
      */
-    public function saveFile(File $file) {
-        $this->client->storeDoc($file->getDocument());
+    public function storeFile(File $file) {
+        $document = $file->getDocument();
+
+        // save module data and id in document
+        $module = $file->getModule();
+        $document->data = $module->getData();
+        $document->module = $module::TYPE_ID;
+
+        // store document in db
+        $this->client->storeDoc($document);
     }
 
     /**
@@ -44,7 +67,11 @@ class Cabinet {
      */
     public function fetchFile($path) {
         $document = $this->client->getDoc('stack:/' . $path);
-        return new File($document);
+
+        // create module via factory
+        $module = $this->moduleFactory->createModule($document->module, $document->data);
+
+        return new File($document, $module);
     }
 
     /**
