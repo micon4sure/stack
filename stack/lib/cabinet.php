@@ -5,6 +5,8 @@ namespace stack;
  * Licensed under MIT License, see /path/to/stack/LICENSE
  */
 
+use lean\util\Dump;
+
 /**
  * Class Cabinet provides abstracted access to the underlying couch database
  *
@@ -37,7 +39,8 @@ class Cabinet {
         $document = new \stdClass();
         $document->_id = 'stack:/' . $path;
         $file = new File($document, new Module_Default( new \stdClass()));
-        $this->storeFile($file);
+        $file->connect($this);
+        $file->store();
         return $file;
     }
 
@@ -55,7 +58,8 @@ class Cabinet {
         $document->module = $module::TYPE_ID;
 
         // store document in db
-        $this->client->storeDoc($document);
+        $response = $this->client->storeDoc($document);
+        $document->_rev = $response->rev;
     }
 
     /**

@@ -1,6 +1,48 @@
 {
-    "hash": "605b6b68549b1f7db3f77c69eefb21f3",
+    "hash": "7091b512aecf7db02211b040bc525a51",
     "packages": [
+        {
+            "name": "dready92/php-on-couch",
+            "version": "1.0.1-p1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dready92/PHP-on-Couch.git",
+                "reference": "1.0.1-p1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dready92/PHP-on-Couch/zipball/1.0.1-p1",
+                "reference": "1.0.1-p1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.0"
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPLv3"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Bailly",
+                    "email": "mickael.bailly@free.fr",
+                    "homepage": "https://github.com/dready92/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "CouchDB NoSQL database access in PHP",
+            "homepage": "https://github.com/dready92/PHP-on-Couch",
+            "keywords": [
+                "apache",
+                "couch",
+                "couchdb",
+                "db",
+                "driver",
+                "nosql"
+            ],
+            "time": "2013-03-14 12:54:52"
+        },
         {
             "name": "lean/lean",
             "version": "2.0",
@@ -19,7 +61,6 @@
                 "php": ">=5.4.0",
                 "slim/slim": "2.*"
             },
-            "time": "2013-02-16 10:45:21",
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -41,7 +82,8 @@
             "homepage": "http://github.com/klawd-prime/stack",
             "keywords": [
                 "microlib"
-            ]
+            ],
+            "time": "2013-02-16 10:45:21"
         },
         {
             "name": "slim/slim",
@@ -60,7 +102,6 @@
             "require": {
                 "php": ">=5.3.0"
             },
-            "time": "2012-12-13 02:15:50",
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -84,15 +125,24 @@
                 "microframework",
                 "rest",
                 "router"
-            ]
+            ],
+            "time": "2012-12-13 02:15:50"
         }
     ],
-    "packages-dev": null,
+    "packages-dev": [
+
+    ],
     "aliases": [
 
     ],
     "minimum-stability": "stable",
     "stability-flags": [
+
+    ],
+    "platform": {
+        "php": ">=5.4.0"
+    },
+    "platform-dev": [
 
     ]
 }

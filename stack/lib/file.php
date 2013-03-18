@@ -20,6 +20,10 @@ class File {
      * @var Module
      */
     private $module;
+    /**
+     * @var Cabinet
+     */
+    private $cabinet;
 
     /**
      * @param \stdClass $document the raw document
@@ -51,9 +55,35 @@ class File {
     }
 
     /**
+     * @param Module $module
+     */
+    public function setModule(Module $module) {
+        $this->module = $module;
+    }
+
+    /**
      * @return Module
      */
     public function getModule() {
         return $this->module;
+    }
+
+    /**
+     * @param Cabinet $cabinet
+     */
+    public function connect(Cabinet $cabinet) {
+        $this->cabinet = $cabinet;
+    }
+
+    /**
+     * Store this file in a cabinet, if connected
+     *
+     * @throws Exception
+     */
+    public function store() {
+        if($this->cabinet === null) {
+            throw new Exception('File is not connected to a cabinet');
+        }
+        $this->cabinet->storeFile($this);
     }
 }

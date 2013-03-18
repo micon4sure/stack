@@ -14,7 +14,9 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "lean/lean": "2.*"
+        "lean/lean": "2.*",
+        "dready92/php-on-couch": "1.0.1-p1"
+
     },
     "autoload": {
         "classmap": ["stack/lib"]

@@ -11,22 +11,9 @@ use lean\util\Dump;
 use stack\Environment;
 
 date_default_timezone_set('Europe/Berlin');
-
-define('STACK_ROOT', realpath(__DIR__ . '/..'));
 define('STACK_APPLICATION_ROOT', __DIR__);
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-// initialize lean
-include STACK_ROOT . '/vendor/lean/lean/lean/init.php';
-$autoload = new \lean\Autoload();
-$autoload->loadLean();
-$autoload->register('stack', STACK_APPLICATION_ROOT . '/../stack/lib');
-
-require STACK_ROOT . '/external/PHP-on-Couch/lib/couch.php';
-require STACK_ROOT . '/external/PHP-on-Couch/lib/couchClient.php';
-require STACK_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
+require '../bootstrap.php';
 
 class StackTest extends \PHPUnit_Framework_TestCase {
 
