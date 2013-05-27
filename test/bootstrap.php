@@ -19,7 +19,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // initialize lean
-include STACK_ROOT . '/vendor/lean/lean/lean/init.php';
+include STACK_ROOT . '/vendor/klawd-prime/lean/lean/init.php';
 $autoload = new \lean\Autoload();
 $autoload->loadLean();
 $autoload->register('stack', STACK_APPLICATION_ROOT . '/../stack/lib');
@@ -31,11 +31,12 @@ require STACK_ROOT . '/external/PHP-on-Couch/lib/couchDocument.php';
 class StackTest extends \PHPUnit_Framework_TestCase {
 
     protected $environment;
+    protected $client;
 
     public function setUp() {
         // create environment
         $this->environment = new Environment('test');
-        $client = new \couchClient($this->environment->get('stack.database.dsn'), $this->environment->get('stack.database.name'));
+        $client = $this->client = new \couchClient($this->environment->get('stack.database.dsn'), $this->environment->get('stack.database.name'));
         if($client->databaseExists()) {
             $client->deleteDatabase();
         }

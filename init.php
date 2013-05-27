@@ -2,7 +2,7 @@
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', 1);
 
-include STACK_ROOT_PATH . '/external/lean/lean/init.php';
+include STACK_ROOT_PATH . '/vendor/klawd-prime/lean/lean/init.php';
 
 $autoload = new \lean\Autoload();
 $autoload->loadLean();

@@ -56,4 +56,27 @@ class File {
     public function getModule() {
         return $this->module;
     }
+
+    /**
+     * @return string
+     */
+    public function getOwner() {
+        return $this->document->owner;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPermissions() {
+        return $this->document->permissions;
+    }
+
+    /**
+     * @param string      $priviledge
+     * @param string      $context
+     * @param string|null $subject
+     */
+    public function addPermission($priviledge, $context, $subject = null) {
+        $this->document->permissions[] = ['priviledge' => $priviledge, 'context' => $context, 'subject' => $subject];
+    }
 }

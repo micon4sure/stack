@@ -10,7 +10,10 @@ namespace stack;
  *
  * @package stack
  */
-class Cabinet {
+use lean\util\Dump;
+use stack\module\User;
+
+class Cabinet implements FileAccess {
     /**
      * @var \couchClient
      */
@@ -29,14 +32,18 @@ class Cabinet {
     }
 
     /**
-     * @param $path
+     * @param string $path
+     *
+     * @param module\User $owner
      *
      * @return File
      */
-    public function createFile($path) {
+    public function createFile($path, User $owner) {
         $document = new \stdClass();
         $document->_id = 'stack:/' . $path;
-        $file = new File($document, new Module_Default( new \stdClass()));
+        $document->permissions = [];
+        $document->owner = $owner->getUname();
+        $file = new File($document, new Module_Default(new \stdClass()));
         $this->storeFile($file);
         return $file;
     }
@@ -52,10 +59,11 @@ class Cabinet {
         // save module data and id in document
         $module = $file->getModule();
         $document->data = $module->getData();
-        $document->module = $module::TYPE_ID;
+        $document->module = $this->moduleFactory->getMappedIdentifier($module);
 
         // store document in db
-        $this->client->storeDoc($document);
+        $response = $this->client->storeDoc($document);
+        $file->getDocument()->_rev = $response->rev;
     }
 
     /**

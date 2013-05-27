@@ -10,26 +10,26 @@ namespace stack;
  *
  * @package stack
  */
+use lean\util\Dump;
+
 class ModuleFactory {
-    /**
-     * @var callable[]
-     */
-    private $workers = array();
+
+    const DEFAULT_MODULE_TYPE = 'stack.module.default';
+
+    private $mapping = [];
 
     public function __construct() {
-        $this->registerWorker(Module_Default::TYPE_ID, function(\stdClass $data) {
-            return new Module_Default($data);
-        });
+        $this->addMapping(self::DEFAULT_MODULE_TYPE, 'stack\Module_Default');
     }
 
-    /**
-     * Register a module worker
-     *
-     * @param string   $id
-     * @param callable $worker
-     */
-    public function registerWorker($id, callable $worker) {
-        $this->workers[$id] = $worker;
+    public function addMapping($identifier, $moduleType) {
+        $this->mapping[$identifier] = $moduleType;
+    }
+
+    public function addMappings(array $mapping) {
+        foreach($mapping as $id => $type) {
+            $this->addMapping($id, $type);
+        }
     }
 
     /**
@@ -42,11 +42,21 @@ class ModuleFactory {
      * @throws Exception
      */
     public function createModule($id, $data) {
-        if(!array_key_exists($id, $this->workers)) {
-            throw new Exception("No worker registered for id '$id'");
+        if(!array_key_exists($id, $this->mapping)) {
+            throw new Exception("Type identifier '$id' is not registered");
         }
 
-        $worker = $this->workers[$id];
-        return $worker($data);
+        $class = $this->mapping[$id];
+        return new $class($data);
+    }
+
+    public function getMappedIdentifier(Module $module) {
+        $flipped = array_flip($this->mapping);
+        $class = get_class($module);
+        if(!array_key_exists($class, $flipped)) {
+            throw new Exception("No identifier mapped for module of type '$class'");
+        }
+
+        return $flipped[$class];
     }
 }

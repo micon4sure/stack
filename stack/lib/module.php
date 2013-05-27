@@ -14,7 +14,7 @@ abstract class Module {
     /**
      * @var \stdClass
      */
-    private $data;
+    protected $data;
 
     /**
      * @param \stdClass $data
@@ -36,8 +36,16 @@ abstract class Module {
     public function getData() {
         return $this->data;
     }
+
+    /**
+     * Get a string to identify the class
+     *
+     * @return string
+     */
+    public static function getTypeIdentifier() {
+        return get_called_class();
+    }
 }
 
 class Module_Default extends Module {
-    const TYPE_ID = 'stack.default';
 }

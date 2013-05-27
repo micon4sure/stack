@@ -6,21 +6,10 @@ use stack\File;
 use stack\Module;
 use stack\ModuleFactory;
 use stack\Module_Default;
+use stack\module\User;
 
 class CabinetTest extends StackTest {
 
-    /**
-     * @var \couchClient
-     */
-    protected $client;
-
-    /**
-     * create couch client
-     */
-    public function setUp() {
-        parent::setUp();
-        $this->client = new \couchClient($this->environment->get('stack.database.dsn'), $this->environment->get('stack.database.name'));
-    }
     /**
      * Create a file cabinet
      *
@@ -35,9 +24,10 @@ class CabinetTest extends StackTest {
      */
     public function testCRUD() {
         $cabinet = $this->createCabinet();
+        $owner = User::create('testUser');
 
         // create a file
-        $created = $cabinet->createFile('/gnark');
+        $created = $cabinet->createFile('/gnark', $owner);
         // fetch it from the cabinet
         $read = $cabinet->fetchFile('/gnark');
 
@@ -47,32 +37,17 @@ class CabinetTest extends StackTest {
         // add some data to the read file
         $read->getModule()->getData()->foo = 'bar';
         $cabinet->storeFile($read);
+        // add some more data, save again
+        $read->getModule()->getData()->qux = 'kos';
+        $cabinet->storeFile($read);
 
         // read again
         $readAgain = $cabinet->fetchFile('/gnark');
         $this->assertEquals($readAgain->getModule()->getData()->foo, 'bar');
+        $this->assertEquals($readAgain->getModule()->getData()->qux, 'kos');
 
         // delete file, make sure it's gone
         $cabinet->deleteFile($readAgain);
         $this->assertFalse($cabinet->fileExists('/gnark'));
     }
-
-    public function testModules() {
-        $factory = new ModuleFactory();
-        $factory->registerWorker(CabinetTest_MockModule::TYPE_ID, function(\stdClass $data) {
-                return new CabinetTest_MockModule($data);
-            });
-        $cabinet = new Cabinet($this->client, $factory);
-
-
-    }
-}
-
-/**
- * Class CabinetTest_Module
- *
- * @package stack\test
- */
-class CabinetTest_MockModule {
-    const TYPE_ID = 'test.mock';
 }

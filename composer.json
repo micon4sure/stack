@@ -1,5 +1,5 @@
 {
-    "name": "stack/stack",
+    "name": "klawd-prime/stack",
     "type": "library",
     "description": "Micro library for php5.4",
     "keywords": ["microlib"],
@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "lean/lean": "2.*"
+        "klawd-prime/lean": "2.*"
     },
     "autoload": {
         "classmap": ["stack/lib"]
