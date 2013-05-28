@@ -3,8 +3,55 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "2c2578812d5c8a6eec60020f994cbc37",
+    "hash": "a35347c97f7b5a56d78b82f1750001a1",
     "packages": [
+        {
+            "name": "dready92/php-on-couch",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dready92/PHP-on-Couch.git",
+                "reference": "4901846b2ad5fb492082b118fbe9ebd2fe6ef569"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dready92/PHP-on-Couch/zipball/4901846b2ad5fb492082b118fbe9ebd2fe6ef569",
+                "reference": "4901846b2ad5fb492082b118fbe9ebd2fe6ef569",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "lib/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPLv3"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Bailly",
+                    "email": "mickael.bailly@free.fr",
+                    "homepage": "https://github.com/dready92/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "CouchDB NoSQL database access in PHP",
+            "homepage": "https://github.com/dready92/PHP-on-Couch",
+            "keywords": [
+                "apache",
+                "couch",
+                "couchdb",
+                "db",
+                "driver",
+                "nosql"
+            ],
+            "time": "2013-04-15 16:47:16"
+        },
         {
             "name": "klawd-prime/lean",
             "version": "2.0",
@@ -98,9 +145,9 @@
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": [
-
-    ],
+    "stability-flags": {
+        "dready92/php-on-couch": 20
+    },
     "platform": {
         "php": ">=5.4.0"
     },

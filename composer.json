@@ -14,9 +14,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "klawd-prime/lean": "2.*"
-    },
-    "autoload": {
-        "classmap": ["stack/lib"]
+        "klawd-prime/lean": "2.*",
+        "dready92/php-on-couch": "dev-master"
     }
 }
