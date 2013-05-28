@@ -1,9 +1,9 @@
 <?php
 namespace stack;
-    /*
-     * Copyright (C) 2012 Michael Saller
-     * Licensed under MIT License, see /path/to/stack/LICENSE
-     */
+/*
+ * Copyright (C) 2012 Michael Saller
+ * Licensed under MIT License, see /path/to/stack/LICENSE
+ */
 
 /**
  * Class Cabinet provides abstracted access to the underlying couch database

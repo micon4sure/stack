@@ -5,6 +5,7 @@
     "keywords": ["microlib"],
     "homepage": "http://github.com/klawd-prime/stack",
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Michael Saller",

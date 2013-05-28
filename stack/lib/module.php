@@ -19,10 +19,7 @@ abstract class Module {
     /**
      * @param \stdClass $data
      */
-    public function __construct(\stdClass $data = null) {
-        if($data === null) {
-            $data = new \stdClass;
-        }
+    public function __construct(\stdClass $data) {
         $this->data = $data;
     }
 
